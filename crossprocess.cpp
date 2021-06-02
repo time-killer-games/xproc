@@ -1157,6 +1157,9 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
   *procId = (PROCID)property;
   XCloseDisplay(display);
   #endif
+  if (!ProcIdExists(*procId)) {
+    *procId = 0;
+  }
 }
 
 bool WindowIdExists(WINDOWID winId) {
