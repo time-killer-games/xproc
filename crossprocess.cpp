@@ -1158,6 +1158,24 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
   XCloseDisplay(display);
   #endif
 }
+
+bool WindowIdExists(WINDOWID winId) {
+  PROCID procId;
+  ProcIdFromWindowId(winId, &procId);
+  if (procId) {
+    return ProcIdExists(procId);
+  }
+  return false;
+}
+
+bool WindowIdKill(WINDOWID winId) {
+  PROCID procId;
+  ProcIdFromWindowId(winId, &procId);
+  if (procId) {
+    return ProcIdKill(procId);
+  }
+  return false;
+}
 #endif
 
 PROCINFO ProcInfoFromInternalProcInfo(_PROCINFO *procInfo) {

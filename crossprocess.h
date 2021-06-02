@@ -109,6 +109,8 @@ void WindowIdEnumerate(WINDOWID **winId, int *size);
 void ProcIdFromWindowId(WINDOWID winId, PROCID *procId);
 void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size);
 void FreeWindowId(WINDOWID *winId);
+bool WindowIdExists(WINDOWID winId);
+bool WindowIdKill(WINDOWID winId);
 #endif
 
 inline PROCID ProcessId(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->ProcessId; }

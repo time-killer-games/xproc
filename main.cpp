@@ -86,6 +86,8 @@ void PrintXProcHelp() {
   std::cout << "    --wid-enum                 " << std::endl;
   std::cout << "    --wid-from-pid   pid       " << std::endl;
   std::cout << "    --pid-from-wid   wid       " << std::endl;
+  std::cout << "    --wid-exists     wid       " << std::endl;
+  std::cout << "    --wid-kill       wid       " << std::endl;
   #endif
 }
 
@@ -199,6 +201,14 @@ void PrintWidEnumeration() {
   }
 }
 
+void PrintWhetherWidExists(WINDOWID winId) {
+  std::cout << CrossProcess::WindowIdExists(winId) << std::endl;
+}
+
+void PrintWhetherWidKilled(WINDOWID winId) {
+  std::cout << CrossProcess::WindowIdKill(winId) << std::endl;
+}
+
 void PrintWidFromPid(PROCID procId) {
   if (!CrossProcess::ProcIdExists(procId)) return;
   WINDOWID *winId = nullptr; int size;
@@ -303,6 +313,10 @@ int main(int argc, char **argv) {
       XProcPrint::PrintWidFromPid(pid);
     } else if (strcmp(argv[1], "--pid-from-wid") == 0) {
       XProcPrint::PrintPidFromWid((WINDOWID)argv[2]);
+    } else if (strcmp(argv[1], "--wid-exists") == 0) {
+      XProcPrint::PrintWhetherWidExists((WINDOWID)argv[2]);	
+    } else if (strcmp(argv[1], "--wid-kill") == 0) {
+      XProcPrint::PrintWhetherWidKilled((WINDOWID)argv[2]);	
     }
     #endif
   }
