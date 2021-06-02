@@ -1,4 +1,4 @@
-#!/bin/sh-m32
+#!/bin/sh
 cd "${0%/*}"
 
 if [ $(uname) = "Darwin" ]; then
