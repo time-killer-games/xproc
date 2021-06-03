@@ -1067,13 +1067,8 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
   XCloseDisplay(display);
   #endif
   std::vector<WINDOWID> widVec2;
-  #if !defined(_WIN32)
-  for (int i = 0; i < widVec1.size(); i++) {
-  #else
-  for (int i = widVec1.size() - 1; i >= 0; i--) {
-  #endif
+  for (int i = 0; i < widVec1.size(); i++)
     widVec2.push_back((WINDOWID)widVec1[i].c_str());
-  }
   WINDOWID *arr = new WINDOWID[widVec2.size()]();
   std::copy(widVec2.begin(), widVec2.end(), arr);
   *winId = arr; *size = i;
