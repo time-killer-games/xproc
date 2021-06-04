@@ -45,6 +45,7 @@ typedef int PROCID;
 #else
 typedef unsigned long PROCID;
 #endif
+typedef PROCID PROCESS;
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
 typedef HWND WINDOW;
@@ -129,6 +130,14 @@ inline WINDOWID *OwnedWindowId(PROCINFO procInfo) { return InternalProcInfoFromP
 inline WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return InternalProcInfoFromProcInfo(procInfo)->OwnedWindowId[i]; }
 inline int OwnedWindowIdLength(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->OwnedWindowIdLength; }
 #endif
+
+PROCESS ProcessExecute(const char *command);
+PROCESS ProcessExecuteAsync(const char *command);
+void ExecutedProcessWriteToStandardInput(PROCESS procIndex, const char *input);
+const char *ExecutedProcessReadFromStandardOutput(PROCESS procIndex);
+void FreeExecutedProcessStandardInput(PROCESS procIndex);
+void FreeExecutedProcessStandardOutput(PROCESS procIndex);
+bool CompletionStatusFromExecutedProcess(PROCESS procIndex);
 
 } // namespace CrossProcess
 

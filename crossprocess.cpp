@@ -32,6 +32,8 @@
 #include <thread>
 #include <string>
 #include <vector>
+#include <mutex>
+#include <map>
 
 #include <cstdlib>
 #include <cstddef>
@@ -194,60 +196,6 @@ BOOL IsX86Process(HANDLE proc) {
   IsWow64Process(proc, &isWow);
   return isWow;
 }
-
-#if defined(XPROCESS_WIN32EXE_INCLUDES)
-void ReadProcessOuputThread(HANDLE handle, std::string *output) {
-  std::string result;
-  DWORD dwRead = 0;
-  char buffer[BUFSIZ];
-  while (ReadFile(handle, buffer, BUFSIZ, &dwRead, nullptr) && dwRead) {
-    buffer[dwRead] = '\0';
-    result.append(buffer, dwRead);
-    *(output) = result;
-  }
-}
-
-std::string ExecuteProcessAndReadOutput(std::string command) {
-  std::string output; wchar_t cwstr_command[32768];
-  std::wstring wstr_command = widen(command); bool proceed = true;
-  wcsncpy_s(cwstr_command, 32768, wstr_command.c_str(), 32768);
-  HANDLE hStdInPipeRead = nullptr; HANDLE hStdInPipeWrite = nullptr;
-  HANDLE hStdOutPipeRead = nullptr; HANDLE hStdOutPipeWrite = nullptr;
-  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
-  proceed = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
-  if (proceed == false) return "";
-  SetHandleInformation(hStdInPipeWrite, HANDLE_FLAG_INHERIT, 0);
-  proceed = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
-  if (proceed == false) return "";
-  STARTUPINFOW si = { 0 };
-  si.cb = sizeof(STARTUPINFOW);
-  si.dwFlags = STARTF_USESTDHANDLES;
-  si.hStdError = hStdOutPipeWrite;
-  si.hStdOutput = hStdOutPipeWrite;
-  si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { 0 };
-  if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
-    CloseHandle(hStdOutPipeWrite);
-    CloseHandle(hStdInPipeRead);
-    MSG msg; HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    std::thread outthrd(ReadProcessOuputThread, hStdOutPipeRead, &output);
-    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
-      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
-        TranslateMessage(&msg);
-        DispatchMessage(&msg);
-      }
-    }
-    outthrd.join();
-    CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
-    CloseHandle(hStdOutPipeRead);
-    CloseHandle(hStdInPipeWrite); 
-    while (output.back() == '\r' || output.back() == '\n')
-      output.pop_back();
-  }
-  return output;
-}
-#endif
 
 void CwdCmdEnvFromProc(HANDLE proc, wchar_t **buffer, int type) {
   PEB peb; SIZE_T nRead; ULONG len = 0; 
@@ -593,6 +541,11 @@ bool DirectorySetCurrentWorking(const char *dname) {
   #endif
 }
 
+static std::map<PROCESS, std::uintptr_t> stdIptMap;
+static std::map<PROCESS, std::string>    stdOptMap;
+static std::map<PROCESS, bool>           completeMap;
+static std::mutex                        stdOptMutex;
+
 void CwdFromProcId(PROCID procId, char **buffer) {
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
@@ -620,9 +573,10 @@ void CwdFromProcId(PROCID procId, char **buffer) {
         fclose(file);
       }
     }
-    static std::string str;
-    str = ExecuteProcessAndReadOutput("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId));
-    *buffer = (char *)str.c_str(); 
+    PROCESS ind = ProcessExecute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId)).c_str());
+    static std::string str; str = stdOptMap.find(ind)->second;
+    *buffer = (char *)str.c_str();
+    FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
     wchar_t *cwdbuf = nullptr;
@@ -712,7 +666,8 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
         fclose(file);
       }
     }
-    std::string str = ExecuteProcessAndReadOutput("\"" + exe + "\" --cmd-from-pid " + std::to_string(procId));
+    PROCESS ind = ProcessExecute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(procId)).c_str());
+    std::string str = stdOptMap.find(ind)->second;
     char *cmd = str.data();
     int j = 0; if (!str.empty()) {
       while (cmd[j] != '\0') {
@@ -720,6 +675,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
         j += strlen(cmd + j) + 1;
       }
     }
+    FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
     wchar_t *cmdbuf = nullptr; int cmdsize;
@@ -876,7 +832,8 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
         fclose(file);
       }
     }
-    std::string str = ExecuteProcessAndReadOutput("\"" + exe + "\" --env-from-pid " + std::to_string(procId));
+    PROCESS ind = ProcessExecute(("\"" + exe + "\" --env-from-pid " + std::to_string(procId)).c_str());
+    std::string str = stdOptMap.find(ind)->second;
     char *env = str.data();
     int j = 0; if (!str.empty()) {
       while (env[j] != '\0') {
@@ -884,6 +841,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
         j += strlen(env + j) + 1;
       }
     }
+	FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
     wchar_t *wenv = nullptr;
@@ -1238,6 +1196,195 @@ void FreeInternalProcInfo(_PROCINFO *procInfo) {
 
 void FreeProcInfo(PROCINFO procInfo) {
   FreeInternalProcInfo(InternalProcInfoFromProcInfo(procInfo));
+}
+
+#if !defined(_WIN32)
+static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *outfp) {
+  int p_stdin[2];
+  int p_stdout[2];
+  PROCID pid;
+  if (pipe(p_stdin) == -1)
+    return -1;
+  if (pipe(p_stdout) == -1) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    return -1;
+  }
+  pid = fork();
+  if (pid < 0) {
+    close(p_stdin[0]);
+    close(p_stdin[1]);
+    close(p_stdout[0]);
+    close(p_stdout[1]);
+    return pid;
+  } else if (pid == 0) {
+    close(p_stdin[1]);
+    dup2(p_stdin[0], 0);
+    close(p_stdout[0]);
+    dup2(p_stdout[1], 1);
+    dup2(open("/dev/null", O_RDONLY), 2);
+    for (int i = 3; i < 4096; i++)
+      close(i);
+    setsid();
+    execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
+    exit(0);
+  }
+  close(p_stdin[0]);
+  close(p_stdout[1]);
+  if (infp == nullptr) {
+    close(p_stdin[1]);
+  } else {
+    *infp = p_stdin[1];
+  }
+  if (outfp == nullptr) {
+    close(p_stdout[0]);
+  } else {
+    *outfp = p_stdout[0];
+  }
+  return pid;
+}
+#endif
+
+static inline void OutputThread(std::uintptr_t file, PROCESS procIndex) {
+  #if !defined(_WIN32)
+  ssize_t nRead = 0; char buffer[BUFSIZ];
+  while ((nRead = read((int)infd, buffer, BUFSIZ)) > 0) {
+    buffer[nRead] = '\0';
+  #else
+  DWORD dwRead = 0; char buffer[BUFSIZ];
+  while (ReadFile((HANDLE)(void *)file, buffer, BUFSIZ, &dwRead, nullptr) && dwRead) {
+    buffer[dwRead] = '\0';
+  #endif
+    std::lock_guard<std::mutex> guard(stdOptMutex);
+    stdOptMap[procIndex].append(buffer, dwRead);
+  }
+}
+
+#if !defined(_WIN32)
+static PROCID procForkPid;
+#else
+static bool procDidExecute;
+static PROCID procChildPid;
+#endif
+
+PROCESS ProcessExecute(const char *command) {
+  #if !defined(_WIN32)
+  int pidsize, infd, outfd; 
+  procId = ProcessExecuteHelper(command.c_str(), &infd, &outfd);
+  procForkPid = procId; PROCID procId, *pid = nullptr;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  CrossProcess::ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
+  while (procId && !pidsize) {
+    if (pid) { CrossProcess::FreeProcId(pid); }
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    CrossProcess::ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
+  } if (pidsize) { procId = pid[0]; }
+  if (pid) { CrossProcess::FreeProcId(pid); }
+  PROCESS procIndex = (PROCESS)procId;
+  stdIptMap.insert(std::make_pair(procIndex, (std::uintptr_t)infd));
+  std::thread optThread(OutputThread, (std::uintptr_t)infd, procIndex);
+  optThread.join();
+  #else
+  procDidExecute = true; procChildPid = 0; wchar_t cwstr_command[32768];
+  std::wstring wstr_command = widen(command); bool proceed = true;
+  wcsncpy_s(cwstr_command, 32768, wstr_command.c_str(), 32768);
+  HANDLE hStdInPipeRead = nullptr; HANDLE hStdInPipeWrite = nullptr;
+  HANDLE hStdOutPipeRead = nullptr; HANDLE hStdOutPipeWrite = nullptr;
+  SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
+  proceed = CreatePipe(&hStdInPipeRead, &hStdInPipeWrite, &sa, 0);
+  if (proceed == false) return 0;
+  SetHandleInformation(hStdInPipeWrite, HANDLE_FLAG_INHERIT, 0);
+  proceed = CreatePipe(&hStdOutPipeRead, &hStdOutPipeWrite, &sa, 0);
+  if (proceed == false) return 0;
+  STARTUPINFOW si = { 0 };
+  si.cb = sizeof(STARTUPINFOW);
+  si.dwFlags = STARTF_USESTDHANDLES;
+  si.hStdError = hStdOutPipeWrite;
+  si.hStdOutput = hStdOutPipeWrite;
+  si.hStdInput = hStdInPipeRead;
+  PROCESS_INFORMATION pi = { 0 }; PROCESS procIndex;
+  if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
+    CloseHandle(hStdOutPipeWrite);
+    CloseHandle(hStdInPipeRead);
+    PROCID procId = pi.dwProcessId;
+    procChildPid = procId; procIndex = (PROCESS)procId;
+    stdIptMap.insert(std::make_pair(procIndex, (std::uintptr_t)(void *)hStdInPipeWrite));
+    MSG msg; HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
+    std::thread optThread(OutputThread, (std::uintptr_t)(void *)hStdOutPipeRead, procIndex);
+    while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+      while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
+        TranslateMessage(&msg);
+        DispatchMessage(&msg);
+      }
+    }
+    optThread.join();
+    CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
+    CloseHandle(hStdOutPipeRead);
+    CloseHandle(hStdInPipeWrite);
+  } else { procDidExecute = false; }
+  #endif
+  FreeExecutedProcessStandardInput(procIndex);
+  if (completeMap.find(procIndex) != completeMap.end())
+    completeMap.erase(procIndex);
+  return procIndex;
+}
+
+PROCESS ProcessExecuteAsync(const char *command) {
+  PROCID procId, *pid = nullptr; int pidsize;
+  std::thread procThread(ProcessExecute, command);
+  #if !defined(_WIN32)
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  CrossProcess::ProcIdFromParentProcIdSkipSh(procForkPid, &pid, &pidsize);
+  while (procForkPid && !pidsize) {
+    if (pid) { CrossProcess::FreeProcId(pid); }
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    CrossProcess::ProcIdFromParentProcIdSkipSh(procForkPid, &pid, &pidsize);
+  } if (pidsize) { procId = pid[0]; }
+  if (pid) { CrossProcess::FreeProcId(pid); }
+  #else
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while (procDidExecute && !procChildPid)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  procId = procChildPid;
+  #endif
+  PROCESS procIndex = (PROCESS)procId;
+  completeMap.insert(std::make_pair(procIndex, false));
+  procThread.detach(); return procIndex;
+}
+
+void ExecutedProcessWriteToStandardInput(PROCESS procIndex, const char *input) {
+  if (stdIptMap.find(procIndex) == stdIptMap.end()) return;
+  std::string str = input; char *buffer = new char[str.length() + 1]();
+  #if !defined(_WIN32)
+  strcpy(buffer, str.c_str());
+  write((int)stdIptMap[procIndex], buffer, str.length() + 1);
+  #else
+  strncpy_s(buffer, str.length() + 1, str.c_str(), str.length() + 1);
+  DWORD dwWritten; WriteFile((HANDLE)(void *)stdIptMap[procIndex], buffer, 
+  str.length() + 1, &dwWritten, nullptr);
+  #endif
+  delete[] buffer;
+}
+
+const char *ExecutedProcessReadFromStandardOutput(PROCESS procIndex) {
+  std::lock_guard<std::mutex> guard(stdOptMutex);
+  return stdOptMap.find(procIndex)->second.c_str();
+}
+
+void FreeExecutedProcessStandardInput(PROCESS procIndex) {
+  if (stdIptMap.find(procIndex) == stdIptMap.end()) return;
+  stdIptMap.erase(procIndex);
+}
+
+void FreeExecutedProcessStandardOutput(PROCESS procIndex) {
+  if (stdOptMap.find(procIndex) == stdOptMap.end()) return;
+  stdOptMap.erase(procIndex);
+}
+
+bool CompletionStatusFromExecutedProcess(PROCESS procIndex) {
+  if (completeMap.find(procIndex) == completeMap.end()) return true;
+  return completeMap.find(procIndex)->second;
 }
 
 } // namespace CrossProcess
