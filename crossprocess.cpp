@@ -995,7 +995,7 @@ WINDOW NativeWindowFromWindowId(WINDOWID winId) {
   void *address; sscanf(winId, "%p", &address);
   WINDOW window = (WINDOW)address;
   #else
-  WINDOW window = (WINDOW)strtoull(winId, nullptr, 10);
+  WINDOW window = (WINDOW)strtoul(winId, nullptr, 10);
   #endif
   return window;
 }
