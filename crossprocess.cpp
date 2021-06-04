@@ -25,6 +25,7 @@
  
 */
 
+#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -33,7 +34,6 @@
 #include <string>
 #include <vector>
 #include <mutex>
-#include <map>
 
 #include <cstdlib>
 #include <cstddef>
@@ -541,9 +541,9 @@ bool DirectorySetCurrentWorking(const char *dname) {
   #endif
 }
 
-static std::map<PROCESS, std::uintptr_t> stdIptMap;
-static std::map<PROCESS, std::string>    stdOptMap;
-static std::map<PROCESS, bool>           completeMap;
+static std::unordered_map<PROCESS, std::uintptr_t> stdIptMap;
+static std::unordered_map<PROCESS, std::string>    stdOptMap;
+static std::unordered_map<PROCESS, bool>           completeMap;
 static std::mutex                        stdOptMutex;
 
 void CwdFromProcId(PROCID procId, char **buffer) {
