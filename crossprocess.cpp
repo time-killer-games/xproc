@@ -544,7 +544,7 @@ bool DirectorySetCurrentWorking(const char *dname) {
 static std::unordered_map<PROCESS, std::uintptr_t> stdIptMap;
 static std::unordered_map<PROCESS, std::string>    stdOptMap;
 static std::unordered_map<PROCESS, bool>           completeMap;
-static std::mutex                        stdOptMutex;
+static std::mutex                                  stdOptMutex;
 
 void CwdFromProcId(PROCID procId, char **buffer) {
   if (!ProcIdExists(procId)) return;
@@ -841,7 +841,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
         j += strlen(env + j) + 1;
       }
     }
-	FreeExecutedProcessStandardOutput(ind);
+    FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
     wchar_t *wenv = nullptr;
