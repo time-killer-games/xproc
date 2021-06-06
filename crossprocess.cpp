@@ -52,6 +52,8 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 #endif
 
 #if defined(_WIN32)
@@ -65,6 +67,8 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif (defined(__linux__) && !defined(__ANDROID__))
+#include <sys/time.h>
+#include <sys/resource.h>
 #include <proc/readproc.h>
 #elif defined(__FreeBSD__)
 #include <sys/socket.h>
@@ -1208,7 +1212,12 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
     return 0;
   }
   #elif (defined(__linux__) && !defined(__ANDROID__))
-  int filesmax = 4096;
+  int filesmax; struct rlimit nofile_rlmt;
+  if (getrlimit(RLIMIT_NOFILE, &nofile_rlmt) == -1) {
+    return 0;
+  } else {
+    filesmax = nofile_rlmt.rlim_max;
+  }
   #endif
   int p_stdin[2];
   int p_stdout[2];
