@@ -25,6 +25,7 @@
  
 */
 
+#include <unordered_map>
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
 #include <windows.h>
@@ -57,6 +58,7 @@ typedef Window WINDOW;
 typedef char *WINDOWID;
 #endif
 typedef char *PROCINFO;
+typedef char *PROCINFOLIST;
 typedef struct {
   PROCID ProcessId;
   char *ExecutableImageFilePath;
@@ -73,6 +75,7 @@ typedef struct {
   int OwnedWindowIdLength;
   #endif
 } _PROCINFO;
+typedef _PROCINFO *_PROCINFOLIST;
 
 void ProcIdEnumerate(PROCID **procId, int *size);
 void FreeProcId(PROCID *procId);
@@ -97,8 +100,10 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size);
 void EnvironFromProcIdEx(PROCID procId, const char *name, char **value);
  PROCINFO  ProcInfoFromInternalProcInfo(_PROCINFO *procInfo);
 _PROCINFO *InternalProcInfoFromProcInfo( PROCINFO  procInfo);
- PROCINFO ProcInfoFromProcId(PROCID procId);
+ PROCINFO  ProcInfoFromProcId(PROCID procId);
 _PROCINFO *InternalProcInfoFromProcId(PROCID procId);
+ PROCINFOLIST  ProcInfoListFromInternalProcInfoList(_PROCINFOLIST *procInfo);
+_PROCINFOLIST *InternalProcInfoListFromProcInfoList( PROCINFOLIST  procInfo);
 void FreeProcInfo(PROCINFO procInfo);
 void FreeInternalProcInfo(_PROCINFO *procInfo);
 #if defined(XPROCESS_GUIWINDOW_IMPL)
@@ -111,6 +116,26 @@ void FreeWindowId(WINDOWID *winId);
 bool WindowIdExists(WINDOWID winId);
 bool WindowIdKill(WINDOWID winId);
 #endif
+
+static std::unordered_map<PROCINFOLIST, int> procInfoListSize;
+inline _PROCINFOLIST *InternalProcInfoEnumerate(int *size) { PROCID *procId; ProcIdEnumerate(&procId, size); 
+_PROCINFOLIST *procInfoList = new _PROCINFOLIST[*size](); for (int i = 0; i < *size; i++) 
+ procInfoList[i] = InternalProcInfoFromProcId(procId[i]); FreeProcId(procId); return procInfoList; }
+inline  PROCINFOLIST ProcInfoEnumerate(int *size) { 
+return ProcInfoListFromInternalProcInfoList(InternalProcInfoEnumerate(size)); }
+inline void FreeInternalProcInfoList(_PROCINFOLIST *procInfoList, int size) { 
+for (int i = 0; i < size; i++) FreeInternalProcInfo(procInfoList[i]);
+procInfoListSize.erase(ProcInfoListFromInternalProcInfoList(procInfoList)); }
+inline void FreeProcInfoList(PROCINFOLIST procInfoList, int size) { 
+_PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList);
+FreeInternalProcInfoList(_procInfoList, size); }
+inline PROCINFO ProcessInfo(PROCINFOLIST procInfoList, int i) { 
+procInfoList = ProcInfoEnumerate(&procInfoListSize[procInfoList]);
+_PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList); 
+return ProcInfoFromInternalProcInfo(_procInfoList[i]); }
+inline int ProcessInfoLength(PROCINFOLIST procInfoList) {
+FreeProcInfoList(procInfoList, procInfoListSize[procInfoList]); 
+return procInfoListSize[procInfoList]; }
 
 inline PROCID ProcessId(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->ProcessId; }
 inline char *ExecutableImageFilePath(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->ExecutableImageFilePath; }

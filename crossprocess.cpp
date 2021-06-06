@@ -25,7 +25,6 @@
  
 */
 
-#include <unordered_map>
 #include <algorithm>
 #include <iostream>
 #include <sstream>
@@ -1149,6 +1148,20 @@ PROCINFO ProcInfoFromInternalProcInfo(_PROCINFO *procInfo) {
 _PROCINFO *InternalProcInfoFromProcInfo(PROCINFO procInfo) {
   void *address; sscanf(procInfo, "%p", &address);
   _PROCINFO *res = (_PROCINFO *)address;
+  return res;
+}
+
+PROCINFOLIST ProcInfoListFromInternalProcInfoList(_PROCINFOLIST *procInfo) {
+  static std::string res; 
+  const void *address = static_cast<const void *>(procInfo);
+  std::stringstream ss; ss << address;  
+  res = ss.str();
+  return (PROCINFOLIST)res.c_str();
+}
+
+_PROCINFOLIST *InternalProcInfoListFromProcInfoList(PROCINFOLIST procInfo) {
+  void *address; sscanf(procInfo, "%p", &address);
+  _PROCINFOLIST *res = (_PROCINFOLIST *)address;
   return res;
 }
 
