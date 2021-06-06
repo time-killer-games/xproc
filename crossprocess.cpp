@@ -544,10 +544,10 @@ bool DirectorySetCurrentWorking(const char *dname) {
   #endif
 }
 
-static std::unordered_map<PROCESS, std::uintptr_t> stdIptMap;
-static std::unordered_map<PROCESS, std::string>    stdOptMap;
-static std::unordered_map<PROCESS, bool>           completeMap;
-static std::mutex                                  stdOptMutex;
+static std::unordered_map<PROCESS, std::intptr_t> stdIptMap;
+static std::unordered_map<PROCESS, std::string>   stdOptMap;
+static std::unordered_map<PROCESS, bool>          completeMap;
+static std::mutex                                 stdOptMutex;
 
 void CwdFromProcId(PROCID procId, char **buffer) {
   if (!ProcIdExists(procId)) return;
@@ -1222,12 +1222,12 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
   mib[0] = CTL_KERN;
   mib[1] = KERN_MAXFILESPERPROC;
   if (sysctl(mib, 2, &filesmax, &s, nullptr, 0) == -1) {
-    return 0;
+    return -1;
   }
   #elif (defined(__linux__) && !defined(__ANDROID__))
   int filesmax; struct rlimit nofile_rlmt;
   if (getrlimit(RLIMIT_NOFILE, &nofile_rlmt) == -1) {
-    return 0;
+    return -1;
   } else {
     filesmax = nofile_rlmt.rlim_max;
   }
@@ -1254,7 +1254,7 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
     dup2(p_stdin[0], 0);
     close(p_stdout[0]);
     dup2(p_stdout[1], 1);
-    dup2(open("/dev/null", O_RDONLY), 2);
+    dup2(open("/dev/null", O_WRONLY), 2);
     for (int i = 3; i < filesmax; i++)
       close(i);
     setsid();
@@ -1277,7 +1277,7 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
 }
 #endif
 
-static inline void OutputThread(std::uintptr_t file, PROCESS procIndex) {
+static inline void OutputThread(std::intptr_t file, PROCESS procIndex) {
   #if !defined(_WIN32)
   ssize_t nRead = 0; char buffer[BUFSIZ];
   while ((nRead = read((int)file, buffer, BUFSIZ)) > 0) {
@@ -1292,32 +1292,34 @@ static inline void OutputThread(std::uintptr_t file, PROCESS procIndex) {
   }
 }
 
-#if !defined(_WIN32)
-static PROCID procForkPid;
-#else
-static bool procDidExecute;
-static PROCID procChildPid;
-#endif
+static PROCID childProcId = 0;
+static bool procDidExecute = false;
+
+static inline PROCID ProcIdFromForkProcId(PROCID procId) {
+  PROCID *pid = nullptr; int pidsize;
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
+  if (pid) { if (pidsize) { 
+  procId = ProcIdFromForkProcId(pid[pidsize - 1]); 
+  FreeProcId(pid); } } return procId;
+}
 
 PROCESS ProcessExecute(const char *command) {
+  childProcId = 0;
+  procDidExecute = false; 
   #if !defined(_WIN32)
-  int pidsize, infd, outfd; 
-  PROCID procId = ProcessExecuteHelper(command, &infd, &outfd);
-  procForkPid = procId; PROCID *pid = nullptr;
-  std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  CrossProcess::ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
-  while (procId && !pidsize) {
-    if (pid) { CrossProcess::FreeProcId(pid); }
+  int infd, outfd; PROCID procId, forkProcId;
+  forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
+  procId = forkProcId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while ((procId = ProcIdFromForkProcId(procId)) == forkProcId)
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    CrossProcess::ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
-  } if (pidsize) { procId = pid[0]; }
-  if (pid) { CrossProcess::FreeProcId(pid); }
-  PROCESS procIndex = (PROCESS)procId;
-  stdIptMap.insert(std::make_pair(procIndex, (std::uintptr_t)infd));
-  std::thread optThread(OutputThread, (std::uintptr_t)infd, procIndex);
+  childProcId = procId; procDidExecute = true;
+  PROCESS procIndex = (PROCESS)childProcId;
+  stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)infd));
+  std::thread optThread(OutputThread, (std::intptr_t)outfd, procIndex);
   optThread.join();
   #else
-  procDidExecute = true; procChildPid = 0; wchar_t cwstr_command[32768];
+  wchar_t cwstr_command[32768];
   std::wstring wstr_command = widen(command); bool proceed = true;
   wcsncpy_s(cwstr_command, 32768, wstr_command.c_str(), 32768);
   HANDLE hStdInPipeRead = nullptr; HANDLE hStdInPipeWrite = nullptr;
@@ -1338,11 +1340,12 @@ PROCESS ProcessExecute(const char *command) {
   if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    PROCID procId = pi.dwProcessId;
-    procChildPid = procId; procIndex = (PROCESS)procId;
-    stdIptMap.insert(std::make_pair(procIndex, (std::uintptr_t)(void *)hStdInPipeWrite));
+    PROCID procId = pi.dwProcessId; procDidExecute = true;
+    childProcId = procId; procIndex = (PROCESS)procId;
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)(void *)hStdInPipeWrite));
     MSG msg; HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
-    std::thread optThread(OutputThread, (std::uintptr_t)(void *)hStdOutPipeRead, procIndex);
+    std::thread optThread(OutputThread, (std::intptr_t)(void *)hStdOutPipeRead, procIndex);
     while (MsgWaitForMultipleObjects(2, waitHandles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
       while (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE)) {
         TranslateMessage(&msg);
@@ -1354,7 +1357,8 @@ PROCESS ProcessExecute(const char *command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-  } else { procDidExecute = false; }
+  } else { while (true) // unix behavior if file not found...
+  std::this_thread::sleep_for(std::chrono::milliseconds(5); }
   #endif
   FreeExecutedProcessStandardInput(procIndex);
   if (completeMap.find(procIndex) != completeMap.end())
@@ -1363,24 +1367,12 @@ PROCESS ProcessExecute(const char *command) {
 }
 
 PROCESS ProcessExecuteAsync(const char *command) {
+  procDidExecute = false; childProcId = 0;
   std::thread procThread(ProcessExecute, command);
-  #if !defined(_WIN32)
-  PROCID procId, *pid = nullptr; int pidsize;
-  std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  CrossProcess::ProcIdFromParentProcIdSkipSh(procForkPid, &pid, &pidsize);
-  while (procForkPid && !pidsize) {
-    if (pid) { CrossProcess::FreeProcId(pid); }
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    CrossProcess::ProcIdFromParentProcIdSkipSh(procForkPid, &pid, &pidsize);
-  } if (pidsize) { procId = pid[0]; }
-  if (pid) { CrossProcess::FreeProcId(pid); }
-  #else
-  PROCID procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while (procDidExecute && !procChildPid)
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  procId = procChildPid;
-  #endif
-  PROCESS procIndex = (PROCESS)procId;
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  while (!procDidExecute && !childProcId)
+    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  PROCESS procIndex = (PROCESS)childProcId;
   completeMap.insert(std::make_pair(procIndex, false));
   procThread.detach(); return procIndex;
 }
