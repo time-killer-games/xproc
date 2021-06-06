@@ -129,7 +129,8 @@ procInfoListSize.erase(ProcInfoListFromInternalProcInfoList(procInfoList)); }
 inline void FreeProcInfoList(PROCINFOLIST procInfoList, int size) { 
 _PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList);
 FreeInternalProcInfoList(_procInfoList, size); }
-inline PROCINFOLIST ProcInfoListCreate() { int size; procInfoList = ProcInfoEnumerate(&size);
+inline PROCINFOLIST ProcInfoListCreate() { int size; 
+PROCINFOLIST procInfoList = ProcInfoEnumerate(&size);
 procInfoListSize[procInfoList] = size; return procInfoList; }
 inline PROCINFO ProcessInfo(PROCINFOLIST procInfoList, int i) { 
 _PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList); 
