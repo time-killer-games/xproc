@@ -118,7 +118,7 @@ bool WindowIdKill(WINDOWID winId);
 
 static std::unordered_map<PROCLIST, int> procListSize;
 inline PROCLIST ProcListCreate() { 
-PROCID procId; int size; ProcIdEnumerate(&procId, &size); 
+PROCID *procId; int size; ProcIdEnumerate(&procId, &size); 
 PROCLIST procList = ProcListFromProcId(procId);  
 procListSize[procList] = size; return procList; }
 inline PROCINFO ProcessInfo(PROCLIST procList, int i) { 
