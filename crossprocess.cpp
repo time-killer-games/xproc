@@ -1151,17 +1151,17 @@ _PROCINFO *InternalProcInfoFromProcInfo(PROCINFO procInfo) {
   return res;
 }
 
-PROCINFOLIST ProcInfoListFromInternalProcInfoList(_PROCINFOLIST *procInfo) {
+PROCLIST ProcListFromProcId(PROCID *procInfo) {
   static std::string res; 
   const void *address = static_cast<const void *>(procInfo);
   std::stringstream ss; ss << address;  
   res = ss.str();
-  return (PROCINFOLIST)res.c_str();
+  return (PROCLIST)res.c_str();
 }
 
-_PROCINFOLIST *InternalProcInfoListFromProcInfoList(PROCINFOLIST procInfo) {
+PROCID *ProcIdFromProcList(PROCLIST procInfo) {
   void *address; sscanf(procInfo, "%p", &address);
-  _PROCINFOLIST *res = (_PROCINFOLIST *)address;
+  PROCID *res = (PROCID *)address;
   return res;
 }
 

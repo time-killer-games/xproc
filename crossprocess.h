@@ -57,8 +57,8 @@ typedef Window WINDOW;
 #endif
 typedef char *WINDOWID;
 #endif
+typedef char *PROCLIST;
 typedef char *PROCINFO;
-typedef char *PROCINFOLIST;
 typedef struct {
   PROCID ProcessId;
   char *ExecutableImageFilePath;
@@ -75,7 +75,6 @@ typedef struct {
   int OwnedWindowIdLength;
   #endif
 } _PROCINFO;
-typedef _PROCINFO *_PROCINFOLIST;
 
 void ProcIdEnumerate(PROCID **procId, int *size);
 void FreeProcId(PROCID *procId);
@@ -102,10 +101,10 @@ void EnvironFromProcIdEx(PROCID procId, const char *name, char **value);
 _PROCINFO *InternalProcInfoFromProcInfo( PROCINFO  procInfo);
  PROCINFO  ProcInfoFromProcId(PROCID procId);
 _PROCINFO *InternalProcInfoFromProcId(PROCID procId);
- PROCINFOLIST  ProcInfoListFromInternalProcInfoList(_PROCINFOLIST *procInfo);
-_PROCINFOLIST *InternalProcInfoListFromProcInfoList( PROCINFOLIST  procInfo);
 void FreeProcInfo(PROCINFO procInfo);
 void FreeInternalProcInfo(_PROCINFO *procInfo);
+PROCLIST ProcListFromProcId(PROCID *procInfo);
+PROCID *ProcIdFromProcList(PROCLIST procInfo);
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 WINDOWID WindowIdFromNativeWindow(WINDOW window);
 WINDOW NativeWindowFromWindowId(WINDOWID winid);
@@ -117,27 +116,19 @@ bool WindowIdExists(WINDOWID winId);
 bool WindowIdKill(WINDOWID winId);
 #endif
 
-static std::unordered_map<PROCINFOLIST, int> procInfoListSize;
-inline _PROCINFOLIST *InternalProcInfoEnumerate(int *size) { PROCID *procId; ProcIdEnumerate(&procId, size); 
-_PROCINFOLIST *procInfoList = new _PROCINFOLIST[*size](); for (int i = 0; i < *size; i++) 
- procInfoList[i] = InternalProcInfoFromProcId(procId[i]); FreeProcId(procId); return procInfoList; }
-inline  PROCINFOLIST ProcInfoEnumerate(int *size) { 
-return ProcInfoListFromInternalProcInfoList(InternalProcInfoEnumerate(size)); }
-inline void FreeInternalProcInfoList(_PROCINFOLIST *procInfoList, int size) { 
-for (int i = 0; i < size; i++) FreeInternalProcInfo(procInfoList[i]);
-procInfoListSize.erase(ProcInfoListFromInternalProcInfoList(procInfoList)); delete[] procInfoList; }
-inline void FreeProcInfoList(PROCINFOLIST procInfoList, int size) { 
-_PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList);
-FreeInternalProcInfoList(_procInfoList, size); }
-inline PROCINFOLIST ProcInfoListCreate() { int size; 
-PROCINFOLIST procInfoList = ProcInfoEnumerate(&size);
-procInfoListSize[procInfoList] = size; return procInfoList; }
-inline PROCINFO ProcessInfo(PROCINFOLIST procInfoList, int i) { 
-_PROCINFOLIST *_procInfoList = InternalProcInfoListFromProcInfoList(procInfoList); 
-return ProcInfoFromInternalProcInfo(_procInfoList[i]); }
-inline int ProcessInfoLength(PROCINFOLIST procInfoList) {
-FreeProcInfoList(procInfoList, procInfoListSize[procInfoList]); 
-return procInfoListSize[procInfoList]; }
+static std::unordered_map<PROCLIST, int> procListSize;
+inline PROCLIST ProcListCreate() { 
+PROCID procId; int size; ProcIdEnumerate(&procId, &size); 
+PROCLIST procList = ProcListFromProcId(procId);  
+procListSize[procList] = size; return procList; }
+inline PROCINFO ProcessInfo(PROCLIST procList, int i) { 
+PROCID *procId = ProcIdFromProcList(procList);
+return ProcInfoFromProcId(procId[i]); }
+inline int ProcessInfoLength(PROCLIST procList) { 
+return procListSize[procList]; }
+inline void FreeProcList(PROCLIST procList) {
+procListSize.erase(procList);
+FreeProcId(ProcIdFromProcList(procList)); }
 
 inline PROCID ProcessId(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->ProcessId; }
 inline char *ExecutableImageFilePath(PROCINFO procInfo) { return InternalProcInfoFromProcInfo(procInfo)->ExecutableImageFilePath; }
