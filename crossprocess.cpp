@@ -1331,9 +1331,9 @@ PROCESS ProcessExecute(const char *command) {
 }
 
 PROCESS ProcessExecuteAsync(const char *command) {
-  PROCID procId, *pid = nullptr; int pidsize;
   std::thread procThread(ProcessExecute, command);
   #if !defined(_WIN32)
+  PROCID procId, *pid = nullptr; int pidsize;
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   CrossProcess::ProcIdFromParentProcIdSkipSh(procForkPid, &pid, &pidsize);
   while (procForkPid && !pidsize) {
@@ -1343,7 +1343,7 @@ PROCESS ProcessExecuteAsync(const char *command) {
   } if (pidsize) { procId = pid[0]; }
   if (pid) { CrossProcess::FreeProcId(pid); }
   #else
-  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  PROCID procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
   while (procDidExecute && !procChildPid)
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   procId = procChildPid;
