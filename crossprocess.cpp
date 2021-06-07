@@ -67,8 +67,6 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif (defined(__linux__) && !defined(__ANDROID__))
-#include <sys/time.h>
-#include <sys/resource.h>
 #include <proc/readproc.h>
 #elif defined(__FreeBSD__)
 #include <sys/socket.h>
@@ -1218,21 +1216,6 @@ void FreeProcInfo(PROCINFO procInfo) {
 
 #if !defined(_WIN32)
 static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *outfp) {
-  #if (defined(__APPLE__) && defined(__MACH__)) || defined(__FreeBSD__)
-  int mib[2]; int filesmax; std::size_t s;
-  mib[0] = CTL_KERN;
-  mib[1] = KERN_MAXFILESPERPROC;
-  if (sysctl(mib, 2, &filesmax, &s, nullptr, 0) == -1) {
-    return -1;
-  }
-  #elif (defined(__linux__) && !defined(__ANDROID__))
-  int filesmax; struct rlimit nofile_rlmt;
-  if (getrlimit(RLIMIT_NOFILE, &nofile_rlmt) == -1) {
-    return -1;
-  } else {
-    filesmax = nofile_rlmt.rlim_max;
-  }
-  #endif
   int p_stdin[2];
   int p_stdout[2];
   PROCID pid;
@@ -1256,7 +1239,7 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
     close(p_stdout[0]);
     dup2(p_stdout[1], 1);
     dup2(open("/dev/null", O_WRONLY), 2);
-    for (int i = 3; i < filesmax; i++)
+    for (int i = 3; i < 4096; i++)
       close(i);
     setsid();
     execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
@@ -1300,8 +1283,8 @@ static bool procDidExecute = false;
 static inline PROCID ProcIdFromForkProcId(PROCID procId) {
   PROCID *pid = nullptr; int pidsize;
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
-  if (pid) { if (pidsize) { procId = pid[pidsize - 1]; } 
+  ProcIdFromParentProcId(procId, &pid, &pidsize);
+  if (pid) { if (pidsize) { procId = pid[pidsize - 1]; }
   FreeProcId(pid); } 
   return procId;
 }
@@ -1311,12 +1294,15 @@ PROCESS ProcessExecute(const char *command) {
   childProcId = 0;
   procDidExecute = false; 
   #if !defined(_WIN32)
-  int infd, outfd; PROCID procId, forkProcId;
+  int infd, outfd; PROCID procId, forkProcId, waitProcId;
   forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
-  procId = forkProcId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while ((procId = ProcIdFromForkProcId(procId)) == forkProcId) {
+  procId = forkProcId; waitProcId = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    int status; if (waitpid(forkProcId, &status, WNOHANG) > 0) break;
+    int status; waitProcId = waitpid(forkProcId, &status, WNOHANG);
+    char **cmd = nullptr; int cmdsize; CmdlineFromProcId(forkProcId, &cmd, &cmdsize);
+    if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
+    if (waitProcId > 0) procId = waitProcId; } FreeCmdline(cmd); }
   }
   childProcId = procId; procDidExecute = true;
   PROCESS procIndex = (PROCESS)childProcId;
