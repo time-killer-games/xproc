@@ -1311,7 +1311,7 @@ PROCESS ProcessExecute(const char *command) {
   childProcId = 0;
   procDidExecute = false; 
   #if !defined(_WIN32)
-  int infd, outfd; PROCID procId, forkProcId, parentProcId;
+  int infd, outfd; PROCID procId, forkProcId;
   forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
   procId = forkProcId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
   while ((procId = ProcIdFromForkProcId(procId)) == forkProcId) {
