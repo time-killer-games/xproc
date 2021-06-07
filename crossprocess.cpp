@@ -51,6 +51,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <sys/wait.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #endif
@@ -1259,7 +1260,7 @@ static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *o
       close(i);
     setsid();
     execl("/bin/sh", "/bin/sh", "-c", command, nullptr);
-    exit(0);
+    _exit(-1);
   }
   close(p_stdin[0]);
   close(p_stdout[1]);
@@ -1295,24 +1296,28 @@ static inline void OutputThread(std::intptr_t file, PROCESS procIndex) {
 static PROCID childProcId = 0;
 static bool procDidExecute = false;
 
+#if !defined(_WIN32)
 static inline PROCID ProcIdFromForkProcId(PROCID procId) {
   PROCID *pid = nullptr; int pidsize;
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   ProcIdFromParentProcIdSkipSh(procId, &pid, &pidsize);
-  if (pid) { if (pidsize) { 
-  procId = ProcIdFromForkProcId(pid[pidsize - 1]); 
-  FreeProcId(pid); } } return procId;
+  if (pid) { if (pidsize) { procId = pid[pidsize - 1]; } 
+  FreeProcId(pid); } 
+  return procId;
 }
+#endif
 
 PROCESS ProcessExecute(const char *command) {
   childProcId = 0;
   procDidExecute = false; 
   #if !defined(_WIN32)
-  int infd, outfd; PROCID procId, forkProcId;
+  int infd, outfd; PROCID procId, forkProcId, parentProcId;
   forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
   procId = forkProcId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while ((procId = ProcIdFromForkProcId(procId)) == forkProcId)
+  while ((procId = ProcIdFromForkProcId(procId)) == forkProcId) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    int status; if (waitpid(forkProcId, &status, WNOHANG) > 0) break;
+  }
   childProcId = procId; procDidExecute = true;
   PROCESS procIndex = (PROCESS)childProcId;
   stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)infd));
@@ -1357,8 +1362,7 @@ PROCESS ProcessExecute(const char *command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-  } else { while (true) // unix behavior if file not found...
-  std::this_thread::sleep_for(std::chrono::milliseconds(5); }
+  } else { procDidExecute = true; }
   #endif
   FreeExecutedProcessStandardInput(procIndex);
   if (completeMap.find(procIndex) != completeMap.end())
@@ -1369,9 +1373,9 @@ PROCESS ProcessExecute(const char *command) {
 PROCESS ProcessExecuteAsync(const char *command) {
   procDidExecute = false; childProcId = 0;
   std::thread procThread(ProcessExecute, command);
-  std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  while (!procDidExecute && !childProcId)
-    std::this_thread::sleep_for(std::chrono::milliseconds(50));
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while (!procDidExecute)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
   PROCESS procIndex = (PROCESS)childProcId;
   completeMap.insert(std::make_pair(procIndex, false));
   procThread.detach(); return procIndex;
