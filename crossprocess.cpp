@@ -1276,7 +1276,7 @@ static inline void OutputThread(std::intptr_t file, PROCESS procIndex) {
   }
 }
 
-static int index = 0;
+static int index = -1;
 static std::unordered_map<int, PROCID>  childProcId;
 static std::unordered_map<int, bool> procDidExecute;
 
