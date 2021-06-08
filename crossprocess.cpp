@@ -1218,7 +1218,7 @@ void FreeProcInfo(PROCINFO procInfo) {
 static inline PROCID ProcessExecuteHelper(const char *command, int *infp, int *outfp) {
   int p_stdin[2];
   int p_stdout[2];
-  PROCID pid;
+  PROCID pid = -1;
   if (pipe(p_stdin) == -1)
     return -1;
   if (pipe(p_stdout) == -1) {
@@ -1276,8 +1276,9 @@ static inline void OutputThread(std::intptr_t file, PROCESS procIndex) {
   }
 }
 
-static PROCID childProcId = 0;
-static bool procDidExecute = false;
+static int index = 0;
+static std::unordered_map<int, PROCID>  childProcId;
+static std::unordered_map<int, bool> procDidExecute;
 
 #if !defined(_WIN32)
 static inline PROCID ProcIdFromForkProcId(PROCID procId) {
@@ -1291,11 +1292,9 @@ static inline PROCID ProcIdFromForkProcId(PROCID procId) {
 #endif
 
 PROCESS ProcessExecute(const char *command) {
-  childProcId = 0;
-  procDidExecute = false; 
   #if !defined(_WIN32)
   int infd, outfd; PROCID procId, forkProcId, waitProcId;
-  forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
+  index++; forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
   procId = forkProcId; waitProcId = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
   while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -1304,8 +1303,8 @@ PROCESS ProcessExecute(const char *command) {
     if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
     if (waitProcId > 0) procId = waitProcId; } FreeCmdline(cmd); }
   }
-  childProcId = procId; procDidExecute = true;
-  PROCESS procIndex = (PROCESS)childProcId;
+  childProcId[index] = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  procDidExecute[index] = true; PROCESS procIndex = (PROCESS)procId;
   stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)infd));
   std::thread optThread(OutputThread, (std::intptr_t)outfd, procIndex);
   optThread.join();
@@ -1331,9 +1330,8 @@ PROCESS ProcessExecute(const char *command) {
   if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
-    PROCID procId = pi.dwProcessId; procDidExecute = true;
-    childProcId = procId; procIndex = (PROCESS)procId;
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
+    PROCID procId = pi.dwProcessId; childProcId[index] = procId; procIndex = (PROCESS)procId;
+    std::this_thread::sleep_for(std::chrono::milliseconds(5)); procDidExecute[index] = true;
     stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)(void *)hStdInPipeWrite));
     MSG msg; HANDLE waitHandles[] = { pi.hProcess, hStdOutPipeRead };
     std::thread optThread(OutputThread, (std::intptr_t)(void *)hStdOutPipeRead, procIndex);
@@ -1348,7 +1346,7 @@ PROCESS ProcessExecute(const char *command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-  } else { procDidExecute = true; }
+  } else { procDidExecute[index] = true; }
   #endif
   FreeExecutedProcessStandardInput(procIndex);
   if (completeMap.find(procIndex) != completeMap.end())
@@ -1357,14 +1355,14 @@ PROCESS ProcessExecute(const char *command) {
 }
 
 PROCESS ProcessExecuteAsync(const char *command) {
-  procDidExecute = false; childProcId = 0;
   std::thread procThread(ProcessExecute, command);
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while (!procDidExecute)
+  while (procDidExecute.find(procIndex) == procDidExecute.end() || !procDidExecute[index])
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  PROCESS procIndex = (PROCESS)childProcId;
+  PROCESS procIndex = (PROCESS)childProcId[index];
   completeMap.insert(std::make_pair(procIndex, false));
-  procThread.detach(); return procIndex;
+  procThread.detach();
+  return procIndex;
 }
 
 void ExecutedProcessWriteToStandardInput(PROCESS procIndex, const char *input) {
