@@ -1296,13 +1296,15 @@ PROCESS ProcessExecute(const char *command) {
   int infd, outfd; PROCID procId, forkProcId, waitProcId;
   index++; forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
   procId = forkProcId; waitProcId = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    int status; waitProcId = waitpid(forkProcId, &status, WNOHANG);
-    char **cmd = nullptr; int cmdsize; CmdlineFromProcId(forkProcId, &cmd, &cmdsize);
-    if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
-    if (waitProcId > 0) procId = waitProcId; } FreeCmdline(cmd); }
-  }
+  if (forkProcId != -1) {
+    while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      int status; waitProcId = waitpid(forkProcId, &status, WNOHANG);
+      char **cmd = nullptr; int cmdsize; CmdlineFromProcId(forkProcId, &cmd, &cmdsize);
+      if (cmd) { if (cmdsize && strcmp(cmd[0], "/bin/sh") == 0) {
+      if (waitProcId > 0) procId = waitProcId; } FreeCmdline(cmd); }
+    }
+  } else { procId = 0; }
   childProcId[index] = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
   procDidExecute[index] = true; PROCESS procIndex = (PROCESS)procId;
   stdIptMap.insert(std::make_pair(procIndex, (std::intptr_t)infd));
@@ -1346,7 +1348,10 @@ PROCESS ProcessExecute(const char *command) {
     CloseHandle(pi.hThread);
     CloseHandle(hStdOutPipeRead);
     CloseHandle(hStdInPipeWrite);
-  } else { procDidExecute[index] = true; }
+  } else { 
+    procDidExecute[index] = true;
+    childProcId[index] = 0;
+  }
   #endif
   FreeExecutedProcessStandardInput(procIndex);
   if (completeMap.find(procIndex) != completeMap.end())
@@ -1355,8 +1360,10 @@ PROCESS ProcessExecute(const char *command) {
 }
 
 PROCESS ProcessExecuteAsync(const char *command) {
+  int prevIndex = index;
   std::thread procThread(ProcessExecute, command);
-  std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  while (prevIndex == index)
+    std::this_thread::sleep_for(std::chrono::milliseconds(5));
   while (procDidExecute.find(index) == procDidExecute.end() || !procDidExecute[index])
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   PROCESS procIndex = (PROCESS)childProcId[index];
