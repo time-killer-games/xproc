@@ -1357,7 +1357,7 @@ PROCESS ProcessExecute(const char *command) {
 PROCESS ProcessExecuteAsync(const char *command) {
   std::thread procThread(ProcessExecute, command);
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
-  while (procDidExecute.find(procIndex) == procDidExecute.end() || !procDidExecute[index])
+  while (procDidExecute.find(index) == procDidExecute.end() || !procDidExecute[index])
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   PROCESS procIndex = (PROCESS)childProcId[index];
   completeMap.insert(std::make_pair(procIndex, false));
