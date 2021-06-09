@@ -1292,9 +1292,10 @@ static inline PROCID ProcIdFromForkProcId(PROCID procId) {
 #endif
 
 PROCESS ProcessExecute(const char *command) {
+  index++;
   #if !defined(_WIN32)
   int infd, outfd; PROCID procId, forkProcId, waitProcId;
-  index++; forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
+  forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
   procId = forkProcId; waitProcId = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
   if (forkProcId != -1) {
     while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
