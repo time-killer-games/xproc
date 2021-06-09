@@ -1368,7 +1368,7 @@ PROCESS ProcessExecuteAsync(const char *command) {
   while (procDidExecute.find(index) == procDidExecute.end() || !procDidExecute[index])
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   PROCESS procIndex = (PROCESS)childProcId[index];
-  completeMap.insert(std::make_pair(procIndex, false));
+  completeMap[procIndex] = true;
   procThread.detach();
   return procIndex;
 }
@@ -1403,7 +1403,7 @@ void FreeExecutedProcessStandardOutput(PROCESS procIndex) {
 }
 
 bool CompletionStatusFromExecutedProcess(PROCESS procIndex) {
-  if (completeMap.find(procIndex) == completeMap.end()) return true;
+  if (completeMap.find(procIndex) == completeMap.end()) return false;
   return completeMap.find(procIndex)->second;
 }
 
