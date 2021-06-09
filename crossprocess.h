@@ -123,7 +123,8 @@ PROCLIST procList = ProcListFromProcId(procId);
 procListSize[procList] = size; return procList; }
 inline PROCINFO ProcessInfo(PROCLIST procList, int i) { 
 PROCID *procId = ProcIdFromProcList(procList);
-return ProcInfoFromProcId(procId[i]); }
+PROCINFO res = ProcInfoFromProcId(procId[i]);
+FreeProcId(procId); return res; }
 inline int ProcessInfoLength(PROCLIST procList) { 
 return procListSize[procList]; }
 inline void FreeProcList(PROCLIST procList) {
