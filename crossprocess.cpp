@@ -102,7 +102,11 @@ enum MEMTYP {
   MEMCWD
 };
 
+#if !defined(_MSC_VER)
+#pragma pack(push, 8)
+#else
 #include <pshpack8.h>
+#endif
 
 /* RTL_DRIVE_LETTER_CURDIR struct from:
  https://github.com/processhacker/phnt/ 
@@ -160,7 +164,11 @@ enum MEMTYP {
   ULONG DefaultThreadpoolCpuSetMaskCount;\
 }
 
+#if !defined(_MSC_VER)
+#pragma pack(pop)
+#else
 #include <poppack.h>
+#endif
 
 std::wstring widen(std::string str) {
   std::size_t wchar_count = str.size() + 1;
@@ -939,25 +947,13 @@ static inline void SetErrorHandlers() {
 #endif
 
 WINDOWID WindowIdFromNativeWindow(WINDOW window) {
-  static std::string wid; 
-  #if defined(_WIN32)
-  const void *address = static_cast<const void *>(window);
-  std::stringstream ss; ss << address;  
-  wid = ss.str();
-  #else 
-  wid = std::to_string((unsigned long)window);
-  #endif
-  return (WINDOWID)wid.c_str();
+  static std::string res; 
+  res = std::to_string((unsigned long long)window);
+  return (WINDOWID)res.c_str();
 }
 
 WINDOW NativeWindowFromWindowId(WINDOWID winId) {
-  #if defined(_WIN32)
-  void *address; sscanf(winId, "%p", &address);
-  WINDOW window = (WINDOW)address;
-  #else
-  WINDOW window = (WINDOW)strtoul(winId, nullptr, 10);
-  #endif
-  return window;
+  return (WINDOW)strtoull(winId, nullptr, 10);
 }
 
 static std::vector<std::string> widVec1;
@@ -1136,35 +1132,27 @@ bool WindowIdKill(WINDOWID winId) {
 }
 #endif
 
-PROCINFO ProcInfoFromInternalProcInfo(_PROCINFO *procInfo) {
-  static std::string res; 
-  const void *address = static_cast<const void *>(procInfo);
-  std::stringstream ss; ss << address;  
-  res = ss.str();
-  return (PROCINFO)res.c_str();
+PROCLIST ProcListCreate() { 
+  PROCID *procId = nullptr; int size; 
+  ProcIdEnumerate(&procId, &size); 
+  _PROCLIST *procList = new _PROCLIST(); 
+  procList->ProcessId = procId;
+  procList->ProcessIdLength = size;
+  procListIndex++; procListMap1[procList] = procListIndex;
+  procListMap2[procListIndex] = procList;
+  return procListMap1[procList]; 
 }
 
-_PROCINFO *InternalProcInfoFromProcInfo(PROCINFO procInfo) {
-  void *address; sscanf(procInfo, "%p", &address);
-  _PROCINFO *res = (_PROCINFO *)address;
-  return res;
+PROCINFO ProcessInfo(PROCLIST procList, int i) { 
+  PROCID procId = procListMap2[procList]->ProcessId[i];
+  return ProcInfoFromProcId(procId); 
 }
 
-PROCLIST ProcListFromProcId(PROCID *procInfo) {
-  static std::string res; 
-  const void *address = static_cast<const void *>(procInfo);
-  std::stringstream ss; ss << address;  
-  res = ss.str();
-  return (PROCLIST)res.c_str();
+int ProcessInfoLength(PROCLIST procList) { 
+  return procListMap2[procList]->ProcessIdLength; 
 }
 
-PROCID *ProcIdFromProcList(PROCLIST procInfo) {
-  void *address; sscanf(procInfo, "%p", &address);
-  PROCID *res = (PROCID *)address;
-  return res;
-}
-
-_PROCINFO *InternalProcInfoFromProcId(PROCID procId) {
+PROCINFO ProcInfoFromProcId(PROCID procId) {
   char *exe    = nullptr; ExeFromProcId(procId, &exe);
   char *cwd    = nullptr; CwdFromProcId(procId, &cwd);
   PROCID ppid; ParentProcIdFromProcId(procId, &ppid);
@@ -1193,25 +1181,28 @@ _PROCINFO *InternalProcInfoFromProcId(PROCID procId) {
   procInfo->OwnedWindowId           = wid;
   procInfo->OwnedWindowIdLength     = widsize;
   #endif
-  return procInfo;
-}
-
-PROCINFO ProcInfoFromProcId(PROCID procId) {
-  return ProcInfoFromInternalProcInfo(InternalProcInfoFromProcId(procId));
-}
-
-void FreeInternalProcInfo(_PROCINFO *procInfo) {
-  FreeProcId(procInfo->ChildProcessId);
-  FreeCmdline(procInfo->CommandLine);
-  FreeEnviron(procInfo->Environment);
-  #if defined(XPROCESS_GUIWINDOW_IMPL)
-  FreeWindowId(procInfo->OwnedWindowId);
-  #endif
-  delete procInfo;
+  procInfoIndex++; procInfoMap1[procInfo] = procInfoIndex;
+  procInfoMap2[procInfoIndex] = procInfo;
+  return procInfoIndex;
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
-  FreeInternalProcInfo(InternalProcInfoFromProcInfo(procInfo));
+  FreeProcId(procInfoMap2[procInfo]->ChildProcessId);
+  FreeCmdline(procInfoMap2[procInfo]->CommandLine);
+  FreeEnviron(procInfoMap2[procInfo]->Environment);
+  #if defined(XPROCESS_GUIWINDOW_IMPL)
+  FreeWindowId(procInfoMap2[procInfo]->OwnedWindowId);
+  #endif
+  delete procInfoMap2[procInfo];
+  procInfoMap1.erase(procInfoMap2[procInfo]);
+  procInfoMap2.erase(procInfo);
+}
+
+void FreeProcList(PROCINFO procList) { 
+  FreeProcId(procListMap2[procList]->ProcessId);
+  delete procListMap2[procList];
+  procListMap1.erase(procListMap2[procList]);
+  procListMap2.erase(procList); 
 }
 
 #if !defined(_WIN32)
