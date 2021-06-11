@@ -964,12 +964,12 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
   HWND hWnd = GetTopWindow(GetDesktopWindow());
   PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
   if (procId == pid) {  
-    widVec1.push_back(ss.str()); i++; 
+    widVec1.push_back(WindowIdFromNativeWindow(hWnd)); i++; 
   }
   while (hWnd = GetWindow(hWnd, GW_HWNDNEXT)) {
     PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
     if (procId == pid) {  
-      widVec1.push_back(ss.str()); i++; 
+      widVec1.push_back(WindowIdFromNativeWindow(hWnd)); i++; 
     }
   }
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
