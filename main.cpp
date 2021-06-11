@@ -231,9 +231,8 @@ void PrintPidFromWid(WINDOWID winId) {
 #endif
 
 void PrintAllProcInfo(PROCID procId) {
-  if (!CrossProcess::ProcIdExists(procId)) return;
   CrossProcess::PROCINFO procInfo = CrossProcess::ProcInfoFromProcId(procId);
-  if (procInfo) {
+  if (procInfo != -1) {
     if (CrossProcess::ExecutableImageFilePath(procInfo)) {
       std::cout << "ExecutableImageFilePath:\n" << CrossProcess::ExecutableImageFilePath(procInfo) << std::endl; std::cin.get();
     }

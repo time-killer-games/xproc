@@ -1153,6 +1153,7 @@ int ProcessInfoLength(PROCLIST procList) {
 }
 
 PROCINFO ProcInfoFromProcId(PROCID procId) {
+  if (!CrossProcess::ProcIdExists(procId)) return -1;
   char *exe    = nullptr; ExeFromProcId(procId, &exe);
   char *cwd    = nullptr; CwdFromProcId(procId, &cwd);
   PROCID ppid; ParentProcIdFromProcId(procId, &ppid);
