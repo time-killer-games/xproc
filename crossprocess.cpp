@@ -962,16 +962,12 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
   widVec1.clear(); int i = 0;
   #if defined(_WIN32)
   HWND hWnd = GetTopWindow(GetDesktopWindow());
-  const void *address = static_cast<const void *>(hWnd);
-  std::stringstream ss; ss << address; 
-  PROCID pid; ProcIdFromWindowId((WINDOWID)ss.str().c_str(), &pid);
+  PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
   if (procId == pid) {  
     widVec1.push_back(ss.str()); i++; 
   }
   while (hWnd = GetWindow(hWnd, GW_HWNDNEXT)) {
-    const void *address = static_cast<const void *>(hWnd);
-    std::stringstream ss; ss << address; 
-    PROCID pid; ProcIdFromWindowId((WINDOWID)ss.str().c_str(), &pid);
+    PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
     if (procId == pid) {  
       widVec1.push_back(ss.str()); i++; 
     }
@@ -992,7 +988,7 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
         windowInfoDictionary, kCGWindowNumber);
         CGWindowID wid; CFNumberGetValue(windowID,
         kCGWindowIDCFNumberType, &wid);
-        widVec1.push_back(std::to_string((unsigned long)wid)); i++;
+        widVec1.push_back(WindowIdFromNativeWindow(wid)); i++;
       }
     }
   }
@@ -1014,7 +1010,7 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
       for (int j = nitems - 1; j >= 0; j--) {
         PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(array[j]), &pid);
         if (procId == pid) {
-          widVec1.push_back(std::to_string(array[j])); i++;
+          widVec1.push_back(WindowIdFromNativeWindow(array[j])); i++;
         }
       }
     }
