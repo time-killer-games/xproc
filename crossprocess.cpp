@@ -371,7 +371,7 @@ bool ProcIdExists(PROCID procId) {
   #elif defined(_WIN32)
   PROCID *buffer; int size;
   ProcIdEnumerate(&buffer, &size);
-  if (procId) {
+  if (buffer) {
     for (int i = 0; i < size; i++) {
       if (procId == buffer[i]) {
         return true;
