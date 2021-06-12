@@ -1138,14 +1138,14 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   char *exe    = nullptr; ExeFromProcId(procId, &exe);
   char *cwd    = nullptr; CwdFromProcId(procId, &cwd);
   PROCID ppid  = 0; ParentProcIdFromProcId(procId, &ppid);
-  PROCID *pid  = nullptr; int pidsize; 
+  PROCID *pid  = nullptr; int pidsize = 0; 
   ProcIdFromParentProcId(procId, &pid, &pidsize);
-  char **cmd   = nullptr; int cmdsize; 
+  char **cmd   = nullptr; int cmdsize = 0; 
   CmdlineFromProcId(procId, &cmd, &cmdsize);
-  char **env   = nullptr; int envsize; 
+  char **env   = nullptr; int envsize = 0; 
   EnvironFromProcId(procId, &env, &envsize);
   #if defined(XPROCESS_GUIWINDOW_IMPL)
-  WINDOWID *wid = nullptr; int widsize;
+  WINDOWID *wid = nullptr; int widsize = 0;
   WindowIdFromProcId(procId, &wid, &widsize);
   #endif
   _PROCINFO *procInfo = new _PROCINFO();
@@ -1175,14 +1175,14 @@ PROCID *ChildProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildP
 PROCID ChildProcessId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->ChildProcessId[i]; }
 int ChildProcessIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessIdLength; }
 char **CommandLine(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLine; }
-char *CommandLine(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->CommandLine[i] ? : (char *)""; }
+char *CommandLine(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->CommandLine[i]; }
 int CommandLineLength(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLineLength; }
 char **Environment(PROCINFO procInfo) { return procInfoMap[procInfo]->Environment; }
-char *Environment(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->Environment[i] ? : (char *)""; }
+char *Environment(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->Environment[i]; }
 int EnvironmentLength(PROCINFO procInfo) { return procInfoMap[procInfo]->EnvironmentLength; }
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowId; }
-WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i] ? : (WINDOWID)"0"; }
+WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i]; }
 int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
 #endif
 
