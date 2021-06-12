@@ -137,9 +137,9 @@ char **Environment(PROCINFO procInfo);
 char *Environment(PROCINFO procInfo, int i);
 int EnvironmentLength(PROCINFO procInfo);
 #if defined(XPROCESS_GUIWINDOW_IMPL)
-WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowId; }
-WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i]; }
-int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
+WINDOWID *OwnedWindowId(PROCINFO procInfo);
+WINDOWID OwnedWindowId(PROCINFO procInfo, int i);
+int OwnedWindowIdLength(PROCINFO procInfo);
 #endif
 
 PROCESS ProcessExecute(const char *command);
