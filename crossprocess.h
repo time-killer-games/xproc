@@ -25,7 +25,6 @@
  
 */
 
-#include <unordered_map>
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 #if defined(_WIN32)
 #include <windows.h>
@@ -64,10 +63,6 @@ typedef int PROCINFO;
 #else
 #include <pshpack8.h>
 #endif
-typedef struct {
-  PROCID *ProcessId;
-  int ProcessIdLength;
-} _PROCLIST;
 typedef struct {
   PROCID ProcessId;
   char *ExecutableImageFilePath;
@@ -128,28 +123,23 @@ bool WindowIdExists(WINDOWID winId);
 bool WindowIdKill(WINDOWID winId);
 #endif
 
-static int procInfoIndex = -1;
-static int procListIndex = -1;
-static std::unordered_map<PROCINFO, _PROCINFO *> procInfoMap;
-static std::unordered_map<PROCLIST, _PROCLIST *> procListMap;
-
-inline PROCID ProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ProcessId; }
-inline char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap[procInfo]->ExecutableImageFilePath; }
-inline char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap[procInfo]->CurrentWorkingDirectory; }
-inline PROCID ParentProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ParentProcessId; }
-inline PROCID *ChildProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessId; }
-inline PROCID ChildProcessId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->ChildProcessId[i]; }
-inline int ChildProcessIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessIdLength; }
-inline char **CommandLine(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLine; }
-inline char *CommandLine(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->CommandLine[i]; }
-inline int CommandLineLength(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLineLength; }
-inline char **Environment(PROCINFO procInfo) { return procInfoMap[procInfo]->Environment; }
-inline char *Environment(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->Environment[i]; }
-inline int EnvironmentLength(PROCINFO procInfo) { return procInfoMap[procInfo]->EnvironmentLength; }
+PROCID ProcessId(PROCINFO procInfo);
+char *ExecutableImageFilePath(PROCINFO procInfo);
+char *CurrentWorkingDirectory(PROCINFO procInfo);
+PROCID ParentProcessId(PROCINFO procInfo);
+PROCID *ChildProcessId(PROCINFO procInfo);
+PROCID ChildProcessId(PROCINFO procInfo, int i);
+int ChildProcessIdLength(PROCINFO procInfo);
+char **CommandLine(PROCINFO procInfo);
+char *CommandLine(PROCINFO procInfo, int i);
+int CommandLineLength(PROCINFO procInfo);
+char **Environment(PROCINFO procInfo);
+char *Environment(PROCINFO procInfo, int i);
+int EnvironmentLength(PROCINFO procInfo);
 #if defined(XPROCESS_GUIWINDOW_IMPL)
-inline WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowId; }
-inline WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i]; }
-inline int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
+WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowId; }
+WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i]; }
+int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
 #endif
 
 PROCESS ProcessExecute(const char *command);
