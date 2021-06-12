@@ -1128,26 +1128,6 @@ bool WindowIdKill(WINDOWID winId) {
 }
 #endif
 
-PROCLIST ProcListCreate() { 
-  PROCID *procId = nullptr; int size; 
-  ProcIdEnumerate(&procId, &size); 
-  _PROCLIST *procList = new _PROCLIST(); 
-  procList->ProcessId = procId;
-  procList->ProcessIdLength = size;
-  procListIndex++; procListMap1[procList] = procListIndex;
-  procListMap2[procListIndex] = procList;
-  return procListMap1[procList]; 
-}
-
-PROCINFO ProcessInfo(PROCLIST procList, int i) { 
-  PROCID procId = procListMap2[procList]->ProcessId[i];
-  return ProcInfoFromProcId(procId); 
-}
-
-int ProcessInfoLength(PROCLIST procList) { 
-  return procListMap2[procList]->ProcessIdLength; 
-}
-
 PROCINFO ProcInfoFromProcId(PROCID procId) {
   if (!CrossProcess::ProcIdExists(procId)) return -1;
   char *exe    = nullptr; ExeFromProcId(procId, &exe);
@@ -1181,6 +1161,26 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   procInfoIndex++; procInfoMap1[procInfo] = procInfoIndex;
   procInfoMap2[procInfoIndex] = procInfo;
   return procInfoIndex;
+}
+
+PROCLIST ProcListCreate() { 
+  PROCID *procId = nullptr; int size; 
+  ProcIdEnumerate(&procId, &size); 
+  _PROCLIST *procList = new _PROCLIST(); 
+  procList->ProcessId = procId;
+  procList->ProcessIdLength = size;
+  procListIndex++; procListMap1[procList] = procListIndex;
+  procListMap2[procListIndex] = procList;
+  return procListIndex; 
+}
+
+PROCINFO ProcessInfo(PROCLIST procList, int i) { 
+  PROCID procId = procListMap2[procList]->ProcessId[i];
+  return ProcInfoFromProcId(procId); 
+}
+
+int ProcessInfoLength(PROCLIST procList) { 
+  return procListMap2[procList]->ProcessIdLength; 
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
