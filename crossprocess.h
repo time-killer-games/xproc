@@ -130,28 +130,26 @@ bool WindowIdKill(WINDOWID winId);
 
 static int procInfoIndex = -1;
 static int procListIndex = -1;
-static std::unordered_map<_PROCINFO *, PROCINFO> procInfoMap1;
-static std::unordered_map<_PROCLIST *, PROCLIST> procListMap1;
-static std::unordered_map<PROCINFO, _PROCINFO *> procInfoMap2;
-static std::unordered_map<PROCLIST, _PROCLIST *> procListMap2;
+static std::unordered_map<PROCINFO, _PROCINFO *> procInfoMap;
+static std::unordered_map<PROCLIST, _PROCLIST *> procListMap;
 
-inline PROCID ProcessId(PROCINFO procInfo) { return procInfoMap2[procInfo]->ProcessId; }
-inline char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap2[procInfo]->ExecutableImageFilePath; }
-inline char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap2[procInfo]->CurrentWorkingDirectory; }
-inline PROCID ParentProcessId(PROCINFO procInfo) { return procInfoMap2[procInfo]->ParentProcessId; }
-inline PROCID *ChildProcessId(PROCINFO procInfo) { return procInfoMap2[procInfo]->ChildProcessId; }
-inline PROCID ChildProcessId(PROCINFO procInfo, int i) { return procInfoMap2[procInfo]->ChildProcessId[i]; }
-inline int ChildProcessIdLength(PROCINFO procInfo) { return procInfoMap2[procInfo]->ChildProcessIdLength; }
-inline char **CommandLine(PROCINFO procInfo) { return procInfoMap2[procInfo]->CommandLine; }
-inline char *CommandLine(PROCINFO procInfo, int i) { return procInfoMap2[procInfo]->CommandLine[i]; }
-inline int CommandLineLength(PROCINFO procInfo) { return procInfoMap2[procInfo]->CommandLineLength; }
-inline char **Environment(PROCINFO procInfo) { return procInfoMap2[procInfo]->Environment; }
-inline char *Environment(PROCINFO procInfo, int i) { return procInfoMap2[procInfo]->Environment[i]; }
-inline int EnvironmentLength(PROCINFO procInfo) { return procInfoMap2[procInfo]->EnvironmentLength; }
+inline PROCID ProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ProcessId; }
+inline char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap[procInfo]->ExecutableImageFilePath; }
+inline char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap[procInfo]->CurrentWorkingDirectory; }
+inline PROCID ParentProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ParentProcessId; }
+inline PROCID *ChildProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessId; }
+inline PROCID ChildProcessId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->ChildProcessId[i]; }
+inline int ChildProcessIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessIdLength; }
+inline char **CommandLine(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLine; }
+inline char *CommandLine(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->CommandLine[i]; }
+inline int CommandLineLength(PROCINFO procInfo) { return procInfoMap[procInfo]->CommandLineLength; }
+inline char **Environment(PROCINFO procInfo) { return procInfoMap[procInfo]->Environment; }
+inline char *Environment(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->Environment[i]; }
+inline int EnvironmentLength(PROCINFO procInfo) { return procInfoMap[procInfo]->EnvironmentLength; }
 #if defined(XPROCESS_GUIWINDOW_IMPL)
-inline WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap2[procInfo]->OwnedWindowId; }
-inline WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap2[procInfo]->OwnedWindowId[i]; }
-inline int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap2[procInfo]->OwnedWindowIdLength; }
+inline WINDOWID *OwnedWindowId(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowId; }
+inline WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->OwnedWindowId[i]; }
+inline int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
 #endif
 
 PROCESS ProcessExecute(const char *command);

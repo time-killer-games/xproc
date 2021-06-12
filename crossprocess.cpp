@@ -1158,8 +1158,7 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   procInfo->OwnedWindowId           = wid;
   procInfo->OwnedWindowIdLength     = widsize;
   #endif
-  procInfoIndex++; procInfoMap1[procInfo] = procInfoIndex;
-  procInfoMap2[procInfoIndex] = procInfo;
+  procInfoIndex++; procInfoMap[procInfoIndex] = procInfo;
   return procInfoIndex;
 }
 
@@ -1169,37 +1168,34 @@ PROCLIST ProcListCreate() {
   _PROCLIST *procList = new _PROCLIST(); 
   procList->ProcessId = procId;
   procList->ProcessIdLength = size;
-  procListIndex++; procListMap1[procList] = procListIndex;
-  procListMap2[procListIndex] = procList;
-  return procListIndex; 
+  procListIndex++; procListMap[procListIndex] = procList;
+  return procListIndex;
 }
 
 PROCINFO ProcessInfo(PROCLIST procList, int i) { 
-  PROCID procId = procListMap2[procList]->ProcessId[i];
+  PROCID procId = procListMap[procList]->ProcessId[i];
   return ProcInfoFromProcId(procId); 
 }
 
 int ProcessInfoLength(PROCLIST procList) { 
-  return procListMap2[procList]->ProcessIdLength; 
+  return procListMap[procList]->ProcessIdLength; 
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
-  FreeProcId(procInfoMap2[procInfo]->ChildProcessId);
-  FreeCmdline(procInfoMap2[procInfo]->CommandLine);
-  FreeEnviron(procInfoMap2[procInfo]->Environment);
+  FreeProcId(procInfoMap[procInfo]->ChildProcessId);
+  FreeCmdline(procInfoMap[procInfo]->CommandLine);
+  FreeEnviron(procInfoMap[procInfo]->Environment);
   #if defined(XPROCESS_GUIWINDOW_IMPL)
-  FreeWindowId(procInfoMap2[procInfo]->OwnedWindowId);
+  FreeWindowId(procInfoMap[procInfo]->OwnedWindowId);
   #endif
-  delete procInfoMap2[procInfo];
-  procInfoMap1.erase(procInfoMap2[procInfo]);
-  procInfoMap2.erase(procInfo);
+  delete procInfoMap[procInfo];
+  procInfoMap.erase(procInfo);
 }
 
 void FreeProcList(PROCINFO procList) { 
-  FreeProcId(procListMap2[procList]->ProcessId);
-  delete procListMap2[procList];
-  procListMap1.erase(procListMap2[procList]);
-  procListMap2.erase(procList); 
+  FreeProcId(procListMap[procList]->ProcessId);
+  delete procListMap[procList];
+  procListMap.erase(procList); 
 }
 
 #if !defined(_WIN32)
