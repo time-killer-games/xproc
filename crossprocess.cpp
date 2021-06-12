@@ -1189,11 +1189,15 @@ int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->Owned
 PROCLIST ProcListCreate() { 
   PROCID *procId = nullptr; int size; 
   ProcIdEnumerate(&procId, &size);
-  std::vector<PROCID> res;
-  for (int i = 0; i < size; i++)
-    res.push_back(procId[i]); 
-  procListVec.push_back(res); procListIndex++;
-  FreeProcId(procId); return procListIndex;
+  if (procId) {
+    std::vector<PROCID> res;
+    for (int i = 0; i < size; i++)
+      res.push_back(procId[i]); 
+    procListVec.push_back(res);
+    FreeProcId(procId);
+  }
+  procListIndex++;
+  return procListIndex;
 }
 
 PROCINFO ProcessInfo(PROCLIST procList, int i) { 
