@@ -1200,16 +1200,21 @@ PROCLIST ProcListCreate() {
   return procListIndex;
 }
 
-PROCINFO ProcessInfo(PROCLIST procList, int i) { 
-  std::vector<PROCID> procId = procListVec[procList];
-  return ProcInfoFromProcId(procId[i]); 
+PROCINFO ProcessInfo(PROCLIST procList, int i) {
+  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end()) {
+    std::vector<PROCID> procId = procListVec[procList];
+    return ProcInfoFromProcId(procId[i]);
+  }
+  return -1;
 }
 
-int ProcessInfoLength(PROCLIST procList) { 
-  return procListVec[procList].size(); 
+int ProcessInfoLength(PROCLIST procList) {
+  if (procInfoMap.find(procIndex) == procInfoMap.end()) return 0;
+  return procListVec[procList].size();
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
+  if (procInfoMap.find(procIndex) == procInfoMap.end()) return;
   FreeProcId(procInfoMap[procInfo]->ChildProcessId);
   FreeCmdline(procInfoMap[procInfo]->CommandLine);
   FreeEnviron(procInfoMap[procInfo]->Environment);
@@ -1220,8 +1225,9 @@ void FreeProcInfo(PROCINFO procInfo) {
   procInfoMap.erase(procInfo);
 }
 
-void FreeProcList(PROCINFO procList) {
-  procListVec[procList].clear();
+void FreeProcList(PROCLIST procList) {
+  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end())
+    procListVec[procList].clear();
 }
 
 #if !defined(_WIN32)
