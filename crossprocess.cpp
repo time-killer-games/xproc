@@ -184,7 +184,7 @@ std::string narrow(std::wstring wstr) {
 }
 
 HANDLE OpenProcessWithDebugPrivilege(PROCID procId) {
-  HANDLE proc = nullptr; HANDLE hToken = nullptr; LUID luid; TOKEN_PRIVILEGES tkp;
+  HANDLE proc = nullptr; HANDLE hToken = nullptr; LUID luid = { 0 }; TOKEN_PRIVILEGES tkp = { 0 };
   if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
     if (LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid)) {
       tkp.PrivilegeCount = 1; tkp.Privileges[0].Luid = luid;
@@ -209,8 +209,8 @@ BOOL IsX86Process(HANDLE proc) {
 }
 
 void CwdCmdEnvFromProc(HANDLE proc, wchar_t **buffer, int type) {
-  PEB peb; SIZE_T nRead; ULONG len = 0; 
-  PROCESS_BASIC_INFORMATION pbi; RTL_USER_PROCESS_PARAMETERS upp;
+  PEB peb = { 0 }; SIZE_T nRead = 0; ULONG len = 0; 
+  PROCESS_BASIC_INFORMATION pbi = { 0 }; RTL_USER_PROCESS_PARAMETERS upp = { 0 };
   typedef NTSTATUS (__stdcall *NTQIP)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
   NTQIP NtQueryInformationProcess = NTQIP(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQueryInformationProcess"));
   NTSTATUS status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
@@ -246,9 +246,9 @@ static std::vector<std::string> CmdEnvVec1;
 void CmdEnvFromProcId(PROCID procId, char ***buffer, int *size, int type) {
   if (!CrossProcess::ProcIdExists(procId)) return;
   CmdEnvVec1.clear(); int i = 0;
-  int argmax, nargs; std::size_t s;
-  char *procargs, *sp, *cp; int mib[3];
-  mib[0] = CTL_KERN; mib[1] = KERN_ARGMAX;
+  int argmax = 0, nargs = 0; std::size_t s = 0;
+  char *procargs = nullptr, *sp = nullptr, *cp = nullptr; 
+  int mib[3]; mib[0] = CTL_KERN; mib[1] = KERN_ARGMAX;
   s = sizeof(argmax);
   if (sysctl(mib, 2, &argmax, &s, nullptr, 0) == -1) {
     return;
@@ -330,7 +330,7 @@ void ProcIdEnumerate(PROCID **procId, int *size) {
   }
   closeproc(proc);
   #elif defined(__FreeBSD__)
-  int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+  int cntp = 0; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
     for (int j = 0; j < cntp; j++) {
       vec.push_back(proc_info[j].ki_pid); i++;
     }
@@ -415,7 +415,7 @@ void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId) {
   }
   CloseHandle(hp);
   #elif (defined(__APPLE__) && defined(__MACH__))
-  proc_bsdinfo proc_info;
+  proc_bsdinfo proc_info = { 0 };
   if (proc_pidinfo(procId, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
     *parentProcId = proc_info.pbi_ppid;
   }
@@ -470,7 +470,7 @@ void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
   }
   closeproc(proc);
   #elif defined(__FreeBSD__)
-  int cntp; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
+  int cntp = 0; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
     for (int j = 0; j < cntp; j++) {
       if (proc_info[j].ki_ppid == parentProcId) {
         vec.push_back(proc_info[j].ki_pid); i++;
@@ -511,7 +511,7 @@ void ExeFromProcId(PROCID procId, char **buffer) {
     *buffer = (char *)str.c_str();
   }
   #elif defined(__FreeBSD__)
-  int mib[4]; std::size_t s;
+  int mib[4]; std::size_t s = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
   mib[2] = KERN_PROC_PATHNAME;
@@ -602,7 +602,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
   #endif
   CloseHandle(proc);
   #elif (defined(__APPLE__) && defined(__MACH__))
-  proc_vnodepathinfo vpi;
+  proc_vnodepathinfo vpi = { 0 };
   char cwd[PROC_PIDPATHINFO_MAXSIZE];
   if (proc_pidinfo(procId, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0) {
     strcpy(cwd, vpi.pvi_cdir.vip_path);
@@ -624,7 +624,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     if (proc_info) {
       filestat_list *head = procstat_getfiles(proc_stat, proc_info, 0);
       if (head) {
-        filestat *fst;
+        filestat *fst = nullptr;
         STAILQ_FOREACH(fst, head, next) {
           if (fst->fs_uflags & PS_FST_UFLAG_CDIR) {
             strcpy(cwd, fst->fs_path);
@@ -689,7 +689,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
     FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
-    wchar_t *cmdbuf = nullptr; int cmdsize;
+    wchar_t *cmdbuf = nullptr; int cmdsize = 0;
     CwdCmdEnvFromProc(proc, &cmdbuf, MEMCMD);
     if (cmdbuf) {
       wchar_t **cmdline = CommandLineToArgvW(cmdbuf, &cmdsize);
@@ -706,7 +706,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   #endif
   CloseHandle(proc);
   #elif (defined(__APPLE__) && defined(__MACH__))
-  char **cmdline = nullptr; int cmdsiz;
+  char **cmdline = nullptr; int cmdsiz = 0;
   CmdEnvFromProcId(procId, &cmdline, &cmdsiz, MEMCMD);
   if (cmdline) {
     for (int j = 0; j < cmdsiz; j++) {
@@ -724,7 +724,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   }
   closeproc(proc);
   #elif defined(__FreeBSD__)
-  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp;
+  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp = 0;
   if (proc_stat) {
     kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, procId, &cntp);
     if (proc_info) {
@@ -751,7 +751,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
 void ParentProcIdFromProcIdSkipSh(PROCID procId, PROCID *parentProcId) {
   ParentProcIdFromProcId(procId, parentProcId);
   #if !defined(_WIN32)
-  char **cmdline = nullptr; int cmdsize;
+  char **cmdline = nullptr; int cmdsize = 0;
   CmdlineFromProcId(*parentProcId, &cmdline, &cmdsize);
   if (cmdline) {
     if (strcmp(cmdline[0], "/bin/sh") == 0) {
@@ -767,7 +767,7 @@ void ProcIdFromParentProcIdSkipSh(PROCID parentProcId, PROCID **procId, int *siz
   #if !defined(_WIN32)
   if (procId) {
     for (int i = 0; i < *size; i++) {
-      char **cmdline = nullptr; int cmdsize;
+      char **cmdline = nullptr; int cmdsize = 0;
       CmdlineFromProcId(*procId[i], &cmdline, &cmdsize);
       if (cmdline) {
         if (strcmp(cmdline[0], "/bin/sh") == 0) {
@@ -869,7 +869,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
   #endif
   CloseHandle(proc);
   #elif (defined(__APPLE__) && defined(__MACH__))
-  char **env = nullptr; int envsiz;
+  char **env = nullptr; int envsiz = 0;
   CmdEnvFromProcId(procId, &env, &envsiz, MEMENV);
   if (env) {
     for (int j = 0; j < envsiz; j++) {
@@ -887,7 +887,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
   }
   closeproc(proc);
   #elif defined(__FreeBSD__)
-  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp;
+  procstat *proc_stat = procstat_open_sysctl(); unsigned cntp = 0;
   if (proc_stat) {
     kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, procId, &cntp);
     if (proc_info) {
@@ -912,7 +912,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
 }
 
 void EnvironFromProcIdEx(PROCID procId, const char *name, char **value) {
-  char **buffer = nullptr; int size; *value = (char *)"\0";
+  char **buffer = nullptr; int size = 0; *value = (char *)"\0";
   EnvironFromProcId(procId, &buffer, &size);
   if (buffer) {
     for (int i = 0; i < size; i++) {
@@ -963,12 +963,12 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
   widVec1.clear(); int i = 0;
   #if defined(_WIN32)
   HWND hWnd = GetTopWindow(GetDesktopWindow());
-  PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
+  PROCID pid = 0; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
   if (procId == pid) {  
     widVec1.push_back(WindowIdFromNativeWindow(hWnd)); i++; 
   }
   while (hWnd = GetWindow(hWnd, GW_HWNDNEXT)) {
-    PROCID pid; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
+    PROCID pid = 0; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
     if (procId == pid) {  
       widVec1.push_back(WindowIdFromNativeWindow(hWnd)); i++; 
     }
@@ -982,7 +982,7 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
       CFDictionaryRef windowInfoDictionary = 
       (CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, j);
       CFNumberRef ownerPID = (CFNumberRef)CFDictionaryGetValue(
-      windowInfoDictionary, kCGWindowOwnerPID); PROCID pid;
+      windowInfoDictionary, kCGWindowOwnerPID); PROCID pid = 0;
       CFNumberGetValue(ownerPID, kCFNumberIntType, &pid);
       if (procId == pid) {
         CFNumberRef windowID = (CFNumberRef)CFDictionaryGetValue(
@@ -999,9 +999,9 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
   Display *display = XOpenDisplay(nullptr);
   Window window = XDefaultRootWindow(display);
   unsigned char *prop = nullptr;
-  Atom actual_type, filter_atom;
-  int actual_format, status;
-  unsigned long nitems, bytes_after;
+  Atom actual_type = 0, filter_atom = 0;
+  int actual_format = 0, status = 0;
+  unsigned long nitems = 0, bytes_after = 0;
   filter_atom = XInternAtom(display, "_NET_CLIENT_LIST_STACKING", true);
   status = XGetWindowProperty(display, window, filter_atom, 0, 1024, false,
   AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
@@ -1036,11 +1036,11 @@ void FreeWindowId(WINDOWID *winId) {
 static std::vector<std::string> widVec3;
 void WindowIdEnumerate(WINDOWID **winId, int *size) {
   widVec3.clear(); int i = 0;
-  PROCID *pid = nullptr; int pidsize; 
+  PROCID *pid = nullptr; int pidsize = 0; 
   ProcIdEnumerate(&pid, &pidsize);
   if (pid) {
     for (int j = 0; j < pidsize; j++) {
-      WINDOWID *wid = nullptr; int widsize;
+      WINDOWID *wid = nullptr; int widsize = 0;
       WindowIdFromProcId(pid[j], &wid, &widsize);
       if (wid) {
         for (int ii = 0; ii < widsize; ii++) {
@@ -1060,7 +1060,7 @@ void WindowIdEnumerate(WINDOWID **winId, int *size) {
 
 void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
   #if defined(_WIN32)
-  DWORD pid; GetWindowThreadProcessId(NativeWindowFromWindowId(winId), &pid);
+  DWORD pid = 0; GetWindowThreadProcessId(NativeWindowFromWindowId(winId), &pid);
   *procId = (PROCID)pid;
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
   CFArrayRef windowArray = CGWindowListCopyWindowInfo(
@@ -1071,9 +1071,9 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
       CFDictionaryRef windowInfoDictionary = 
       (CFDictionaryRef)CFArrayGetValueAtIndex(windowArray, i);
       CFNumberRef ownerPID = (CFNumberRef)CFDictionaryGetValue(
-      windowInfoDictionary, kCGWindowOwnerPID); PROCID pid;
+      windowInfoDictionary, kCGWindowOwnerPID); PROCID pid = 0;
       CFNumberGetValue(ownerPID, kCFNumberIntType, &pid);
-      WINDOWID *wid = nullptr; int size; 
+      WINDOWID *wid = nullptr; int size = 0; 
       WindowIdFromProcId(pid, &wid, &size);
       if (wid) {
         for (int j = 0; j < size; j++) {
@@ -1090,11 +1090,11 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
   #elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr);
-  unsigned long property;
+  unsigned long property = 0;
   unsigned char *prop = nullptr;
-  Atom actual_type, filter_atom;
-  int actual_format, status;
-  unsigned long nitems, bytes_after;
+  Atom actual_type = 0, filter_atom = 0;
+  int actual_format = 0, status = 0;
+  unsigned long nitems = 0, bytes_after = 0;
   filter_atom = XInternAtom(display, "_NET_WM_PID", true);
   status = XGetWindowProperty(display, NativeWindowFromWindowId(winId), filter_atom, 0, 1000, false,
   AnyPropertyType, &actual_type, &actual_format, &nitems, &bytes_after, &prop);
@@ -1187,7 +1187,7 @@ int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->Owned
 #endif
 
 PROCLIST ProcListCreate() { 
-  PROCID *procId = nullptr; int size; 
+  PROCID *procId = nullptr; int size = 0; 
   ProcIdEnumerate(&procId, &size);
   if (procId) {
     std::vector<PROCID> res;
@@ -1292,7 +1292,7 @@ static std::unordered_map<int, bool> procDidExecute;
 
 #if !defined(_WIN32)
 static inline PROCID ProcIdFromForkProcId(PROCID procId) {
-  PROCID *pid = nullptr; int pidsize;
+  PROCID *pid = nullptr; int pidsize = 0;
   std::this_thread::sleep_for(std::chrono::milliseconds(5));
   ProcIdFromParentProcId(procId, &pid, &pidsize);
   if (pid) { if (pidsize) { procId = pid[pidsize - 1]; }
@@ -1304,9 +1304,11 @@ static inline PROCID ProcIdFromForkProcId(PROCID procId) {
 PROCESS ProcessExecute(const char *command) {
   index++;
   #if !defined(_WIN32)
-  int infd, outfd; PROCID procId, forkProcId, waitProcId;
+  int infd = 0, outfd = 0; 
+  PROCID procId = 0, forkProcId = 0, waitProcId = 0;
   forkProcId = ProcessExecuteHelper(command, &infd, &outfd);
-  procId = forkProcId; waitProcId = procId; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+  procId = forkProcId; waitProcId = procId; 
+  std::this_thread::sleep_for(std::chrono::milliseconds(5));
   if (forkProcId != -1) {
     while ((procId = ProcIdFromForkProcId(procId)) == waitProcId) {
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
@@ -1339,7 +1341,7 @@ PROCESS ProcessExecute(const char *command) {
   si.hStdError = hStdOutPipeWrite;
   si.hStdOutput = hStdOutPipeWrite;
   si.hStdInput = hStdInPipeRead;
-  PROCESS_INFORMATION pi = { 0 }; PROCESS procIndex;
+  PROCESS_INFORMATION pi = { 0 }; PROCESS procIndex = 0;
   if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
     CloseHandle(hStdOutPipeWrite);
     CloseHandle(hStdInPipeRead);
@@ -1440,7 +1442,7 @@ int main(int argc, char **argv) {
         printf("%s", buffer);
       }
     } else if (strcmp(argv[1], "--cmd-from-pid") == 0) {
-      char **buffer = nullptr; int size;
+      char **buffer = nullptr; int size = 0;
       CrossProcess::CmdlineFromProcId(strtoul(argv[2], nullptr, 10), &buffer, &size);
       if (buffer) {
         for (int i = 0; i < size; i++)
@@ -1449,7 +1451,7 @@ int main(int argc, char **argv) {
         CrossProcess::FreeCmdline(buffer);
       }
     } else if (strcmp(argv[1], "--env-from-pid") == 0) {
-      char **buffer = nullptr; int size;
+      char **buffer = nullptr; int size = 0;
       CrossProcess::EnvironFromProcId(strtoul(argv[2], nullptr, 10), &buffer, &size);
       if (buffer) {
         for (int i = 0; i < size; i++)
