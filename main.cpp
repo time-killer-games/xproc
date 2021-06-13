@@ -232,7 +232,7 @@ void PrintPidFromWid(WINDOWID winId) {
 
 void PrintAllProcInfo(PROCID procId) {
   CrossProcess::PROCINFO procInfo = CrossProcess::ProcInfoFromProcId(procId);
-  if (CrossProcess::ProcIdExists(procId)) {
+  if (procInfo != -1) {
     if (CrossProcess::ExecutableImageFilePath(procInfo)) {
       std::cout << "ExecutableImageFilePath:\n" << CrossProcess::ExecutableImageFilePath(procInfo) << std::endl; std::cin.get();
     }
@@ -264,8 +264,8 @@ void PrintAllProcInfo(PROCID procId) {
       }
     }
     #endif
+    CrossProcess::FreeProcInfo(procInfo);
   }
-  CrossProcess::FreeProcInfo(procInfo);
 }
 
 } // namespace XProcPrint
