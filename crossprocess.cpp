@@ -1201,17 +1201,12 @@ PROCLIST ProcListCreate() {
 }
 
 PROCINFO ProcessInfo(PROCLIST procList, int i) {
-  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end()) {
-    std::vector<PROCID> procId = procListVec[procList];
-    return ProcInfoFromProcId(procId[i]);
-  }
-  return -1;
+  std::vector<PROCID> procId = procListVec[procList];
+  return ProcInfoFromProcId(procId[i]);
 }
 
 int ProcessInfoLength(PROCLIST procList) {
-  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end())
-    return procListVec[procList].size();
-  return 0;
+  return procListVec[procList].size();
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
@@ -1227,8 +1222,7 @@ void FreeProcInfo(PROCINFO procInfo) {
 }
 
 void FreeProcList(PROCLIST procList) {
-  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end())
-    procListVec[procList].clear();
+  procListVec[procList].clear();
 }
 
 #if !defined(_WIN32)
