@@ -92,7 +92,7 @@ void PrintXProcHelp() {
 }
 
 void PrintPidEnumeration() {
-  PROCID *procId = nullptr; int size;
+  PROCID *procId = nullptr; int size = 0;
   CrossProcess::ProcIdEnumerate(&procId, &size);
   if (procId) {
     for (int i = 0; i < size; i++) {
@@ -112,14 +112,14 @@ void PrintWhetherPidKilled(PROCID procId) {
 
 void PrintPpidFromPid(PROCID procId) {
   if (!CrossProcess::ProcIdExists(procId)) return;
-  PROCID parentProcId;
+  PROCID parentProcId = 0;
   CrossProcess::ParentProcIdFromProcId(procId, &parentProcId);
   std::cout << parentProcId << std::endl;
 }
 
 void PrintPidFromPpid(PROCID parentProcId) {
   if (!CrossProcess::ProcIdExists(parentProcId)) return;
-  PROCID *procId = nullptr; int size;
+  PROCID *procId = nullptr; int size = 0;
   CrossProcess::ProcIdFromParentProcId(parentProcId, &procId, &size);
   if (procId) {
     for (int i = 0; i < size; i++) {
@@ -149,13 +149,13 @@ void PrintCwdFromPid(PROCID procId) {
 
 void PrintCmdFromPid(PROCID procId) {
   if (!CrossProcess::ProcIdExists(procId)) return;
-  char **buffer = nullptr; int size;
+  char **buffer = nullptr; int size = 0;
   CrossProcess::CmdlineFromProcId(procId, &buffer, &size);
   if (buffer) {
     for (int i = 0; i < size; i++) {
       string tmpstr = StringReplaceAll(buffer[i], "\\", "\\\\");
       std::cout << "\"" << StringReplaceAll(tmpstr, "\"", 
-	  "\\\"") << ((i < size - 1) ? "\" " : "\"");
+        "\\\"") << ((i < size - 1) ? "\" " : "\"");
     }
     std::cout << std::endl;
     CrossProcess::FreeCmdline(buffer);
@@ -172,7 +172,7 @@ void PrintEnvFromPid(PROCID procId, const char *name) {
       return;
     }
   }
-  char **buffer = nullptr; int size;
+  char **buffer = nullptr; int size = 0;
   CrossProcess::EnvironFromProcId(procId, &buffer, &size);
   if (buffer) {
     for (int i = 0; i < size; i++) {
@@ -191,7 +191,7 @@ void PrintEnvFromPid(PROCID procId, const char *name) {
 
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 void PrintWidEnumeration() {
-  WINDOWID *winId = nullptr; int size;
+  WINDOWID *winId = nullptr; int size = 0;
   CrossProcess::WindowIdEnumerate(&winId, &size);
   if (winId) {
     for (int i = 0; i < size; i++) {
@@ -211,7 +211,7 @@ void PrintWhetherWidKilled(WINDOWID winId) {
 
 void PrintWidFromPid(PROCID procId) {
   if (!CrossProcess::ProcIdExists(procId)) return;
-  WINDOWID *winId = nullptr; int size;
+  WINDOWID *winId = nullptr; int size = 0;
   CrossProcess::WindowIdFromProcId(procId, &winId, &size);
   if (winId) {
     for (int i = 0; i < size; i++) {
@@ -222,7 +222,7 @@ void PrintWidFromPid(PROCID procId) {
 }
 
 void PrintPidFromWid(WINDOWID winId) {
-  PROCID procId;
+  PROCID procId = 0;
   CrossProcess::ProcIdFromWindowId(winId, &procId);
   if (procId) {
     std::cout << procId << std::endl;
@@ -232,7 +232,7 @@ void PrintPidFromWid(WINDOWID winId) {
 
 void PrintAllProcInfo(PROCID procId) {
   CrossProcess::PROCINFO procInfo = CrossProcess::ProcInfoFromProcId(procId);
-  if (procInfo != -1) {
+  if (CrossProcess::ProcIdExists(procId)) {
     if (CrossProcess::ExecutableImageFilePath(procInfo)) {
       std::cout << "ExecutableImageFilePath:\n" << CrossProcess::ExecutableImageFilePath(procInfo) << std::endl; std::cin.get();
     }
@@ -264,8 +264,8 @@ void PrintAllProcInfo(PROCID procId) {
       }
     }
     #endif
-    CrossProcess::FreeProcInfo(procInfo);
   }
+  CrossProcess::FreeProcInfo(procInfo);
 }
 
 } // namespace XProcPrint
