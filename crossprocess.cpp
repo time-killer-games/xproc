@@ -1209,12 +1209,13 @@ PROCINFO ProcessInfo(PROCLIST procList, int i) {
 }
 
 int ProcessInfoLength(PROCLIST procList) {
-  if (procInfoMap.find(procIndex) == procInfoMap.end()) return 0;
-  return procListVec[procList].size();
+  if (std::find(procListVec.begin(), procListVec.end(), procList) != procListVec.end())
+    return procListVec[procList].size();
+  return 0;
 }
 
 void FreeProcInfo(PROCINFO procInfo) {
-  if (procInfoMap.find(procIndex) == procInfoMap.end()) return;
+  if (procInfoMap.find(procInfo) == procInfoMap.end()) return;
   FreeProcId(procInfoMap[procInfo]->ChildProcessId);
   FreeCmdline(procInfoMap[procInfo]->CommandLine);
   FreeEnviron(procInfoMap[procInfo]->Environment);
