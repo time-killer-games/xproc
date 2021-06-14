@@ -366,11 +366,29 @@ void ProcIdFromSelf(PROCID *procId) {
   #endif
 }
 
+PROCID ProcIdFromSelf() {
+  #if !defined(_WIN32)
+  return getpid();
+  #elif defined(_WIN32)
+  return GetCurrentProcessId();
+  #endif
+}
+
 void ParentProcIdFromSelf(PROCID *parentProcId) {
   #if !defined(_WIN32)
   *parentProcId = getppid();
   #elif defined(_WIN32)
   ParentProcIdFromProcId(GetCurrentProcessId(), parentProcId);
+  #endif
+}
+
+PROCID ParentProcIdFromSelf() {
+  #if !defined(_WIN32)
+  return getppid();
+  #elif defined(_WIN32)
+  PROCID parentProcId;
+  ParentProcIdFromProcId(GetCurrentProcessId(), &parentProcId);
+  return parentProcId;
   #endif
 }
 
@@ -533,6 +551,11 @@ void ExeFromProcId(PROCID procId, char **buffer) {
     }
   }
   #endif
+}
+
+const char *ExecuableFromSelf() {
+  char *exe; ExeFromProcId(ProcIdFromSelf(), &exe);
+  return exe;
 }
 
 const char *DirectoryGetCurrentWorking() {
@@ -807,11 +830,18 @@ bool EnvironmentSetVariable(const char *name, const char *value) {
   #if defined(_WIN32)
   std::wstring u8name = widen(name);
   std::wstring u8value = widen(value);
-  if (strcmp(value, "") == 0) return (SetEnvironmentVariableW(u8name.c_str(), nullptr) != 0);
   return (SetEnvironmentVariableW(u8name.c_str(), u8value.c_str()) != 0);
   #else
-  if (strcmp(value, "") == 0) return (unsetenv(name) == 0);
   return (setenv(name, value, 1) == 0);
+  #endif
+}
+
+bool EnvironmentUnsetVariable(const char *name) {
+  #if defined(_WIN32)
+  std::wstring u8name = widen(name);
+  return (SetEnvironmentVariableW(u8name.c_str(), nullptr) != 0);
+  #else
+  return (unsetenv(name) == 0);
   #endif
 }
 
