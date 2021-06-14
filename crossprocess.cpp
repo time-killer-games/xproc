@@ -553,7 +553,7 @@ void ExeFromProcId(PROCID procId, char **buffer) {
   #endif
 }
 
-const char *ExecuableFromSelf() {
+const char *ExecutableFromSelf() {
   char *exe; ExeFromProcId(ProcIdFromSelf(), &exe);
   return exe;
 }

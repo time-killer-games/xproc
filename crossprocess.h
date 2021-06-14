@@ -93,7 +93,7 @@ void ParentProcIdFromSelf(PROCID *parentProcId);
 PROCID ParentProcIdFromSelf();
 bool ProcIdExists(PROCID procId);
 bool ProcIdKill(PROCID procId);
-const char *ExecuableFromSelf();
+const char *ExecutableFromSelf();
 void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId);
 void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size);
 void ExeFromProcId(PROCID procId, char **buffer);
