@@ -513,6 +513,7 @@ void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
 }
 
 void ExeFromProcId(PROCID procId, char **buffer) {
+  *buffer = nullptr;
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HANDLE proc = OpenProcessWithDebugPrivilege(procId);
@@ -589,6 +590,7 @@ static std::unordered_map<PROCESS, bool>          completeMap;
 static std::mutex                                 stdOptMutex;
 
 void CwdFromProcId(PROCID procId, char **buffer) {
+  *buffer = nullptr;
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HANDLE proc = OpenProcessWithDebugPrivilege(procId);
@@ -680,8 +682,9 @@ void FreeCmdline(char **buffer) {
 
 static std::vector<std::string> CmdlineVec1;
 void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
-  if (!ProcIdExists(procId)) return;
+  *buffer = nullptr; *size = 0;
   CmdlineVec1.clear(); int i = 0;
+  if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HANDLE proc = OpenProcessWithDebugPrivilege(procId);
   if (proc == nullptr) return;
@@ -853,8 +856,9 @@ void FreeEnviron(char **buffer) {
 
 static std::vector<std::string> EnvironVec1; 
 void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
-  if (!ProcIdExists(procId)) return;
+  *buffer = nullptr; *size = 0;
   EnvironVec1.clear(); int i = 0;
+  if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HANDLE proc = OpenProcessWithDebugPrivilege(procId);
   if (proc == nullptr) return;
@@ -997,8 +1001,9 @@ WINDOW NativeWindowFromWindowId(WINDOWID winId) {
 
 static std::vector<std::string> widVec1;
 void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
-  if (!ProcIdExists(procId)) return;
+  *winId = nullptr; *size = 0;
   widVec1.clear(); int i = 0;
+  if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HWND hWnd = GetTopWindow(GetDesktopWindow());
   PROCID pid = 0; ProcIdFromWindowId(WindowIdFromNativeWindow(hWnd), &pid);
