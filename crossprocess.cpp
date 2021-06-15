@@ -308,6 +308,7 @@ void CmdEnvFromProcId(PROCID procId, char ***buffer, int *size, int type) {
 namespace CrossProcess {
 
 void ProcIdEnumerate(PROCID **procId, int *size) {
+  *procId = nullptr; *size = 0; 
   std::vector<PROCID> vec; int i = 0;
   #if defined(_WIN32)
   HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -359,6 +360,7 @@ void FreeProcId(PROCID *procId) {
 }
 
 void ProcIdFromSelf(PROCID *procId) {
+  *procId = 0;
   #if !defined(_WIN32)
   *procId = getpid();
   #elif defined(_WIN32)
@@ -375,6 +377,7 @@ PROCID ProcIdFromSelf() {
 }
 
 void ParentProcIdFromSelf(PROCID *parentProcId) {
+  *parentProcId = 0;
   #if !defined(_WIN32)
   *parentProcId = getppid();
   #elif defined(_WIN32)
@@ -386,7 +389,7 @@ PROCID ParentProcIdFromSelf() {
   #if !defined(_WIN32)
   return getppid();
   #elif defined(_WIN32)
-  PROCID parentProcId;
+  PROCID parentProcId = 0;
   ParentProcIdFromProcId(GetCurrentProcessId(), &parentProcId);
   return parentProcId;
   #endif
@@ -396,7 +399,7 @@ bool ProcIdExists(PROCID procId) {
   #if !defined(_WIN32)
   return (kill(procId, 0) == 0);
   #elif defined(_WIN32)
-  PROCID *buffer; int size;
+  PROCID *buffer = nullptr; int size = 0;
   ProcIdEnumerate(&buffer, &size);
   if (buffer) {
     for (int i = 0; i < size; i++) {
@@ -427,6 +430,7 @@ bool ProcIdKill(PROCID procId) {
 }
 
 void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId) {
+  *parentProcId = 0;
   #if defined(_WIN32)
   HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
   PROCESSENTRY32 pe = { 0 };
@@ -461,6 +465,7 @@ void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId) {
 }
 
 void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
+  *procId = nullptr; *size = 0;
   std::vector<PROCID> vec; int i = 0;
   #if defined(_WIN32)
   HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -783,6 +788,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
 }
 
 void ParentProcIdFromProcIdSkipSh(PROCID procId, PROCID *parentProcId) {
+  *parentProcId = 0;
   ParentProcIdFromProcId(procId, parentProcId);
   #if !defined(_WIN32)
   char **cmdline = nullptr; int cmdsize = 0;
@@ -797,6 +803,7 @@ void ParentProcIdFromProcIdSkipSh(PROCID procId, PROCID *parentProcId) {
 }
 
 void ProcIdFromParentProcIdSkipSh(PROCID parentProcId, PROCID **procId, int *size) {
+  *procId = nullptr; *size = 0;
   ProcIdFromParentProcId(parentProcId, procId, size);
   #if !defined(_WIN32)
   if (procId) {
@@ -1078,6 +1085,7 @@ void FreeWindowId(WINDOWID *winId) {
 
 static std::vector<std::string> widVec3;
 void WindowIdEnumerate(WINDOWID **winId, int *size) {
+  *winId = nullptr; *size = 0;
   widVec3.clear(); int i = 0;
   PROCID *pid = nullptr; int pidsize = 0; 
   ProcIdEnumerate(&pid, &pidsize);
@@ -1102,6 +1110,7 @@ void WindowIdEnumerate(WINDOWID **winId, int *size) {
 }
 
 void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
+  *procId = 0;
   #if defined(_WIN32)
   DWORD pid = 0; GetWindowThreadProcessId(NativeWindowFromWindowId(winId), &pid);
   *procId = (PROCID)pid;
