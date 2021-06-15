@@ -1420,8 +1420,9 @@ PROCESS ProcessExecute(const char *command) {
   }
   #endif
   FreeExecutedProcessStandardInput(procIndex);
+  std::this_thread::sleep_for(std::chrono::milliseconds(100));
   if (completeMap.find(procIndex) != completeMap.end())
-    completeMap.erase(procIndex);
+    completeMap[procIndex] = true;
   return procIndex;
 }
 
@@ -1433,7 +1434,7 @@ PROCESS ProcessExecuteAsync(const char *command) {
   while (procDidExecute.find(index) == procDidExecute.end() || !procDidExecute[index])
     std::this_thread::sleep_for(std::chrono::milliseconds(5));
   PROCESS procIndex = (PROCESS)childProcId[index];
-  completeMap[procIndex] = true;
+  completeMap[procIndex] = false;
   procThread.detach();
   return procIndex;
 }
@@ -1453,6 +1454,7 @@ void ExecutedProcessWriteToStandardInput(PROCESS procIndex, const char *input) {
 }
 
 const char *ExecutedProcessReadFromStandardOutput(PROCESS procIndex) {
+  if (stdOptMap.find(procIndex) == stdOptMap.end()) return "";
   std::lock_guard<std::mutex> guard(stdOptMutex);
   return stdOptMap.find(procIndex)->second.c_str();
 }
