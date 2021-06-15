@@ -1421,8 +1421,7 @@ PROCESS ProcessExecute(const char *command) {
   #endif
   FreeExecutedProcessStandardInput(procIndex);
   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-  if (completeMap.find(procIndex) != completeMap.end())
-    completeMap[procIndex] = true;
+  completeMap[procIndex] = true;
   return procIndex;
 }
 
