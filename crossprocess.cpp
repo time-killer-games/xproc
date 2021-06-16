@@ -1210,7 +1210,6 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   WindowIdFromProcId(procId, &wid, &widsize);
   #endif
   _PROCINFO *procInfo = new _PROCINFO();
-  procInfo->ProcessId               = procId;
   procInfo->ExecutableImageFilePath = exe;
   procInfo->CurrentWorkingDirectory = cwd;
   procInfo->ParentProcessId         = ppid;
