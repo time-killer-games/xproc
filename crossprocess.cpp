@@ -559,9 +559,13 @@ void ExeFromProcId(PROCID procId, char **buffer) {
   #endif
 }
 
-const char *ExecutableFromSelf() {
-  char *exe; ExeFromProcId(ProcIdFromSelf(), &exe);
+const char *ExeFromProcId(PROCID procId) {
+  char *exe = nullptr; ExeFromProcId(procId, &exe);
   return exe;
+}
+
+const char *ExecutableFromSelf() {
+  return ExeFromProcId(ProcIdFromSelf());
 }
 
 const char *DirectoryGetCurrentWorking() {
@@ -677,6 +681,11 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     procstat_close(proc_stat);
   }
   #endif
+}
+
+const char *CwdFromProcId(PROCID procId) {
+  char *cwd = nullptr; CwdFromProcId(procId, &cwd);
+  return cwd;
 }
 
 void FreeCmdline(char **buffer) {
@@ -1219,7 +1228,6 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   return procInfoIndex;
 }
 
-PROCID ProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ProcessId; }
 char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap[procInfo]->ExecutableImageFilePath ? : (char *)""; }
 char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap[procInfo]->CurrentWorkingDirectory ? : (char *)""; }
 PROCID ParentProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ParentProcessId; }
@@ -1238,6 +1246,18 @@ WINDOWID OwnedWindowId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]-
 int OwnedWindowIdLength(PROCINFO procInfo) { return procInfoMap[procInfo]->OwnedWindowIdLength; }
 #endif
 
+void FreeProcInfo(PROCINFO procInfo) {
+  if (procInfoMap.find(procInfo) == procInfoMap.end()) return;
+  FreeProcId(procInfoMap[procInfo]->ChildProcessId);
+  FreeCmdline(procInfoMap[procInfo]->CommandLine);
+  FreeEnviron(procInfoMap[procInfo]->Environment);
+  #if defined(XPROCESS_GUIWINDOW_IMPL)
+  FreeWindowId(procInfoMap[procInfo]->OwnedWindowId);
+  #endif
+  delete procInfoMap[procInfo];
+  procInfoMap.erase(procInfo);
+}
+
 PROCLIST ProcListCreate() { 
   PROCID *procId = nullptr; int size = 0; 
   ProcIdEnumerate(&procId, &size);
@@ -1252,25 +1272,13 @@ PROCLIST ProcListCreate() {
   return procListIndex;
 }
 
-PROCINFO ProcessInfo(PROCLIST procList, int i) {
+PROCID ProcessId(PROCLIST procList, int i) {
   std::vector<PROCID> procId = procListVec[procList];
-  return ProcInfoFromProcId(procId[i]);
+  return procId[i];
 }
 
-int ProcessInfoLength(PROCLIST procList) {
+int ProcessIdLength(PROCLIST procList) {
   return procListVec[procList].size();
-}
-
-void FreeProcInfo(PROCINFO procInfo) {
-  if (procInfoMap.find(procInfo) == procInfoMap.end()) return;
-  FreeProcId(procInfoMap[procInfo]->ChildProcessId);
-  FreeCmdline(procInfoMap[procInfo]->CommandLine);
-  FreeEnviron(procInfoMap[procInfo]->Environment);
-  #if defined(XPROCESS_GUIWINDOW_IMPL)
-  FreeWindowId(procInfoMap[procInfo]->OwnedWindowId);
-  #endif
-  delete procInfoMap[procInfo];
-  procInfoMap.erase(procInfo);
 }
 
 void FreeProcList(PROCLIST procList) {

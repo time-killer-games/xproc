@@ -64,7 +64,6 @@ typedef int PROCINFO;
 #include <pshpack8.h>
 #endif
 typedef struct {
-  PROCID ProcessId;
   char *ExecutableImageFilePath;
   char *CurrentWorkingDirectory;
   PROCID ParentProcessId;
@@ -113,8 +112,8 @@ void EnvironFromProcIdEx(PROCID procId, const char *name, char **value);
 PROCINFO ProcInfoFromProcId(PROCID procId);
 void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();
-PROCINFO ProcessInfo(PROCLIST procList, int i);
-int ProcessInfoLength(PROCLIST procList);
+PROCID ProcessId(PROCLIST procList, int i);
+int ProcessIdLength(PROCLIST procList);
 void FreeProcList(PROCINFO procInfo);
 #if defined(XPROCESS_GUIWINDOW_IMPL)
 WINDOWID WindowIdFromNativeWindow(WINDOW window);
@@ -127,7 +126,6 @@ bool WindowIdExists(WINDOWID winId);
 bool WindowIdKill(WINDOWID winId);
 #endif
 
-PROCID ProcessId(PROCINFO procInfo);
 char *ExecutableImageFilePath(PROCINFO procInfo);
 char *CurrentWorkingDirectory(PROCINFO procInfo);
 PROCID ParentProcessId(PROCINFO procInfo);
