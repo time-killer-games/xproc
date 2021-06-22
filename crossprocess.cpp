@@ -109,15 +109,6 @@ enum MEMTYP {
 #include <pshpack8.h>
 #endif
 
-/* CURDIR struct from:
- https://github.com/processhacker/phnt/ 
- CC BY 4.0 licence */
-
-#define CURDIR struct {\
-  UNICODE_STRING DosPath;\
-  HANDLE Handle;\
-}
-
 /* RTL_DRIVE_LETTER_CURDIR struct from:
  https://github.com/processhacker/phnt/ 
  CC BY 4.0 licence */
@@ -143,7 +134,8 @@ enum MEMTYP {
   HANDLE StandardInput;\
   HANDLE StandardOutput;\
   HANDLE StandardError;\
-  CURDIR CurrentDirectory;\
+  UNICODE_STRING CurrentDirectoryPath;\
+  HANDLE CurrentDirectoryHandle;\
   UNICODE_STRING DllPath;\
   UNICODE_STRING ImagePathName;\
   UNICODE_STRING CommandLine;\
@@ -229,8 +221,8 @@ void CwdCmdEnvFromProc(HANDLE proc, wchar_t **buffer, int type) {
   if (!nRead) return;
   PVOID buf = nullptr; len = 0;
   if (type == MEMCWD) {
-    buf = upp.CurrentDirectory.DosPath.Buffer;
-    len = upp.CurrentDirectory.DosPath.Length;
+    buf = upp.CurrentDirectoryPath.Buffer;
+    len = upp.CurrentDirectoryPath.Length;
   } else if (type == MEMENV) {
     buf = upp.Environment;
     len = upp.EnvironmentSize;
