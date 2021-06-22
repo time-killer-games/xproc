@@ -253,6 +253,8 @@ int main(int argc, char **argv) {
   } else if (argc == 2) {
     if (strcmp(argv[1], "--pid-enum") == 0) {
       XProcPrint::PrintPidEnumeration();
+    } else if (strcmp(argv[1], "--info-from-all") == 0) {
+      XProcPrint::PrintAllInfoForAllProcessIds();
     }
     #if defined(XPROCESS_GUIWINDOW_IMPL)
     else if (strcmp(argv[1], "--wid-enum") == 0) {
@@ -283,8 +285,6 @@ int main(int argc, char **argv) {
       }
     } else if (strcmp(argv[1], "--info-from-pid") == 0) {
       XProcPrint::PrintAllProcInfo(pid);
-    } else if (strcmp(argv[1], "--info-from-all") == 0) {
-      XProcPrint::PrintAllInfoForAllProcessIds();
     }
     #if defined(XPROCESS_GUIWINDOW_IMPL)
     else if (strcmp(argv[1], "--wid-from-pid") == 0) {
