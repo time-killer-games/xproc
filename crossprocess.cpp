@@ -772,8 +772,10 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   #elif (defined(__linux__) && !defined(__ANDROID__))
   PROCTAB *proc = openproc(PROC_FILLCOM | PROC_PID, &procId);
   if (proc_t *proc_info = readproc(proc, nullptr)) {
-    while (proc_info->cmdline[i]) {
-      CmdlineVec1.push_back(proc_info->cmdline[i]); i++;
+    if (proc_info->cmdline) {
+      for (int j = 0; proc_info->cmdline[j]; j++) {
+        CmdlineVec1.push_back(proc_info->cmdline[j]); i++;
+      }
     }
     freeproc(proc_info);
   }
@@ -944,8 +946,10 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
   #elif (defined(__linux__) && !defined(__ANDROID__))
   PROCTAB *proc = openproc(PROC_FILLENV | PROC_PID, &procId);
   if (proc_t *proc_info = readproc(proc, nullptr)) {
-    while (proc_info->environ[i]) {
-      EnvironVec1.push_back(proc_info->environ[i]); i++;
+    if (proc_info->environ) {
+      for (int j = 0; proc_info->environ[j]; j++) {
+        EnvironVec1.push_back(proc_info->environ[j]); i++;
+      }
     }
     freeproc(proc_info);
   }
