@@ -204,13 +204,13 @@ void PrintAllProcInfo(PROCID procId) {
   PROCINFO procInfo = CrossProcess::ProcInfoFromProcId(procId);
   if (CrossProcess::ProcIdExists(procId)) {
     if (CrossProcess::ExecutableImageFilePath(procInfo)) {
-      std::cout << "ProcessId: " << procId << ", ExecutableImageFilePath:\n" << CrossProcess::ExecutableImageFilePath(procInfo) << std::endl;
+      std::cout << "ProcessId: " << procId << ", ExecutableImageFilePath: " << CrossProcess::ExecutableImageFilePath(procInfo) << std::endl;
     }
     if (CrossProcess::CurrentWorkingDirectory(procInfo)) {
-      std::cout << "ProcessId: " << procId << ", CurrentWorkingDirectory:\n" << CrossProcess::CurrentWorkingDirectory(procInfo) << std::endl;
+      std::cout << "ProcessId: " << procId << ", CurrentWorkingDirectory: " << CrossProcess::CurrentWorkingDirectory(procInfo) << std::endl;
     }
     if (CrossProcess::ParentProcessId(procInfo)) {
-      std::cout << "ProcessId: " << procId << ", ParentProcessId:\n" << CrossProcess::ParentProcessId(procInfo) << std::endl;
+      std::cout << "ProcessId: " << procId << ", ParentProcessId: " << CrossProcess::ParentProcessId(procInfo) << std::endl;
     }
     if (CrossProcess::ChildProcessId(procInfo)) {
       for (int i = 0; i < CrossProcess::ChildProcessIdLength(procInfo); i++) {
