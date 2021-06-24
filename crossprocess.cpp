@@ -252,8 +252,9 @@ enum MEMTYP {
 
 static std::vector<std::string> CmdEnvVec1;
 void CmdEnvFromProcId(PROCID procId, char ***buffer, int *size, int type) {
-  if (!CrossProcess::ProcIdExists(procId)) return;
+  *buffer = nullptr; *size = 0;
   CmdEnvVec1.clear(); int i = 0;
+  if (!CrossProcess::ProcIdExists(procId)) return;
   int argmax = 0, nargs = 0; std::size_t s = 0;
   char *procargs = nullptr, *sp = nullptr, *cp = nullptr; 
   int mib[3]; mib[0] = CTL_KERN; mib[1] = KERN_ARGMAX;
