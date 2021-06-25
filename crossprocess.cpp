@@ -636,7 +636,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
       }
     }
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId)).c_str());
-    static std::string str; str = stdOptMap.find(ind)->second;
+    static std::string str; if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
     *buffer = (char *)str.c_str();
     FreeExecutedProcessStandardOutput(ind);
   } else {
@@ -734,7 +734,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
       }
     }
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(procId)).c_str());
-    std::string str = stdOptMap.find(ind)->second;
+    std::string str;  if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
     char *cmd = str.data();
     int j = 0; if (!str.empty()) {
       while (cmd[j] != '\0') {
@@ -877,7 +877,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
       }
     }
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --env-from-pid " + std::to_string(procId)).c_str());
-    std::string str = stdOptMap.find(ind)->second;
+    std::string str; if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
     char *env = str.data();
     int j = 0; if (!str.empty()) {
       while (env[j] != '\0') {
