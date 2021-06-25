@@ -103,8 +103,6 @@ const char *CwdFromProcId(PROCID procId);
 void CwdFromProcId(PROCID procId, char **buffer);
 void FreeCmdline(char **buffer);
 void CmdlineFromProcId(PROCID procId, char ***buffer, int *size);
-void ParentProcIdFromProcIdSkipSh(PROCID procId, PROCID *parentProcId);
-void ProcIdFromParentProcIdSkipSh(PROCID parentProcId, PROCID **procId, int *size);
 const char *EnvironmentGetVariable(const char *name);
 bool EnvironmentSetVariable(const char *name, const char *value);
 bool EnvironmentUnsetVariable(const char *name);

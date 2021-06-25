@@ -806,41 +806,6 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   *buffer = arr; *size = i;
 }
 
-void ParentProcIdFromProcIdSkipSh(PROCID procId, PROCID *parentProcId) {
-  *parentProcId = 0;
-  ParentProcIdFromProcId(procId, parentProcId);
-  #if !defined(_WIN32)
-  char **cmdline = nullptr; int cmdsize = 0;
-  CmdlineFromProcId(*parentProcId, &cmdline, &cmdsize);
-  if (cmdline) {
-    if (strcmp(cmdline[0], "/bin/sh") == 0) {
-      ParentProcIdFromProcIdSkipSh(*parentProcId, parentProcId);
-    }
-    FreeCmdline(cmdline);
-  }
-  #endif
-}
-
-void ProcIdFromParentProcIdSkipSh(PROCID parentProcId, PROCID **procId, int *size) {
-  *procId = nullptr; *size = 0;
-  ProcIdFromParentProcId(parentProcId, procId, size);
-  #if !defined(_WIN32)
-  if (procId) {
-    for (int i = 0; i < *size; i++) {
-      char **cmdline = nullptr; int cmdsize = 0;
-      CmdlineFromProcId(*procId[i], &cmdline, &cmdsize);
-      if (cmdline) {
-        if (strcmp(cmdline[0], "/bin/sh") == 0) {
-          ProcIdFromParentProcIdSkipSh(*procId[i], procId, size);
-          FreeProcId(procId);
-        }
-        FreeCmdline(cmdline);
-      }
-    }
-  }
-  #endif
-}
-
 const char *EnvironmentGetVariable(const char *name) {
   static std::string str;
   #if defined(_WIN32)
