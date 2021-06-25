@@ -243,6 +243,7 @@ void PrintAllInfoForAllProcessIds() {
   for (int i = 0; i < CrossProcess::ProcessIdLength(procList); i++) {
     PrintAllProcInfo(CrossProcess::ProcessId(procList, i));
   }
+  CrossProcess::FreeProcList(procList);
 }	
 
 } // namespace XProcPrint
