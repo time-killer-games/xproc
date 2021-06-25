@@ -286,7 +286,7 @@ void CmdEnvFromProcId(PROCID procId, char ***buffer, int *size, int type) {
     free(procargs); return;
   }
   sp = cp; int j = 0;
-  while (*sp != '\0') {
+  while (*sp != '\0' && sp < &procargs[s]) {
     if (type && j >= nargs) { 
       CmdEnvVec1.push_back(sp); i++;
     } else if (!type && j < nargs) {
