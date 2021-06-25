@@ -519,7 +519,7 @@ void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
 }
 
 void ExeFromProcId(PROCID procId, char **buffer) {
-  *buffer = (char *)"\0";
+  *buffer = nullptr;
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   if (procId == ProcIdFromSelf()) {
@@ -569,7 +569,7 @@ void ExeFromProcId(PROCID procId, char **buffer) {
 }
 
 const char *ExeFromProcId(PROCID procId) {
-  char *exe = (char *)"\0"; ExeFromProcId(procId, &exe);
+  char *exe = nullptr; ExeFromProcId(procId, &exe);
   return exe;
 }
 
@@ -608,7 +608,7 @@ static std::unordered_map<PROCESS, bool>          completeMap;
 static std::mutex                                 stdOptMutex;
 
 void CwdFromProcId(PROCID procId, char **buffer) {
-  *buffer = (char *)"\0";
+  *buffer = nullptr;
   if (!ProcIdExists(procId)) return;
   #if defined(_WIN32)
   HANDLE proc = OpenProcessWithDebugPrivilege(procId);
@@ -693,7 +693,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
 }
 
 const char *CwdFromProcId(PROCID procId) {
-  char *cwd = (char *)"\0"; CwdFromProcId(procId, &cwd);
+  char *cwd = nullptr; CwdFromProcId(procId, &cwd);
   return cwd;
 }
 
@@ -1208,8 +1208,8 @@ static std::unordered_map<PROCINFO, _PROCINFO *> procInfoMap;
 static std::vector<std::vector<PROCID>>          procListVec;
 
 PROCINFO ProcInfoFromProcId(PROCID procId) {
-  char *exe    = (char *)"\0"; ExeFromProcId(procId, &exe);
-  char *cwd    = (char *)"\0"; CwdFromProcId(procId, &cwd);
+  char *exe    = nullptr; ExeFromProcId(procId, &exe);
+  char *cwd    = nullptr; CwdFromProcId(procId, &cwd);
   PROCID ppid  = 0; ParentProcIdFromProcId(procId, &ppid);
   PROCID *pid  = nullptr; int pidsize = 0; 
   ProcIdFromParentProcId(procId, &pid, &pidsize);
