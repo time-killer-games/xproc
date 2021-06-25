@@ -1,3 +1,5 @@
 #!/bin/sh
 cd "${0%/*}"
-./xproc --info-from-all
+gdb ./xproc 
+run --info-from-all
+bt full
