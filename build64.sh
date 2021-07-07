@@ -7,6 +7,8 @@ elif [ $(uname) = "Linux" ]; then
   g++ main.cpp crossprocess.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps -lpthread -m64;
 elif [ $(uname) = "FreeBSD" ]; then
   clang++ main.cpp crossprocess.cpp -o xproc -std=c++17 -lprocstat -lutil -lc -lpthread -m64;
+elif [ $(uname) = "DragonFly" ]; then
+  g++ main.cpp crossprocess.cpp -o xproc -std=c++17 -lkvm -lutil -lc -lpthread -m64;
 else
   C:/msys64/msys2_shell.cmd -defterm -mingw32 -no-start -here -lc "g++ crossprocess.cpp -o crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";
   C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ crossprocess.cpp -o crossprocess64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";

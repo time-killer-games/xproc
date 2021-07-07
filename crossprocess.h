@@ -32,7 +32,7 @@
 #if (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
 #include <CoreGraphics/CoreGraphics.h>
 #include <CoreFoundation/CoreFoundation.h>
-#elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(XPROCESS_XQUARTZ_IMPL)
 #include <X11/Xlib.h>
 #endif
 #endif
@@ -51,7 +51,7 @@ typedef PROCID PROCESS;
 typedef HWND WINDOW;
 #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
 typedef CGWindowID WINDOW;
-#elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
+#elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(XPROCESS_XQUARTZ_IMPL)
 typedef Window WINDOW;
 #endif
 typedef char *WINDOWID;

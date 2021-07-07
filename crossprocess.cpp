@@ -77,6 +77,12 @@
 #include <sys/user.h>
 #include <libprocstat.h>
 #include <libutil.h>
+#elif defined(__DragonFly__)
+#include <sys/param.h>
+#include <sys/sysctl.h>
+#include <sys/user.h>
+#include <libutil.h>
+#include <kvm.h>
 #endif
 
 using CrossProcess::PROCID;
@@ -304,6 +310,10 @@ void CmdEnvFromProcId(PROCID procId, char ***buffer, int *size, int type) {
 }
 #endif
 
+#if defined(__DragonFly__)
+kvm_t *kd = nullptr;
+#endif
+
 } // anonymous namespace
 
 namespace CrossProcess {
@@ -343,6 +353,19 @@ void ProcIdEnumerate(PROCID **procId, int *size) {
   int cntp = 0; if (kinfo_proc *proc_info = kinfo_getallproc(&cntp)) {
     for (int j = 0; j < cntp; j++) {
       vec.push_back(proc_info[j].ki_pid); i++;
+    }
+    free(proc_info);
+  }
+  #elif defined(__DragonFly__)
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+    for (int j = 0; j < cntp; j++) {
+      if (proc_info[j].kp_pid >= 0) {
+        vec.push_back(proc_info[j].kp_pid); i++;
+      }
     }
     free(proc_info);
   }
@@ -462,6 +485,17 @@ void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId) {
     *parentProcId = proc_info->ki_ppid;
     free(proc_info);
   }
+  #elif defined(__DragonFly__)
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
+    if (proc_info->kp_ppid >= 0) {
+      *parentProcId = proc_info->kp_ppid;
+    }
+    free(proc_info);
+  }
   #endif
 }
 
@@ -510,6 +544,20 @@ void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
     }
     free(proc_info);
   }
+  #elif defined(__DragonFly__)
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
+    for (int j = 0; j < cntp; j++) {
+      if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && 
+        proc_info[j].kp_ppid == parentProcId) {
+        vec.push_back(proc_info[j].kp_pid); i++;
+      }
+    }
+    free(proc_info);
+  }
   #endif
   *procId = (PROCID *)malloc(sizeof(PROCID) * vec.size());
   if (procId) {
@@ -552,6 +600,21 @@ void ExeFromProcId(PROCID procId, char **buffer) {
     *buffer = (char *)str.c_str();
   }
   #elif defined(__FreeBSD__)
+  int mib[4]; std::size_t s = 0;
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_PATHNAME;
+  mib[3] = procId;
+  if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
+    std::string str1; str1.resize(s, '\0');
+    char *exe = str1.data();
+    if (sysctl(mib, 4, exe, &s, nullptr, 0) == 0) {
+      static std::string str2; str2 = exe;
+      *buffer = (char *)str2.c_str();
+    }
+  }
+  #elif defined(__DragonFly__)
+  if (procId == 0) { return; }
   int mib[4]; std::size_t s = 0;
   mib[0] = CTL_KERN;
   mib[1] = KERN_PROC;
@@ -689,6 +752,20 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     }
     procstat_close(proc_stat);
   }
+  #elif defined(__DragonFly__)
+  int mib[4]; std::size_t s = 0;
+  mib[0] = CTL_KERN;
+  mib[1] = KERN_PROC;
+  mib[2] = KERN_PROC_CWD;
+  mib[3] = procId;
+  if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
+    std::vector<char> str1; str1.resize(s, '\0');
+    char *cwd = str1.data();
+    if (sysctl(mib, 4, cwd, &s, nullptr, 0) == 0) {
+      static std::string str2; str2 = cwd ? : "";
+      *buffer = (char *)str2.c_str();
+    }
+  }
   #endif
 }
 
@@ -796,6 +873,20 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
       procstat_freeprocs(proc_stat, proc_info);
     }
     procstat_close(proc_stat);
+  }
+  #elif defined(__DragonFly__)
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
+    char **cmdline = kvm_getargv(kd, proc_info, 0);
+    if (cmdline) {
+      for (int j = 0; cmdline[j]; j++) {
+        CmdlineVec1.push_back(cmdline[j]); i++;
+      }
+    }
+    free(proc_info);
   }
   #endif
   std::vector<char *> CmdlineVec2;
@@ -937,6 +1028,20 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
     }
     procstat_close(proc_stat);
   }
+  #elif defined(__DragonFly__)
+  char errbuf[_POSIX2_LINE_MAX];
+  kinfo_proc *proc_info = nullptr; 
+  const char *nlistf, *memf; nlistf = memf = "/dev/null";
+  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
+    char **environ = kvm_getenvv(kd, proc_info, 0);
+    if (environ) {
+      for (int j = 0; environ[j]; j++) {
+        EnvironVec1.push_back(environ[j]); i++;
+      }
+    }
+    free(proc_info);
+  }
   #endif
   std::vector<char *> EnvironVec2;
   for (int i = 0; i < EnvironVec1.size(); i++)
@@ -967,7 +1072,7 @@ void EnvironFromProcIdEx(PROCID procId, const char *name, char **value) {
 }
 
 #if defined(XPROCESS_GUIWINDOW_IMPL)
-#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
+#if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(XPROCESS_XQUARTZ_IMPL)
 static inline int XErrorHandlerImpl(Display *display, XErrorEvent *event) {
   return 0;
 }
@@ -1030,7 +1135,7 @@ void WindowIdFromProcId(PROCID procId, WINDOWID **winId, int *size) {
     }
   }
   CFRelease(windowArray);
-  #elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(XPROCESS_XQUARTZ_IMPL)
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr);
   Window window = XDefaultRootWindow(display);
@@ -1125,7 +1230,7 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
     }
   }
   CFRelease(windowArray);
-  #elif (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__) || defined(XPROCESS_XQUARTZ_IMPL)
+  #elif (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__)) || defined(XPROCESS_XQUARTZ_IMPL)
   SetErrorHandlers();
   Display *display = XOpenDisplay(nullptr);
   unsigned long property = 0;
