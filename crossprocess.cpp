@@ -360,7 +360,7 @@ void ProcIdEnumerate(PROCID **procId, int *size) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; 
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
   int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
     for (int j = 0; j < cntp; j++) {
       if (proc_info[j].kp_pid >= 0) {
@@ -489,7 +489,7 @@ void ParentProcIdFromProcId(PROCID procId, PROCID *parentProcId) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; 
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
   int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
     if (proc_info->kp_ppid >= 0) {
       *parentProcId = proc_info->kp_ppid;
@@ -548,7 +548,7 @@ void ProcIdFromParentProcId(PROCID parentProcId, PROCID **procId, int *size) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; 
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
   int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
     for (int j = 0; j < cntp; j++) {
       if (proc_info[j].kp_pid >= 0 && proc_info[j].kp_ppid >= 0 && 
@@ -878,7 +878,7 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; 
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
   int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
     char **cmdline = kvm_getargv(kd, proc_info, 0);
     if (cmdline) {
@@ -1032,7 +1032,7 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
   char errbuf[_POSIX2_LINE_MAX];
   kinfo_proc *proc_info = nullptr; 
   const char *nlistf, *memf; nlistf = memf = "/dev/null";
-  kd = kvm_openfiles(nlistf, memf, NULL, O_RDONLY, errbuf); if (!kd) return;
+  kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, errbuf); if (!kd) return;
   int cntp = 0; if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, procId, &cntp))) {
     char **environ = kvm_getenvv(kd, proc_info, 0);
     if (environ) {
