@@ -44,8 +44,11 @@
 
 #include "crossprocess.h"
 #if defined(XPROCESS_WIN32EXE_INCLUDES)
+#if defined(_WIN64)
 #include "crossprocess32.h"
+#else
 #include "crossprocess64.h"
+#endif
 #endif
 
 #if !defined(_WIN32)
@@ -691,9 +694,13 @@ void CwdFromProcId(PROCID procId, char **buffer) {
       strm.close();
       if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
         if (IsX86Process(proc)) {
+          #if defined(_WIN64)
           fwrite((char *)crossprocess32, sizeof(char), sizeof(crossprocess32), file);
+          #endif
         } else {
+          #if !defined(_WIN64)
           fwrite((char *)crossprocess64, sizeof(char), sizeof(crossprocess64), file);
+          #endif
         }
         fclose(file);
       }
@@ -803,9 +810,13 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
       strm.close();
       if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
         if (IsX86Process(proc)) {
+          #if defined(_WIN64)
           fwrite((char *)crossprocess32, sizeof(char), sizeof(crossprocess32), file);
+          #endif
         } else {
+          #if !defined(_WIN64)
           fwrite((char *)crossprocess64, sizeof(char), sizeof(crossprocess64), file);
+          #endif
         }
         fclose(file);
       }
@@ -960,9 +971,13 @@ void EnvironFromProcId(PROCID procId, char ***buffer, int *size) {
       strm.close();
       if (_wfopen_s(&file, wexe.c_str(), L"wb") == 0) {
         if (IsX86Process(proc)) {
+          #if defined(_WIN64)
           fwrite((char *)crossprocess32, sizeof(char), sizeof(crossprocess32), file);
+          #endif
         } else {
+          #if !defined(_WIN64)
           fwrite((char *)crossprocess64, sizeof(char), sizeof(crossprocess64), file);
+          #endif
         }
         fclose(file);
       }
