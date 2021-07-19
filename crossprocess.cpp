@@ -1222,7 +1222,7 @@ void ProcIdFromWindowId(WINDOWID winId, PROCID *procId) {
   *procId = (PROCID)pid;
   #elif (defined(__APPLE__) && defined(__MACH__)) && !defined(XPROCESS_XQUARTZ_IMPL)
   CFArrayRef windowArray = CGWindowListCopyWindowInfo(
-  kCGWindowListOptionAll, kCGNullWindowID);
+  kCGWindowListOptionIncludingWindow, NativeWindowFromWindowId(winId));
   CFIndex windowCount = 0;
   if ((windowCount = CFArrayGetCount(windowArray))) {
     for (CFIndex i = 0; i < windowCount; i++) {
