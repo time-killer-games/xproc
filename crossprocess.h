@@ -109,6 +109,7 @@ bool EnvironmentUnsetVariable(const char *name);
 void FreeEnviron(char **buffer);
 void EnvironFromProcId(PROCID procId, char ***buffer, int *size);
 void EnvironFromProcIdEx(PROCID procId, const char *name, char **value);
+const char *EnvironFromProcIdEx(PROCID procId, const char *name);
 PROCINFO ProcInfoFromProcId(PROCID procId);
 void FreeProcInfo(PROCINFO procInfo);
 PROCLIST ProcListCreate();

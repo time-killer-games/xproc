@@ -707,7 +707,11 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     }
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId)).c_str());
     static std::string str; if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
-    *buffer = (char *)str.c_str();
+    if (!str.empty() && str.back == "\\") {
+      *buffer = (char *)str.stbstr(0, str.length() - 1).c_str();
+    } else {
+      *buffer = (char *)str.c_str();
+    }
     FreeExecutedProcessStandardOutput(ind);
   } else {
   #endif
@@ -715,7 +719,11 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     CwdCmdEnvFromProc(proc, &cwdbuf, MEMCWD);
     if (cwdbuf) {
       static std::string str; str = narrow(cwdbuf);
-      *buffer = (char *)str.c_str();
+      if (!str.empty() && str.back == "\\") {
+        *buffer = (char *)str.stbstr(0, str.length() - 1).c_str();
+      } else {
+        *buffer = (char *)str.c_str();
+      }
       delete[] cwdbuf;
     }
   #if defined(XPROCESS_WIN32EXE_INCLUDES)
@@ -769,7 +777,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     std::vector<char> str1; str1.resize(s, '\0');
     char *cwd = str1.data();
     if (sysctl(mib, 4, cwd, &s, nullptr, 0) == 0) {
-      static std::string str2; str2 = cwd ? : "";
+      static std::string str2; str2 = cwd ? : "\0";
       *buffer = (char *)str2.c_str();
     }
   }
@@ -906,40 +914,6 @@ void CmdlineFromProcId(PROCID procId, char ***buffer, int *size) {
   char **arr = new char *[CmdlineVec2.size()]();
   std::copy(CmdlineVec2.begin(), CmdlineVec2.end(), arr);
   *buffer = arr; *size = i;
-}
-
-const char *EnvironmentGetVariable(const char *name) {
-  static std::string str;
-  #if defined(_WIN32)
-  wchar_t buffer[32767];
-  std::wstring u8name = widen(name);
-  if (GetEnvironmentVariableW(u8name.c_str(), buffer, 32767) != 0) {
-    str = narrow(buffer);
-  }
-  #else
-  char *value = getenv(name);
-  str = value ? : "";
-  #endif
-  return str.c_str();
-}
-
-bool EnvironmentSetVariable(const char *name, const char *value) {
-  #if defined(_WIN32)
-  std::wstring u8name = widen(name);
-  std::wstring u8value = widen(value);
-  return (SetEnvironmentVariableW(u8name.c_str(), u8value.c_str()) != 0);
-  #else
-  return (setenv(name, value, 1) == 0);
-  #endif
-}
-
-bool EnvironmentUnsetVariable(const char *name) {
-  #if defined(_WIN32)
-  std::wstring u8name = widen(name);
-  return (SetEnvironmentVariableW(u8name.c_str(), nullptr) != 0);
-  #else
-  return (unsetenv(name) == 0);
-  #endif
 }
 
 void FreeEnviron(char **buffer) {
@@ -1084,6 +1058,45 @@ void EnvironFromProcIdEx(PROCID procId, const char *name, char **value) {
     }
     FreeEnviron(buffer);
   }
+}
+
+const char *EnvironFromProcIdEx(PROCID procId, const char *name) {
+  char *value = (char *)"\0";
+  EnvironFromProcIdEx(procId, name, &value);
+  static std::string str; str = value;
+  return str.c_str();
+}
+
+const char *EnvironmentGetVariable(const char *name) {
+  static std::string str;
+  #if defined(_WIN32)
+  char *value = (char *)"\0";
+  EnvironFromProcIdEx(ProcIdFromSelf(), name, &value);
+  str = value;
+  #else
+  char *value = getenv(name);
+  str = value ? : "\0";
+  #endif
+  return str.c_str();
+}
+
+bool EnvironmentSetVariable(const char *name, const char *value) {
+  #if defined(_WIN32)
+  std::wstring u8name = widen(name);
+  std::wstring u8value = widen(value);
+  return (SetEnvironmentVariableW(u8name.c_str(), u8value.c_str()) != 0);
+  #else
+  return (setenv(name, value, 1) == 0);
+  #endif
+}
+
+bool EnvironmentUnsetVariable(const char *name) {
+  #if defined(_WIN32)
+  std::wstring u8name = widen(name);
+  return (SetEnvironmentVariableW(u8name.c_str(), nullptr) != 0);
+  #else
+  return (unsetenv(name) == 0);
+  #endif
 }
 
 #if defined(XPROCESS_GUIWINDOW_IMPL)
@@ -1324,8 +1337,8 @@ PROCINFO ProcInfoFromProcId(PROCID procId) {
   return procInfoIndex;
 }
 
-char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap[procInfo]->ExecutableImageFilePath ? : (char *)""; }
-char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap[procInfo]->CurrentWorkingDirectory ? : (char *)""; }
+char *ExecutableImageFilePath(PROCINFO procInfo) { return procInfoMap[procInfo]->ExecutableImageFilePath ? : (char *)"\0"; }
+char *CurrentWorkingDirectory(PROCINFO procInfo) { return procInfoMap[procInfo]->CurrentWorkingDirectory ? : (char *)"\0"; }
 PROCID ParentProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ParentProcessId; }
 PROCID *ChildProcessId(PROCINFO procInfo) { return procInfoMap[procInfo]->ChildProcessId; }
 PROCID ChildProcessId(PROCINFO procInfo, int i) { return procInfoMap[procInfo]->ChildProcessId[i]; }
@@ -1557,7 +1570,7 @@ void ExecutedProcessWriteToStandardInput(PROCESS procIndex, const char *input) {
 }
 
 const char *ExecutedProcessReadFromStandardOutput(PROCESS procIndex) {
-  if (stdOptMap.find(procIndex) == stdOptMap.end()) return "";
+  if (stdOptMap.find(procIndex) == stdOptMap.end()) return "\0";
   std::lock_guard<std::mutex> guard(stdOptMutex);
   return stdOptMap.find(procIndex)->second.c_str();
 }
