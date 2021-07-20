@@ -708,7 +708,8 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId)).c_str());
     static std::string str; if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
     if (!str.empty() && str.back() == '\\') {
-      *buffer = (char *)str.substr(0, str.length() - 1).c_str();
+      static std::string substr; substr = str.substr(0, str.length() - 1);
+      *buffer = (char *)substr.c_str();
     } else {
       *buffer = (char *)str.c_str();
     }
@@ -720,7 +721,8 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     if (cwdbuf) {
       static std::string str; str = narrow(cwdbuf);
       if (!str.empty() && str.back() == '\\') {
-        *buffer = (char *)str.substr(0, str.length() - 1).c_str();
+        static std::string substr; substr = str.substr(0, str.length() - 1);
+        *buffer = (char *)substr.c_str();
       } else {
         *buffer = (char *)str.c_str();
       }
