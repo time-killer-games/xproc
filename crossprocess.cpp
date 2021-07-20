@@ -707,7 +707,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     }
     PROCESS ind = ProcessExecute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(procId)).c_str());
     static std::string str; if (stdOptMap.find(ind) != stdOptMap.end()) str = stdOptMap.find(ind)->second;
-    if (!str.empty() && str.back() == '\\') {
+    if (!str.empty() && std::count(str.begin(), str.end(), '\\') > 1 && str.back() == '\\') {
       static std::string substr; substr = str.substr(0, str.length() - 1);
       *buffer = (char *)substr.c_str();
     } else {
@@ -720,7 +720,7 @@ void CwdFromProcId(PROCID procId, char **buffer) {
     CwdCmdEnvFromProc(proc, &cwdbuf, MEMCWD);
     if (cwdbuf) {
       static std::string str; str = narrow(cwdbuf);
-      if (!str.empty() && str.back() == '\\') {
+      if (!str.empty() && std::count(str.begin(), str.end(), '\\') > 1 && str.back() == '\\') {
         static std::string substr; substr = str.substr(0, str.length() - 1);
         *buffer = (char *)substr.c_str();
       } else {
