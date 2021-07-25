@@ -2,7 +2,7 @@
 cd "${0%/*}"
 
 if [ $(uname) = "Darwin" ]; then
-  clang++ main.cpp crossprocess.cpp -o xproc -std=c++17 -m64;
+  clang++ main.cpp crossprocess.cpp -o xproc -std=c++17 -arch arm64 -arch x86_64;
 elif [ $(uname) = "Linux" ]; then
   g++ main.cpp crossprocess.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps -lpthread -m64;
 elif [ $(uname) = "FreeBSD" ]; then
