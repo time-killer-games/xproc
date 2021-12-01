@@ -1450,7 +1450,7 @@ namespace ngs::proc {
       dup2(p_stdin[0], 0);
       close(p_stdout[0]);
       dup2(p_stdout[1], 1);
-      dup2(open("/dev/null", O_WRONLY), 2);
+      dup2(p_stdout[1], 2);
       for (int i = 3; i < 4096; i++)
         close(i);
       setsid();
