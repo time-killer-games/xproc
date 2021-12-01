@@ -1088,7 +1088,7 @@ namespace ngs::proc {
     return str.c_str();
   }
 
-  const char *environment_Get_variable(const char *name) {
+  const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
     char *value = (char *)"\0";
@@ -1118,6 +1118,43 @@ namespace ngs::proc {
     #else
     return (unsetenv(name) == 0);
     #endif
+  }
+
+  static std::string tempdir;
+  const char *directory_get_temporary_path() {
+    #if defined(_WIN32)
+    wchar_t tmp[MAX_PATH + 1];
+    if (GetTempPathW(MAX_PATH + 1, tmp)) {
+      tempdir = strings_util::shorten(tmp);
+      tempdir = string_replace_all(tempdir, "/", "\\");
+      while (!tempdir.empty() && tempdir.back() == "\\") {
+        tempdir.pop_back();
+      }
+      if (tempdir.find("\\") == std::string::npos) {
+        tempdir = "\\";
+      }
+      return tempdir.c_str();
+    }
+    tempdir = directory_get_current_working();
+    #else
+    tempdir = environment_get_variable("TMPDIR"); 
+    if (tempdir.empty()) tempdir = environment_get_variable("TMP");
+    if (tempdir.empty()) tempdir = environment_get_variable("TEMP");
+    if (tempdir.empty()) tempdir = environment_get_variable("TEMPDIR");
+    if (tempdir.empty()) tempdir = "/tmp";
+    struct stat sb = { 0 };
+    if (stat(tempdir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
+      while (!tempdir.empty() && tempdir.back() == "/") {
+        tempdir.pop_back();
+      }
+      if (tempdir.find("/") == std::string::npos) {
+        tempdir = "/";
+      }
+      return tempdir.c_str();
+    }
+    tempdir = directory_get_current_working();
+    #endif
+    return tempdir.c_str();
   }
 
   #if defined(PROCESS_GUIWINDOW_IMPL)
