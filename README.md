@@ -7,6 +7,6 @@ Ubuntu/Debian: `sudo apt-get install g++ libprocps-dev`
 
 Darwin/FreeBSD/DragonFly: no third-party dependencies
 
-Enable GUI windowing with -DXPROCESS_GUIWINDOW_IMPL
+Enable GUI windowing with -DPROCESS_GUIWINDOW_IMPL
 
 When targeting X11 windowing you will need X11 deps
