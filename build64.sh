@@ -2,19 +2,19 @@
 cd "${0%/*}"
 
 if [ $(uname) = "Darwin" ]; then
-  clang++ main.cpp crossprocess.cpp -o xproc -std=c++17 -arch arm64 -arch x86_64;
+  clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -arch arm64 -arch x86_64;
 elif [ $(uname) = "Linux" ]; then
-  g++ main.cpp crossprocess.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps -lpthread -m64;
+  g++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps -lpthread -m64;
 elif [ $(uname) = "FreeBSD" ]; then
-  clang++ main.cpp crossprocess.cpp -o xproc -std=c++17 -lprocstat -lutil -lc -lpthread -m64;
+  clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -lprocstat -lutil -lc -lpthread -m64;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ main.cpp crossprocess.cpp -o xproc -std=c++17 -lkvm -lutil -lc -lpthread -m64;
+  g++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -lkvm -lutil -lc -lpthread -m64;
 else
-  C:/msys64/msys2_shell.cmd -defterm -mingw32 -no-start -here -lc "g++ crossprocess.cpp -o crossprocess32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";
-  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ crossprocess.cpp -o crossprocess64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";
-  xxd -i 'crossprocess32' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'crossprocess32.h'
-  xxd -i 'crossprocess64' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'crossprocess64.h'
-  rm -f "crossprocess32.exe" "crossprocess64.exe"
-  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp crossprocess.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -DXPROCESS_WIN32EXE_INCLUDES -m64";
-  rm -f "crossprocess32.h" "crossprocess64.h"
+  C:/msys64/msys2_shell.cmd -defterm -mingw32 -no-start -here -lc "g++ apiprocess/process.cpp -o process32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";
+  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ apiprocess/process.cpp -o process64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";
+  xxd -i 'process32' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process32.h'
+  xxd -i 'process64' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process64.h'
+  rm -f "process32.exe" "process64.exe"
+  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp apiprocess/process.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -DPROCESS_WIN32EXE_INCLUDES -m64";
+  rm -f "apiprocess/process32.h" "apiprocess/process64.h"
 fi
