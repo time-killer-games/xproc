@@ -167,4 +167,3 @@ namespace ngs::proc {
   const char *current_process_read_from_standard_input();
 
 } // namespace ngs::proc
-
