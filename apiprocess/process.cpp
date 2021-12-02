@@ -681,9 +681,9 @@ namespace ngs::proc {
     #endif
   }
 
-  static std::unordered_map<PROCID_LOCAL, std::intptr_t> stdipt_map;
-  static std::unordered_map<PROCID_LOCAL, std::string> stdopt_map;
-  static std::unordered_map<PROCID_LOCAL, bool> complete_map;
+  static std::unordered_map<LOCALPROCID, std::intptr_t> stdipt_map;
+  static std::unordered_map<LOCALPROCID, std::string> stdopt_map;
+  static std::unordered_map<LOCALPROCID, bool> complete_map;
   static std::mutex stdopt_mutex;
 
   void cwd_from_proc_id(PROCID proc_id, char **buffer) {
@@ -718,7 +718,7 @@ namespace ngs::proc {
           fclose(file);
         }
       }
-      PROCID_LOCAL ind = process_execute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(proc_id)).c_str());
+      LOCALPROCID ind = process_execute(("\"" + exe + "\" --cwd-from-pid " + std::to_string(proc_id)).c_str());
       static std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
       if (!str.empty() && std::count(str.begin(), str.end(), '\\') > 1 && str.back() == '\\') {
         static std::string substr; substr = str.substr(0, str.length() - 1);
@@ -844,7 +844,7 @@ namespace ngs::proc {
           fclose(file);
         }
       }
-      PROCID_LOCAL ind = process_execute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(proc_id)).c_str());
+      LOCALPROCID ind = process_execute(("\"" + exe + "\" --cmd-from-pid " + std::to_string(proc_id)).c_str());
       std::string str;  if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
       char *cmd = str.data();
       int j = 0; if (!str.empty()) {
@@ -973,7 +973,7 @@ namespace ngs::proc {
           fclose(file);
         }
       }
-      PROCID_LOCAL ind = process_execute(("\"" + exe + "\" --env-from-pid " + std::to_string(proc_id)).c_str());
+      LOCALPROCID ind = process_execute(("\"" + exe + "\" --env-from-pid " + std::to_string(proc_id)).c_str());
       std::string str; if (stdopt_map.find(ind) != stdopt_map.end()) str = stdopt_map.find(ind)->second;
       char *env = str.data();
       int j = 0; if (!str.empty()) {
@@ -1510,7 +1510,7 @@ namespace ngs::proc {
   }
   #endif
 
-  static inline void output_thread(std::intptr_t file, PROCID_LOCAL proc_index) {
+  static inline void output_thread(std::intptr_t file, LOCALPROCID proc_index) {
     #if !defined(_WIN32)
     ssize_t nRead = 0; char buffer[BUFSIZ];
     while ((nRead = read((int)file, buffer, BUFSIZ)) > 0) {
@@ -1543,7 +1543,7 @@ namespace ngs::proc {
   }
   #endif
 
-  PROCID_LOCAL process_execute(const char *command) {
+  LOCALPROCID process_execute(const char *command) {
     index++;
     #if !defined(_WIN32)
     int infd = 0, outfd = 0;
@@ -1562,7 +1562,7 @@ namespace ngs::proc {
       }
     } else { proc_id = 0; }
     child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    proc_did_execute[index] = true; PROCID_LOCAL proc_index = (PROCID_LOCAL)proc_id;
+    proc_did_execute[index] = true; LOCALPROCID proc_index = (LOCALPROCID)proc_id;
     stdipt_map.insert(std::make_pair(proc_index, (std::intptr_t)infd));
     std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
     opt_thread.join();
@@ -1584,11 +1584,11 @@ namespace ngs::proc {
     si.hStdError = stdout_write;
     si.hStdOutput = stdout_write;
     si.hStdInput = stdin_read;
-    PROCESS_INFORMATION pi = { 0 }; PROCID_LOCAL proc_index = 0;
+    PROCESS_INFORMATION pi = { 0 }; LOCALPROCID proc_index = 0;
     if (CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi)) {
       CloseHandle(stdout_write);
       CloseHandle(stdin_read);
-      PROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = (PROCID_LOCAL)proc_id;
+      PROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = (LOCALPROCID)proc_id;
       std::this_thread::sleep_for(std::chrono::milliseconds(5)); proc_did_execute[index] = true;
       stdipt_map.insert(std::make_pair(proc_index, (std::intptr_t)(void *)stdin_write));
       MSG msg; HANDLE wait_handles[] = { pi.hProcess, stdout_read };
@@ -1612,7 +1612,7 @@ namespace ngs::proc {
     return proc_index;
   }
 
-  PROCID_LOCAL process_execute_async(const char *command) {
+  LOCALPROCID process_execute_async(const char *command) {
     int prevIndex = index;
     std::thread proc_thread(process_execute, command);
     while (prevIndex == index) {
@@ -1623,13 +1623,13 @@ namespace ngs::proc {
       message_pump();
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
     }
-    PROCID_LOCAL proc_index = (PROCID_LOCAL)child_proc_id[index];
+    LOCALPROCID proc_index = (LOCALPROCID)child_proc_id[index];
     complete_map[proc_index] = false;
     proc_thread.detach();
     return proc_index;
   }
 
-  void executed_process_write_to_standard_input(PROCID_LOCAL proc_index, const char *input) {
+  void executed_process_write_to_standard_input(LOCALPROCID proc_index, const char *input) {
     if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
     std::string str = input; char *buffer = new char[str.length() + 1]();
     #if !defined(_WIN32)
@@ -1643,23 +1643,23 @@ namespace ngs::proc {
     delete[] buffer;
   }
 
-  const char *executed_process_read_from_standard_output(PROCID_LOCAL proc_index) {
+  const char *executed_process_read_from_standard_output(LOCALPROCID proc_index) {
     if (stdopt_map.find(proc_index) == stdopt_map.end()) return "\0";
     std::lock_guard<std::mutex> guard(stdopt_mutex);
     return stdopt_map.find(proc_index)->second.c_str();
   }
 
-  void free_executed_process_standard_input(PROCID_LOCAL proc_index) {
+  void free_executed_process_standard_input(LOCALPROCID proc_index) {
     if (stdipt_map.find(proc_index) == stdipt_map.end()) return;
     stdipt_map.erase(proc_index);
   }
 
-  void free_executed_process_standard_output(PROCID_LOCAL proc_index) {
+  void free_executed_process_standard_output(LOCALPROCID proc_index) {
     if (stdopt_map.find(proc_index) == stdopt_map.end()) return;
     stdopt_map.erase(proc_index);
   }
 
-  bool completion_status_from_executed_process(PROCID_LOCAL proc_index) {
+  bool completion_status_from_executed_process(LOCALPROCID proc_index) {
     if (complete_map.find(proc_index) == complete_map.end()) return false;
     return complete_map.find(proc_index)->second;
   }
