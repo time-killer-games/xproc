@@ -1127,7 +1127,7 @@ namespace ngs::proc {
     if (GetTempPathW(MAX_PATH + 1, tmp)) {
       tempdir = narrow(tmp);
       tempdir = string_replace_all(tempdir, "/", "\\");
-      while (!tempdir.empty() && tempdir.back() == "\\") {
+      while (!tempdir.empty() && tempdir.back() == '\\') {
         tempdir.pop_back();
       }
       if (tempdir.find("\\") == std::string::npos) {
@@ -1144,7 +1144,7 @@ namespace ngs::proc {
     if (tempdir.empty()) tempdir = "/tmp";
     struct stat sb = { 0 };
     if (stat(tempdir.c_str(), &sb) == 0 && S_ISDIR(sb.st_mode)) {
-      while (!tempdir.empty() && tempdir.back() == "/") {
+      while (!tempdir.empty() && tempdir.back() == '/') {
         tempdir.pop_back();
       }
       if (tempdir.find("/") == std::string::npos) {

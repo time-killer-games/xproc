@@ -45,7 +45,7 @@ namespace ngs::proc {
   #else
   typedef unsigned long PROCID;
   #endif
-  typedef PROCID PROCID_LOCAL;
+  typedef PROCID LOCALPROCID;
   #if defined(PROCESS_GUIWINDOW_IMPL)
   #if defined(_WIN32)
   typedef HWND WINDOW;
@@ -157,13 +157,13 @@ namespace ngs::proc {
   int owned_window_id_length(PROCINFO proc_info);
   #endif
 
-  PROCID_LOCAL process_execute(const char *command);
-  PROCID_LOCAL process_execute_async(const char *command);
-  void executed_process_write_to_standard_input(PROCID_LOCAL proc_index, const char *input);
-  const char *executed_process_read_from_standard_output(PROCID_LOCAL proc_index);
-  void free_executed_process_standard_input(PROCID_LOCAL proc_index);
-  void free_executed_process_standard_output(PROCID_LOCAL proc_index);
-  bool completion_status_from_executed_process(PROCID_LOCAL proc_index);
+  LOCALPROCID process_execute(const char *command);
+  LOCALPROCID process_execute_async(const char *command);
+  void executed_process_write_to_standard_input(LOCALPROCID proc_index, const char *input);
+  const char *executed_process_read_from_standard_output(LOCALPROCID proc_index);
+  void free_executed_process_standard_input(LOCALPROCID proc_index);
+  void free_executed_process_standard_output(LOCALPROCID proc_index);
+  bool completion_status_from_executed_process(LOCALPROCID proc_index);
   const char *current_process_read_from_standard_input();
 
 } // namespace ngs::proc
