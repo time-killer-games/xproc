@@ -1131,7 +1131,7 @@ namespace ngs::proc {
         tempdir.pop_back();
       }
       if (tempdir.find("\\") == std::string::npos) {
-        tempdir = "\\";
+        tempdir += "\\";
       }
       return tempdir.c_str();
     }
@@ -1148,7 +1148,7 @@ namespace ngs::proc {
         tempdir.pop_back();
       }
       if (tempdir.find("/") == std::string::npos) {
-        tempdir = "/";
+        tempdir += "/";
       }
       return tempdir.c_str();
     }
