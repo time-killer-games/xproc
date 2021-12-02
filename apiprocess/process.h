@@ -114,13 +114,14 @@ namespace ngs::proc {
   void cwd_from_proc_id(PROCID proc_id, char **buffer);
   void free_cmdline(char **buffer);
   void cmdline_from_proc_id(PROCID proc_id, char ***buffer, int *size);
-  const char *environment_Get_variable(const char *name);
+  const char *environment_get_variable(const char *name);
   bool environment_set_variable(const char *name, const char *value);
   bool environment_unset_variable(const char *name);
   void free_environ(char **buffer);
   void environ_from_proc_id(PROCID proc_id, char ***buffer, int *size);
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value);
   const char *environ_from_proc_id_ex(PROCID proc_id, const char *name);
+  const char *directory_get_temporary_path();
   PROCINFO proc_info_from_proc_id(PROCID proc_id, PROCINFO_SPECIFIC specifics);
   void free_proc_info(PROCINFO proc_info);
   PROCLIST proc_list_create();
