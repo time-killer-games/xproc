@@ -1125,7 +1125,7 @@ namespace ngs::proc {
     #if defined(_WIN32)
     wchar_t tmp[MAX_PATH + 1];
     if (GetTempPathW(MAX_PATH + 1, tmp)) {
-      tempdir = strings_util::shorten(tmp);
+      tempdir = narrow(tmp);
       tempdir = string_replace_all(tempdir, "/", "\\");
       while (!tempdir.empty() && tempdir.back() == "\\") {
         tempdir.pop_back();
