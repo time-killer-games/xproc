@@ -203,7 +203,7 @@ void PrintPidFromWid(WINDOWID win_id) {
 #endif
 
 void PrintAllProcInfo(PROCID proc_id) {
-  PROCINFO procInfo = ngs::proc::proc_info_from_proc_id(proc_id, PROCINFO_ALLINFO);
+  PROCINFO procInfo = ngs::proc::proc_info_from_proc_id(proc_id);
   if (ngs::proc::proc_id_exists(proc_id)) {
     if (ngs::proc::executable_image_file_path(procInfo) && strlen(ngs::proc::executable_image_file_path(procInfo))) {
       std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << ngs::proc::executable_image_file_path(procInfo) << std::endl;
