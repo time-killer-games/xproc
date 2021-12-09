@@ -41,8 +41,6 @@ using std::size_t;
 using ngs::proc::PROCID;
 using ngs::proc::PROCLIST;
 using ngs::proc::PROCINFO;
-using ngs::proc::PROCINFO_SPECIFIC;
-using ngs::proc::PROCINFO_ALLINFO;
 #if defined(PROCESS_GUIWINDOW_IMPL)
 using ngs::proc::WINDOWID;
 #endif
