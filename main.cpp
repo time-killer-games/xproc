@@ -165,18 +165,18 @@ void PrintWidEnumeration() {
   ngs::proc::window_id_enumerate(&win_id, &size);
   if (win_id) {
     for (int i = 0; i < size; i++) {
-      std::cout << "WindowId[" << i << "]: " << win_id[i] << std::endl;
+      std::cout << "window_id[" << i << "]: " << win_id[i] << std::endl;
     }
     ngs::proc::free_window_id(win_id);
   }
 }
 
 void PrintWhetherWidExists(WINDOWID win_id) {
-  std::cout << "WindowId: " << win_id << ", WindowExists: " << ((ngs::proc::window_id_exists(win_id)) ? "True" : "False") << std::endl;
+  std::cout << "window_id: " << win_id << ", WindowExists: " << ((ngs::proc::window_id_exists(win_id)) ? "True" : "False") << std::endl;
 }
 
 void PrintWhetherWidKilled(WINDOWID win_id) {
-  std::cout << "WindowId: " << win_id << ", KillSucceeded: " << ((ngs::proc::window_id_kill(win_id)) ? "True" : "False") << std::endl;
+  std::cout << "window_id: " << win_id << ", KillSucceeded: " << ((ngs::proc::window_id_kill(win_id)) ? "True" : "False") << std::endl;
 }
 
 void PrintWidFromPid(PROCID proc_id) {
@@ -195,7 +195,7 @@ void PrintPidFromWid(WINDOWID win_id) {
   PROCID proc_id = 0;
   ngs::proc::proc_id_from_window_id(win_id, &proc_id);
   if (proc_id) {
-    std::cout << "WindowId: " << win_id << ", OwnerProcessId: " << proc_id << std::endl;
+    std::cout << "window_id: " << win_id << ", OwnerProcessId: " << proc_id << std::endl;
   }
 }
 #endif
