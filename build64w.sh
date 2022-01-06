@@ -2,7 +2,7 @@
 cd "${0%/*}"
 
 if [ $(uname) = "Darwin" ]; then
-  clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -DPROCESS_GUIWINDOW_IMPL -framework CoreFoundation  -framework CoreGraphics -arch arm64 -arch x86_64;
+  clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -DPROCESS_GUIWINDOW_IMPL -framework CoreFoundation -framework CoreGraphics -arch arm64 -arch x86_64;
 elif [ $(uname) = "Linux" ]; then
   g++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps -lpthread -DPROCESS_GUIWINDOW_IMPL `pkg-config x11 --cflags --libs` -m64;
 elif [ $(uname) = "FreeBSD" ]; then
@@ -15,6 +15,6 @@ else
   xxd -i 'process32' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process32.h'
   xxd -i 'process64' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process64.h'
   rm -f "process32.exe" "process64.exe"
-  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp apiprocess/process.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -DPROCESS_WIN32EXE_INCLUDES -DPROCESS_GUIWINDOW_IMPL -m64";
+  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp apiprocess/process.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -DPROCESS_WIN32EXE_INCLUDES -DPROCESS_GUIWINDOW_IMPL -m64";
   rm -f "apiprocess/process32.h" "apiprocess/process64.h"
 fi
