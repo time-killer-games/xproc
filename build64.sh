@@ -15,6 +15,6 @@ else
   xxd -i 'process32' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process32.h'
   xxd -i 'process64' | sed 's/\([0-9a-f]\)$/\0, 0x00/' > 'apiprocess/process64.h'
   rm -f "process32.exe" "process64.exe"
-  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp apiprocess/process.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -lShlwapi -DPROCESS_WIN32EXE_INCLUDES -m64";
+  C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ main.cpp apiprocess/process.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static -DPROCESS_WIN32EXE_INCLUDES -m64";
   rm -f "apiprocess/process32.h" "apiprocess/process64.h"
 fi
