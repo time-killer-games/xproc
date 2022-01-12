@@ -8,7 +8,9 @@ elif [ $(uname) = "Linux" ]; then
 elif [ $(uname) = "FreeBSD" ]; then
   clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -lprocstat -lutil -lc -lpthread -DPROCESS_GUIWINDOW_IMPL `pkg-config x11 --cflags --libs`;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -lkvm -lutil -lc -lpthread -DPROCESS_GUIWINDOW_IMPL `pkg-config x11 --cflags --libs`;
+  g++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lkvm -lc -lpthread -DPROCESS_GUIWINDOW_IMPL `pkg-config x11 --cflags --libs`;
+elif [ $(uname) = "OpenBSD" ]; then
+  clang++ main.cpp apiprocess/process.cpp -o xproc -std=c++17 -lkvm -lc -lpthread -DPROCESS_GUIWINDOW_IMPL `pkg-config x11 --cflags --libs`;
 else
   C:/msys64/msys2_shell.cmd -defterm -mingw32 -no-start -here -lc "g++ apiprocess/process.cpp -o process32.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m32";
   C:/msys64/msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "g++ apiprocess/process.cpp -o process64.exe -std=c++17 -static-libgcc -static-libstdc++ -static -m64";
