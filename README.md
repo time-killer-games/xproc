@@ -5,7 +5,7 @@ Windows: `requires MSYS2 64-bit base packages to build`
 
 Ubuntu/Debian: `sudo apt-get install g++ libprocps-dev`
 
-Darwin/\*BSD's: no third-party dependencies required
+Darwin and other \*BSD's: no third-party dependencies
 
 Enable GUI windowing with -DPROCESS_GUIWINDOW_IMPL
 
