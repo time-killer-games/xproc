@@ -113,7 +113,7 @@ void PrintExeFromPid(PROCID proc_id) {
   if (!ngs::proc::proc_id_exists(proc_id)) return;
   char *buffer = nullptr;
   ngs::proc::exe_from_proc_id(proc_id, &buffer);
-  if (buffer) {
+  if (buffer && strlen(buffer)) {
     std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << buffer << std::endl;
   }
 }
@@ -122,7 +122,7 @@ void PrintCwdFromPid(PROCID proc_id) {
   if (!ngs::proc::proc_id_exists(proc_id)) return;
   char *buffer = nullptr;
   ngs::proc::cwd_from_proc_id(proc_id, &buffer);
-  if (buffer) {
+  if (buffer && strlen(buffer)) {
     std::cout << "proc_id: " << proc_id << ", current_working_directory: " << buffer << std::endl;
   }
 }
