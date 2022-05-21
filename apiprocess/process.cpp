@@ -511,16 +511,14 @@ namespace ngs::proc {
     #endif
   }
 
- 
   bool proc_id_suspend(PROCID proc_id) {
     #if defined(_WIN32)
-    HANDLE other = open_process_with_debug_privilege(proc_id);
-    HANDLE self  = open_process_with_debug_privilege(proc_id_from_self());
-    DebugSetProcessKillOnExit(FALSE);
-    bool result = (!DebugActiveProcess(proc_id));
-    CloseHandle(other);
-    CloseHandle(self);
-    return result;
+    typedef NTSTATUS (__stdcall *NtSuspendProcess)(IN HANDLE ProcessHandle);
+    HANDLE proc = open_process_with_debug_privilege(proc_id);
+    NtSuspendProcess pfnNtSuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
+    NTSTATUS status = pfnNtSuspendProcess(proc);
+    CloseHandle(proc);
+    return (!status);
     #else
     return (kill(proc_id, SIGSTOP) != -1);
     #endif
@@ -528,13 +526,12 @@ namespace ngs::proc {
 
   bool proc_id_resume(PROCID proc_id) {
     #if defined(_WIN32)
-    HANDLE other = open_process_with_debug_privilege(proc_id);
-    HANDLE self  = open_process_with_debug_privilege(proc_id_from_self());
-    DebugSetProcessKillOnExit(FALSE);
-    bool result = (!DebugActiveProcessStop(proc_id));
-    CloseHandle(other);
-    CloseHandle(self);
-    return result;
+    typedef NTSTATUS (__stdcall *NtResumeProcess)(IN HANDLE ProcessHandle);
+    HANDLE proc = open_process_with_debug_privilege(proc_id);
+    NtResumeProcess pfnNtResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
+    NTSTATUS status = pfnNtResumeProcess(proc);
+    CloseHandle(proc);
+    return (!status);
     #else
     return (kill(proc_id, SIGCONT) != -1);
     #endif
