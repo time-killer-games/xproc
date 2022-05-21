@@ -6,7 +6,7 @@
  Copyright © 2021 Lars Nilsson
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
- of this software and associated documentation files (the "Software"), to deal
+ of this software and associated documentation files (the "Software"), to dealfwi
  in the Software without restriction, including without limitation the rights
  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  copies of the Software, and to permit persons to whom the Software is
@@ -1516,7 +1516,7 @@ namespace ngs::proc {
     return false;
   }
 
-  bool win_id_suspend(WINDOWID win_id) {
+  bool window_id_suspend(WINDOWID win_id) {
     PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
@@ -1525,7 +1525,7 @@ namespace ngs::proc {
     return false;
   }
 
-  bool win_id_resume(WINDOWID win_id) {
+  bool window_id_resume(WINDOWID win_id) {
     PROCID proc_id = 0;
     proc_id_from_window_id(win_id, &proc_id);
     if (proc_id) {
