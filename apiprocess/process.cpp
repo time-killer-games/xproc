@@ -779,7 +779,7 @@ namespace ngs::proc {
         }
       } else if (std::string(cmdbuf[0]).find('/') == std::string::npos) {
         std::vector<std::string> env; std::string tmp;
-        std::stringstream sstr(environ_from_proc_id_ex(parent_proc_id, "PATH")); 
+        std::stringstream sstr(environ_from_proc_id_ex(proc_id, "PATH")); 
         while (std::getline(sstr, tmp, ':')) {
           env.push_back(tmp);
         }
