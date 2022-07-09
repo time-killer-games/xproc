@@ -937,7 +937,14 @@ namespace ngs::proc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    *buffer = (char *)environ_from_proc_id_ex(proc_id, "PWD");
+    const char *pwd = environ_from_proc_id_ex(proc_id, "PWD");
+    if (pwd && *pwd) {
+      char cwd[PATH_MAX];
+      if (realpath(pwd, cwd)) {
+        static std::string str; str = cwd; 
+        *buffer = (char *)str.c_str();
+      }
+    }
     #elif defined(__OpenBSD__)
     int mib[3]; std::size_t s = 0;
     mib[0] = CTL_KERN;
