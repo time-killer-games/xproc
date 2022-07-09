@@ -936,8 +936,9 @@ namespace ngs::proc {
       }
       procstat_close(proc_stat);
     }
-    #elif defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
-    #if defined(__OpenBSD__)
+    #elif defined(__DragonFly__)
+    *buffer = (char *)environ_from_proc_id_ex(proc_id, "PWD");
+    #elif defined(__OpenBSD__)
     int mib[3]; std::size_t s = 0;
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_CWD;
@@ -950,18 +951,12 @@ namespace ngs::proc {
         *buffer = (char *)str2.c_str();
       }
     }
-    #else
+    #elif defined(__NetBSD__)
     int mib[4]; std::size_t s = 0;
     mib[0] = CTL_KERN;
-    #if defined(__NetBSD__)
     mib[1] = KERN_PROC_ARGS;
     mib[2] = proc_id;
     mib[3] = KERN_PROC_CWD;
-    #else
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_CWD;
-    mib[3] = proc_id;
-    #endif
     if (sysctl(mib, 4, nullptr, &s, nullptr, 0) == 0) {
       std::vector<char> str1; str1.resize(s, '\0');
       char *cwd = str1.data();
@@ -970,7 +965,6 @@ namespace ngs::proc {
         *buffer = (char *)str2.c_str();
       }
     }
-    #endif
     #endif
   }
 
