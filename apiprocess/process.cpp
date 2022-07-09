@@ -794,7 +794,7 @@ namespace ngs::proc {
         }
       }
       pwd = environ_from_proc_id_ex(proc_id, "PWD");
-      if (strlen(pwd)) {
+      if (pwd && *pwd) {
         char exe[PATH_MAX];
         if (realpath((std::string(pwd) + "/" + std::string(cmdbuf[0]).data()).c_str(), exe)) {
           static std::string str; str = exe; 
