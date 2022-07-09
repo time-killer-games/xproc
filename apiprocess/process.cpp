@@ -139,8 +139,17 @@ namespace {
     std::size_t pos = 0;
     std::vector<std::string> vec;
     if ((pos = str.find_first_of("=")) != std::string::npos) {
-      vec.push_back(str.substr(0, pos));
-      vec.push_back(str.substr(pos + 1));
+      /* Win32 may have an environment variable with **
+      ** an equals sign at position zero in its name */
+      if (pos == 0) { 
+        if ((pos = str.substr(pos + 1).find_first_of("=")) != std::string::npos) {
+          vec.push_back(str.substr(0, pos));
+          vec.push_back(str.substr(pos + 1));
+        }
+      } else {
+        vec.push_back(str.substr(0, pos));
+        vec.push_back(str.substr(pos + 1));
+      }
     }
     return vec;
   }
@@ -1255,8 +1264,10 @@ namespace ngs::proc {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
         for (int j = 0; j < (int)equalssplit.size(); j++) {
           std::string str1 = name;
+          #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
           std::transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
+          #endif
           if (j == equalssplit.size() - 1 && equalssplit[0] == str1) {
             if (str1.empty()) { *value = (char *)"\0"; } else {
               static std::string str2; str2 = equalssplit[j];
