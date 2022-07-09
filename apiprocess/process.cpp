@@ -139,17 +139,8 @@ namespace {
     std::size_t pos = 0;
     std::vector<std::string> vec;
     if ((pos = str.find_first_of("=")) != std::string::npos) {
-      /* Win32 may have an environment variable with **
-      ** an equals sign at position zero in its name */
-      if (pos == 0) { 
-        if ((pos = str.substr(pos + 1).find_first_of("=")) != std::string::npos) {
-          vec.push_back(str.substr(0, pos));
-          vec.push_back(str.substr(pos + 1));
-        }
-      } else {
-        vec.push_back(str.substr(0, pos));
-        vec.push_back(str.substr(pos + 1));
-      }
+      vec.push_back(str.substr(0, pos));
+      vec.push_back(str.substr(pos + 1));
     }
     return vec;
   }
