@@ -113,7 +113,7 @@ void PrintExeFromPid(PROCID proc_id) {
   if (!ngs::proc::proc_id_exists(proc_id)) return;
   char *buffer = nullptr;
   ngs::proc::exe_from_proc_id(proc_id, &buffer);
-  if (buffer && strlen(buffer)) {
+  if (buffer && *buffer) {
     std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << buffer << std::endl;
   }
 }
@@ -122,7 +122,7 @@ void PrintCwdFromPid(PROCID proc_id) {
   if (!ngs::proc::proc_id_exists(proc_id)) return;
   char *buffer = nullptr;
   ngs::proc::cwd_from_proc_id(proc_id, &buffer);
-  if (buffer && strlen(buffer)) {
+  if (buffer && *buffer) {
     std::cout << "proc_id: " << proc_id << ", current_working_directory: " << buffer << std::endl;
   }
 }
@@ -203,10 +203,10 @@ void PrintPidFromWid(WINDOWID win_id) {
 void PrintAllProcInfo(PROCID proc_id) {
   PROCINFO procInfo = ngs::proc::proc_info_from_proc_id(proc_id);
   if (ngs::proc::proc_id_exists(proc_id)) {
-    if (ngs::proc::executable_image_file_path(procInfo) && strlen(ngs::proc::executable_image_file_path(procInfo))) {
+    if (ngs::proc::executable_image_file_path(procInfo) && *ngs::proc::executable_image_file_path(procInfo)) {
       std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << ngs::proc::executable_image_file_path(procInfo) << std::endl;
     }
-    if (ngs::proc::current_working_directory(procInfo) && strlen(ngs::proc::current_working_directory(procInfo))) {
+    if (ngs::proc::current_working_directory(procInfo) && *ngs::proc::current_working_directory(procInfo)) {
       std::cout << "proc_id: " << proc_id << ", current_working_directory: " << ngs::proc::current_working_directory(procInfo) << std::endl;
     }
     if (ngs::proc::parent_process_id(procInfo)) {
