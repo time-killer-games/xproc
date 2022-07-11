@@ -208,7 +208,7 @@ void PrintAllProcInfo(PROCID proc_id) {
   if (ngs::proc::current_working_directory(procInfo) && *ngs::proc::current_working_directory(procInfo)) {
     std::cout << "proc_id: " << proc_id << ", current_working_directory: " << ngs::proc::current_working_directory(procInfo) << std::endl;
   }
-  if (ngs::proc::parent_process_id(procInfo)) {
+  if (ngs::proc::proc_id_exists(ngs::proc::parent_process_id(procInfo))) {
     std::cout << "proc_id: " << proc_id << ", parent_process_id: " << ngs::proc::parent_process_id(procInfo) << std::endl;
   }
   if (ngs::proc::child_process_id(procInfo)) {
