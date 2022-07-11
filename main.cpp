@@ -202,39 +202,37 @@ void PrintPidFromWid(WINDOWID win_id) {
 
 void PrintAllProcInfo(PROCID proc_id) {
   PROCINFO procInfo = ngs::proc::proc_info_from_proc_id(proc_id);
-  if (ngs::proc::proc_id_exists(proc_id)) {
-    if (ngs::proc::executable_image_file_path(procInfo) && *ngs::proc::executable_image_file_path(procInfo)) {
-      std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << ngs::proc::executable_image_file_path(procInfo) << std::endl;
-    }
-    if (ngs::proc::current_working_directory(procInfo) && *ngs::proc::current_working_directory(procInfo)) {
-      std::cout << "proc_id: " << proc_id << ", current_working_directory: " << ngs::proc::current_working_directory(procInfo) << std::endl;
-    }
-    if (ngs::proc::parent_process_id(procInfo)) {
-      std::cout << "proc_id: " << proc_id << ", parent_process_id: " << ngs::proc::parent_process_id(procInfo) << std::endl;
-    }
-    if (ngs::proc::child_process_id(procInfo)) {
-      for (int i = 0; i < ngs::proc::child_process_id_length(procInfo); i++) {
-        std::cout << "proc_id: " << proc_id << ", child_process_id[" << i << "]: " << ngs::proc::child_process_id(procInfo, i) << std::endl;
-      }
-    }
-    if (ngs::proc::commandline(procInfo)) {
-      for (int i = 0; i < ngs::proc::commandline_length(procInfo); i++) {
-        std::cout << "proc_id: " << proc_id << ", commandline[" << i << "]: " << ngs::proc::commandline(procInfo, i) << std::endl;
-      }
-    }
-    if (ngs::proc::environment(procInfo)) {
-      for (int i = 0; i < ngs::proc::environment_length(procInfo); i++) {
-        std::cout << "proc_id: " << proc_id << ", environment[" << i << "]: " << ngs::proc::environment(procInfo, i) << std::endl;
-      }
-    }
-    #if defined(PROCESS_GUIWINDOW_IMPL)
-    if (ngs::proc::owned_window_id(procInfo)) {
-      for (int i = 0; i < ngs::proc::owned_window_id_length(procInfo); i++) {
-        std::cout << "proc_id: " << proc_id << ", owned_window_id[" << i << "]: " << ngs::proc::owned_window_id(procInfo, i) << std::endl;
-      }
-    }
-    #endif
+  if (ngs::proc::executable_image_file_path(procInfo) && *ngs::proc::executable_image_file_path(procInfo)) {
+    std::cout << "proc_id: " << proc_id << ", executable_image_file_path: " << ngs::proc::executable_image_file_path(procInfo) << std::endl;
   }
+  if (ngs::proc::current_working_directory(procInfo) && *ngs::proc::current_working_directory(procInfo)) {
+    std::cout << "proc_id: " << proc_id << ", current_working_directory: " << ngs::proc::current_working_directory(procInfo) << std::endl;
+  }
+  if (ngs::proc::parent_process_id(procInfo)) {
+    std::cout << "proc_id: " << proc_id << ", parent_process_id: " << ngs::proc::parent_process_id(procInfo) << std::endl;
+  }
+  if (ngs::proc::child_process_id(procInfo)) {
+    for (int i = 0; i < ngs::proc::child_process_id_length(procInfo); i++) {
+      std::cout << "proc_id: " << proc_id << ", child_process_id[" << i << "]: " << ngs::proc::child_process_id(procInfo, i) << std::endl;
+    }
+  }
+  if (ngs::proc::commandline(procInfo)) {
+    for (int i = 0; i < ngs::proc::commandline_length(procInfo); i++) {
+      std::cout << "proc_id: " << proc_id << ", commandline[" << i << "]: " << ngs::proc::commandline(procInfo, i) << std::endl;
+    }
+  }
+  if (ngs::proc::environment(procInfo)) {
+    for (int i = 0; i < ngs::proc::environment_length(procInfo); i++) {
+      std::cout << "proc_id: " << proc_id << ", environment[" << i << "]: " << ngs::proc::environment(procInfo, i) << std::endl;
+    }
+  }
+  #if defined(PROCESS_GUIWINDOW_IMPL)
+  if (ngs::proc::owned_window_id(procInfo)) {
+   for (int i = 0; i < ngs::proc::owned_window_id_length(procInfo); i++) {
+      std::cout << "proc_id: " << proc_id << ", owned_window_id[" << i << "]: " << ngs::proc::owned_window_id(procInfo, i) << std::endl;
+    }
+  }
+  #endif
   ngs::proc::free_proc_info(procInfo);
 }
 
