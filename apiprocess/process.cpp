@@ -1263,6 +1263,7 @@ namespace ngs::proc {
             if (str1.empty()) { *value = (char *)"\0"; } else {
               static std::string str2; str2 = equalssplit[j];
               *value = (char *)str2.c_str();
+              break;
             }
           }
         }
@@ -1287,10 +1288,13 @@ namespace ngs::proc {
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(buffer[i]);
         if (!equalssplit.empty()) {
           std::string str = name;
+          #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
-          std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+          std::transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
+          #endif
           if (equalssplit[0] == str) {
             result = true;
+            break;
           }
         }
       }
@@ -1302,9 +1306,16 @@ namespace ngs::proc {
   const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
-    char *value = (char *)"\0";
-    environ_from_proc_id_ex(proc_id_from_self(), name, &value);
-    str = value;
+    size_t sz = 0;
+    if (!_wgetenv_s(&sz, 0, 0, varName)) {
+      wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
+      if (buf) {
+        if (!_wgetenv_s(&sz, buf, sz, varName)) {
+          str = narrow(buf);
+        }
+        free(buf);
+      }
+    }
     #else
     char *value = getenv(name);
     str = value ? value : "\0";
