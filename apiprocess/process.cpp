@@ -1306,7 +1306,7 @@ namespace ngs::proc {
   const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
-    size_t sz = 0;
+    std::size_t sz = 0;
     if (!_wgetenv_s(&sz, 0, 0, varName)) {
       wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
       if (buf) {
