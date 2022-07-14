@@ -1290,7 +1290,7 @@ namespace ngs::proc {
           std::string str = name;
           #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
-          std::transform(str1.begin(), str1.end(), str1.begin(), ::toupper);
+          std::transform(str.begin(), str.end(), str.begin(), ::toupper);
           #endif
           if (equalssplit[0] == str) {
             result = true;
