@@ -1248,7 +1248,7 @@ namespace ngs::proc {
   }
 
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value) {
-    if (proc_id == proc_id_from_self()) { *value environment_get_variable(name); return; }
+    if (proc_id == proc_id_from_self()) { *value = environment_get_variable(name); return; }
     char **buffer = nullptr; int size = 0; *value = (char *)"\0";
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
