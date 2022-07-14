@@ -1248,6 +1248,7 @@ namespace ngs::proc {
   }
 
   void environ_from_proc_id_ex(PROCID proc_id, const char *name, char **value) {
+    if (proc_id == proc_id_from_self()) return environment_get_variable(name);
     char **buffer = nullptr; int size = 0; *value = (char *)"\0";
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
@@ -1280,6 +1281,7 @@ namespace ngs::proc {
   }
 
   bool environ_from_proc_id_ex_exists(PROCID proc_id, const char *name) {
+    if (proc_id == proc_id_from_self()) return environment_get_variable_exists(name);
     char **buffer = nullptr; int size = 0; bool result = false;
     environ_from_proc_id(proc_id, &buffer, &size);
     if (buffer) {
@@ -1314,6 +1316,8 @@ namespace ngs::proc {
       _wgetenv_s(&sz, buf, sz, wname.c_str());
       str = narrow(buf);
       free(buf);
+    } else {
+      str = "\0";
     }
     #else
     char *value = getenv(name);
