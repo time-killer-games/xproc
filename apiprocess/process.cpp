@@ -1307,14 +1307,13 @@ namespace ngs::proc {
     static std::string str;
     #if defined(_WIN32)
     std::size_t sz = 0;
-    if (!_wgetenv_s(&sz, 0, 0, varName)) {
-      wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
-      if (buf) {
-        if (!_wgetenv_s(&sz, buf, sz, varName)) {
-          str = narrow(buf);
-        }
-        free(buf);
-      }
+    std::wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
+    if (buf) {
+      _wgetenv_s(&sz, buf, sz, wname.c_str());
+      str = narrow(buf);
+      free(buf);
     }
     #else
     char *value = getenv(name);
@@ -1325,7 +1324,10 @@ namespace ngs::proc {
 
   bool environment_get_variable_exists(const char *name) {
     #if defined(_WIN32)
-    return environ_from_proc_id_ex_exists(proc_id_from_self(), name);
+    std::size_t sz = 0;
+    std::wstring wname = widen(name);
+    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
+    return (sz != 0);
     #else
     char *value = getenv(name);
     return (value != nullptr);
