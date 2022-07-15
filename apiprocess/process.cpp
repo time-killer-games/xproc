@@ -1308,16 +1308,14 @@ namespace ngs::proc {
   const char *environment_get_variable(const char *name) {
     static std::string str;
     #if defined(_WIN32)
-    std::size_t sz = 0;
-    std::wstring wname = widen(name);
-    _wgetenv_s(&sz, nullptr, 0, wname.c_str());
-    wchar_t *buf = (wchar_t *)malloc(sz * sizeof(wchar_t));
-    if (buf) {
-      _wgetenv_s(&sz, buf, sz, wname.c_str());
-      str = narrow(buf);
-      free(buf);
-    } else {
-      str = "\0";
+    DWORD length = 0; 
+    wstring u8name = widen(name);
+    if ((length = GetEnvironmentVariableW(u8name.c_str(), nullptr, 0)) != 0) {
+      wchar_t *buffer = new wchar_t[length]();
+      if ((GetEnvironmentVariableW(u8name.c_str(), buffer, 0)) != 0) {
+        str = narrow(buffer);
+      }
+      delete[] buffer;
     }
     #else
     char *value = getenv(name);
