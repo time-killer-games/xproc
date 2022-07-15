@@ -1327,7 +1327,7 @@ namespace ngs::proc {
   bool environment_get_variable_exists(const char *name) {
     #if defined(_WIN32)
     wstring u8name = widen(name);
-    return (GetEnvironmentVariableW(u8name.c_str(), nullptr, 0) != 0 && 
+    return (GetEnvironmentVariableW(u8name.c_str(), nullptr, 0) == 0 && 
       GetLastError() == ERROR_ENVVAR_NOT_FOUND);
     #else
     char *value = getenv(name);
