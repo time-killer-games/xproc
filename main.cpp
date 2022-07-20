@@ -38,13 +38,6 @@ using std::vector;
 using std::to_string;
 using std::size_t;
 
-using ngs::proc::PROCID;
-using ngs::proc::PROCLIST;
-using ngs::proc::PROCINFO;
-#if defined(PROCESS_GUIWINDOW_IMPL)
-using ngs::proc::WINDOWID;
-#endif
-
 namespace XProcPrint {
 
 void PrintXProcHelp() {
