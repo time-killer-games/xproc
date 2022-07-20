@@ -1,6 +1,6 @@
 install:
   - set PATH=C:\projects\xproc;C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
-  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "pacman -Sy vim"
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "pacman --noconfirm -Sy vim"
   - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "sh C:/projects/xproc/build.sh"
 build_script:
   - set PATH=C:\projects\xproc;C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
