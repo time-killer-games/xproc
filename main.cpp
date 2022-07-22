@@ -254,7 +254,8 @@ int main(int argc, char **argv) {
     }
     #endif
   } else if (argc >= 3) {
-    PROCID pid = (PROCID)strtoul(argv[2], nullptr, 10);
+    PROCID pid = (PROCID)strtoul((strcmp(argv[2], "-1") == 0) ? 
+      std::to_string(ngs::proc::proc_id_from_self()).c_str() : argv[2], nullptr, 10);
     if (strcmp(argv[1], "--pid-exists") == 0) {
       XProcPrint::PrintWhetherPidExists(pid);
     } else if (strcmp(argv[1], "--pid-kill") == 0) {
