@@ -1012,9 +1012,9 @@ namespace ngs::proc {
     const char *wd = environ_from_proc_id_ex(proc_id, env);
     if (wd && *wd) {
       #if !defined(_WIN32)
-      char cwd[PATH_MAX];
-      if (realpath(wd, cwd)) {
-        static std::string str; str = cwd; 
+      char pwd[PATH_MAX];
+      if (realpath(wd, pwd)) {
+        static std::string str; str = pwd; 
         *buffer = (char *)str.c_str();
       }
       #else
