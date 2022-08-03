@@ -820,7 +820,7 @@ namespace ngs::proc {
       std::string cmdstr = cmdbuf[0];
       if (!cmdstr.empty() && cmdstr[0] == '/') {
         path = cmdstr;
-        is_exe = is_executable(path.c_str(), buffer);;
+        is_exe = is_executable(proc_id, path.c_str(), buffer);;
       } else if (cmdstr.find('/') == std::string::npos) {
         penv = environ_from_proc_id_ex(proc_id, "PATH");
         if (penv && *penv) {
@@ -831,11 +831,11 @@ namespace ngs::proc {
           }
           for (std::size_t i = 0; i < env.size(); i++) {
             path = env[i] + "/" + cmdstr;
-            is_exe = is_executable(path.c_str(), buffer);;
+            is_exe = is_executable(proc_id, path.c_str(), buffer);;
             if (is_exe) break;
             if (cmdstr[0] == '-') {
               path = env[i] + "/" + cmdstr.substr(1);
-              is_exe = is_executable(path.c_str(), buffer);;
+              is_exe = is_executable(proc_id, path.c_str(), buffer);;
               if (is_exe) break;
             }
           }
@@ -844,13 +844,13 @@ namespace ngs::proc {
         pwd = environ_from_proc_id_ex(proc_id, "PWD");
         if (pwd && *pwd) {
           path = std::string(pwd) + "/" + cmdstr;
-          is_exe = is_executable(path.c_str(), buffer);;
+          is_exe = is_executable(proc_id, path.c_str(), buffer);;
         }
         if (!is_exe) {
           cwd = cwd_from_proc_id(proc_id);
           if (cwd && *cwd) {
             path = std::string(cwd) + "/" + cmdstr;
-            is_exe = is_executable(path.c_str(), buffer);;
+            is_exe = is_executable(proc_id, path.c_str(), buffer);;
           }
         }
       }
