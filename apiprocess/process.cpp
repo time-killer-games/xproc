@@ -291,7 +291,11 @@ namespace {
     PEB peb = { 0 }; SIZE_T nRead = 0; ULONG len = 0; 
     PROCESS_BASIC_INFORMATION pbi = { 0 }; RTL_USER_PROCESS_PARAMETERS upp = { 0 };
     typedef NTSTATUS (__stdcall *NTQIP)(HANDLE, PROCESSINFOCLASS, PVOID, ULONG, PULONG);
-    NTQIP NtQueryInformationProcess = NTQIP(GetProcAddress(GetModuleHandleW(L"ntdll.dll"), "NtQueryInformationProcess"));
+    HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
+    if (!hModule) return;
+    FARPROC farProc = GetProcAddress(hModule, "NtQueryInformationProcess");
+    if (!farProc) return;
+    NTQIP NtQueryInformationProcess = (NTQIP)farProc;
     NTSTATUS status = NtQueryInformationProcess(proc, ProcessBasicInformation, &pbi, sizeof(pbi), &len);
     if (status) return;
     ReadProcessMemory(proc, pbi.PebBaseAddress, &peb, sizeof(peb), &nRead);
@@ -523,11 +527,15 @@ namespace ngs::proc {
     #if !defined(_WIN32)
     return (kill(proc_id, SIGSTOP) != -1);
     #else
-    typedef NTSTATUS (__stdcall *NtSuspendProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return false;
-    NtSuspendProcess pfnNtSuspendProcess = (NtSuspendProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtSuspendProcess");
-    NTSTATUS status = pfnNtSuspendProcess(proc);
+    typedef NTSTATUS (__stdcall *NTSP)(IN HANDLE ProcessHandle);
+    HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
+    if (!hModule) return;
+    FARPROC farProc = GetProcAddress(hModule, "NtSuspendProcess");
+    if (!farProc) return;
+    NTSP NtSuspendProcess = (NTSP)farProc;
+    NTSTATUS status = NtSuspendProcess(proc);
     CloseHandle(proc);
     return (!status);
     #endif
@@ -537,11 +545,15 @@ namespace ngs::proc {
     #if !defined(_WIN32)
     return (kill(proc_id, SIGCONT) != -1);
     #else
-    typedef NTSTATUS (__stdcall *NtResumeProcess)(IN HANDLE ProcessHandle);
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return false;
-    NtResumeProcess pfnNtResumeProcess = (NtResumeProcess)GetProcAddress(GetModuleHandle("ntdll"), "NtResumeProcess");
-    NTSTATUS status = pfnNtResumeProcess(proc);
+    typedef NTSTATUS (__stdcall *NTRP)(IN HANDLE ProcessHandle);
+    HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
+    if (!hModule) return;
+    FARPROC farProc = GetProcAddress(hModule, "NtResumeProcess");
+    if (!farProc) return;
+    NTRP NtResumeProcess = (NTRP)farProc;
+    NTSTATUS status = NtResumeProcess(proc);
     CloseHandle(proc);
     return (!status);
     #endif
@@ -1460,7 +1472,7 @@ namespace ngs::proc {
   }
 
   #if defined(PROCESS_GUIWINDOW_IMPL)
-  #if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || defined(PROCESS_XQUARTZ_IMPL)
+  #if (defined(__linux__) && !defined(__ANDROID__)) || (defined(__FreeBSD__) || defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)) || (defined(__APPLE__) && defined(__MACH__) && defined(PROCESS_XQUARTZ_IMPL))
   static inline int x_error_handler_impl(Display *display, XErrorEvent *event) {
     return 0;
   }
