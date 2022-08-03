@@ -531,9 +531,9 @@ namespace ngs::proc {
     if (proc == nullptr) return false;
     typedef NTSTATUS (__stdcall *NTSP)(IN HANDLE ProcessHandle);
     HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
-    if (!hModule) return;
+    if (!hModule) return false;
     FARPROC farProc = GetProcAddress(hModule, "NtSuspendProcess");
-    if (!farProc) return;
+    if (!farProc) return false;
     NTSP NtSuspendProcess = (NTSP)farProc;
     NTSTATUS status = NtSuspendProcess(proc);
     CloseHandle(proc);
@@ -549,9 +549,9 @@ namespace ngs::proc {
     if (proc == nullptr) return false;
     typedef NTSTATUS (__stdcall *NTRP)(IN HANDLE ProcessHandle);
     HMODULE hModule = GetModuleHandleW(L"ntdll.dll");
-    if (!hModule) return;
+    if (!hModule) return false;
     FARPROC farProc = GetProcAddress(hModule, "NtResumeProcess");
-    if (!farProc) return;
+    if (!farProc) return false;
     NTRP NtResumeProcess = (NTRP)farProc;
     NTSTATUS status = NtResumeProcess(proc);
     CloseHandle(proc);
