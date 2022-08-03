@@ -721,6 +721,35 @@ namespace ngs::proc {
       *size = i;
     }
   }
+  
+  #if defined(__OpenBSD__)
+  bool is_executable(const char *in, char **out) {
+    bool ok = false; *out = nullptr;
+    if (!stat(in, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
+      char executable[PATH_MAX];
+      if (realpath(in, executable)) {
+        kinfo_file *kif = nullptr; int cntp = 0;
+        kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+        if (!kd) { return false; }
+        if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
+          for (int i = 0; i < cntp; i++) {
+            if (kif[i].fd_fd == KERN_FILE_TEXT) {
+              if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
+                static std::string result; 
+                result = executable;
+                *out = (char *)result.c_str();
+                ok = true;
+                break;
+              }
+            }
+          }
+        }
+        kvm_close(kd);
+      }
+    }
+    return ok;
+  }
+  #endif
 
   void exe_from_proc_id(PROCID proc_id, char **buffer) {
     *buffer = nullptr;
@@ -782,16 +811,17 @@ namespace ngs::proc {
       }
     }
     #elif defined(__OpenBSD__)
-    char exe[PATH_MAX]; struct stat st = { 0 };
     char **cmdbuf = nullptr; int cmdsize = 0;
     const char *pwd = nullptr, *cwd = nullptr, 
     *penv = nullptr; std::string path;
     cmdline_from_proc_id(proc_id, &cmdbuf, &cmdsize);
     if (cmdsize) {
-      if (*cmdbuf[0] == '/') {
-        path = cmdbuf[0];
-        goto finish1;
-      } else if (std::string(cmdbuf[0]).find('/') == std::string::npos) {
+      bool is_exe = false;
+      std::string cmdstr = cmdbuf[0];
+      if (!cmdstr.empty() && cmdstr[0] == '/') {
+        path = cmdstr;
+        is_exe = is_executable(path.c_str(), buffer);;
+      } else if (cmdstr.find('/') == std::string::npos) {
         penv = environ_from_proc_id_ex(proc_id, "PATH");
         if (penv && *penv) {
           std::vector<std::string> env; std::string tmp;
@@ -800,59 +830,32 @@ namespace ngs::proc {
             env.push_back(tmp);
           }
           for (std::size_t i = 0; i < env.size(); i++) {
-            path = std::string(env[i]) + "/" + std::string(cmdbuf[0]);
-            if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-              goto finish2;
+            path = env[i] + "/" + cmdstr;
+            is_exe = is_executable(path.c_str(), buffer);;
+            if (is_exe) break;
+            if (cmdstr[0] == '-') {
+              path = env[i] + "/" + cmdstr.substr(1);
+              is_exe = is_executable(path.c_str(), buffer);;
+              if (is_exe) break;
             }
-            path.clear();
           }
         }
-      }
-      pwd = environ_from_proc_id_ex(proc_id, "PWD");
-      if (pwd && *pwd) {
-        path = std::string(pwd) + "/" + std::string(cmdbuf[0]);
-        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-          goto finish2;
-        } else {
-          goto fallback;
-        }
       } else {
-        fallback:
-        cwd = cwd_from_proc_id(proc_id);
-        if (cwd && *cwd) {
-          path = std::string(cwd) + "/" + std::string(cmdbuf[0]);
+        pwd = environ_from_proc_id_ex(proc_id, "PWD");
+        if (pwd && *pwd) {
+          path = std::string(pwd) + "/" + cmdstr;
+          is_exe = is_executable(path.c_str(), buffer);;
         }
-      }
-      finish1:
-      if (!path.empty()) {
-        if (!stat(path.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
-          finish2:
-          if (realpath(path.c_str(), exe)) {
-            static std::string str; str = exe; 
-            *buffer = (char *)str.c_str();
+        if (!is_exe) {
+          cwd = cwd_from_proc_id(proc_id);
+          if (cwd && *cwd) {
+            path = std::string(cwd) + "/" + cmdstr;
+            is_exe = is_executable(path.c_str(), buffer);;
           }
         }
       }
     }
     free_cmdline(cmdbuf);
-    if (!(*buffer && **buffer)) return; 
-    kinfo_file *kif = nullptr; int cntp = 0; bool ok = false;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
-    if (!kd) { *buffer = (char *)"\0"; return; }
-    if ((kif = kvm_getfiles(kd, KERN_FILE_BYPID, proc_id, sizeof(struct kinfo_file), &cntp))) {
-      if (!stat(*buffer, &st)) {
-        for (int i = 0; i < cntp; i++) {
-          if (kif[i].fd_fd == KERN_FILE_TEXT) {
-            if (st.st_dev == kif[i].va_fsid || st.st_ino == kif[i].va_fileid) {
-              ok = true;
-              break;
-            }
-          }
-        }
-      }
-    }
-    if (!ok) { *buffer = (char *)"\0"; }
-    kvm_close(kd);
     #endif
   }
 
