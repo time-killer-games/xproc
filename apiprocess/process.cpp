@@ -723,7 +723,7 @@ namespace ngs::proc {
   }
   
   #if defined(__OpenBSD__)
-  bool is_executable(const char *in, char **out) {
+  bool is_executable(PROCID proc_id, const char *in, char **out) {
     bool ok = false; *out = nullptr; struct stat st = { 0 };
     if (!stat(in, &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
       char executable[PATH_MAX];
