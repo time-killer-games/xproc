@@ -181,26 +181,10 @@ namespace {
   #include <poppack.h>
   #endif
 
-  std::wstring widen(std::string str) {
-    std::size_t wchar_count = str.size() + 1; 
-    std::vector<wchar_t> buf(wchar_count);
-    return std::wstring { buf.data(), (std::size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
-  }
-
   std::string narrow(std::wstring wstr) {
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
     std::vector<char> buf(nbytes);
     return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
-  }
-  
-  std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-    std::size_t pos = 0; 
-    while ((pos = str.find(substr, pos)) != std::string::npos) {
-      message_pump(); 
-      str.replace(pos, substr.length(), nstr);
-      pos += nstr.length();
-    }
-    return str;
   }
 
   HANDLE open_process_with_debug_privilege(ngs::xproc::PROCID proc_id) {
@@ -263,7 +247,9 @@ namespace {
     }
     wchar_t *res = new wchar_t[len / 2 + 1];
     ReadProcessMemory(proc, buf, res, len, &nRead);
-    if (!nRead) return; res[len / 2] = L'\0'; *buffer = res;
+    if (!nRead) return; 
+    res[len / 2] = L'\0'; 
+    *buffer = res;
   }
   #endif
 
@@ -928,7 +914,7 @@ namespace ngs::xproc {
     if (buffer) {
       wchar_t **cmd = CommandLineToArgvW(buffer, &cmdsize);
       if (cmd) {
-        for (std::size_t i = 0; i < cmdsize; i++) {
+        for (int i = 0; i < cmdsize; i++) {
           message_pump();
           vec.push_back(narrow(cmd[i]));
         }
