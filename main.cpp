@@ -31,7 +31,7 @@
 
 int main() {
   std::vector<ngs::xproc::PROCID> pid = ngs::xproc::proc_id_enum();
-  for (int i = 0; i < pid.size(); i++) {
+  for (std::size_t i = 0; i < pid.size(); i++) {
 
     std::string exe = ngs::xproc::exe_from_proc_id(pid[i]);
     if (!exe.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", exe: " << exe << std::endl;
