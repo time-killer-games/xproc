@@ -1067,7 +1067,7 @@ namespace ngs::proc {
         if (!equalssplit.empty()) {
           #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
-          std::transform(name.begin(), name.end(), str.begin(), ::toupper);
+          std::transform(name.begin(), name.end(), name.begin(), ::toupper);
           #endif
           if (equalssplit[0] == name) {
             value = name;
@@ -1089,7 +1089,7 @@ namespace ngs::proc {
         if (!equalssplit.empty()) {
           #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
-          std::transform(name.begin(), name.end(), str.begin(), ::toupper);
+          std::transform(name.begin(), name.end(), name.begin(), ::toupper);
           #endif
           if (equalssplit[0] == name) {
             exists = true;
