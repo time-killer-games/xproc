@@ -203,7 +203,7 @@ namespace {
     return str;
   }
 
-  HANDLE open_process_with_debug_privilege(PROCID proc_id) {
+  HANDLE open_process_with_debug_privilege(unsigned long proc_id) {
     HANDLE proc = nullptr; 
     HANDLE hToken = nullptr; 
     LUID luid; 
@@ -273,7 +273,7 @@ namespace {
     MEMENV
   };
 
-  std::vector<std::string> cmd_env_from_proc_id(PROCID proc_id, int type) {
+  std::vector<std::string> cmd_env_from_proc_id(int proc_id, int type) {
     std::vector<std::string> vec;
     std::size_t s = 0;
     int argmax = 0, nargs = 0;
