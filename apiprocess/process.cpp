@@ -26,10 +26,7 @@
 */
 
 #include <algorithm>
-#include <iostream>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #include <cstdlib>
 #include <cstddef>
@@ -39,13 +36,6 @@
 #include <cstdio>
 
 #include "process.h"
-#if defined(PROCESS_WIN32EXE_INCLUDES)
-#if defined(_WIN64)
-#include "process32.h"
-#else
-#include "process64.h"
-#endif
-#endif
 
 #if !defined(_WIN32)
 #include <signal.h>
