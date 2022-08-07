@@ -346,7 +346,7 @@ namespace ngs::proc {
     }
     CloseHandle(hp);
     #elif (defined(__APPLE__) && defined(__MACH__))
-    if (proc_id_exists(0)) { vec.push_back(0); }
+    vec.push_back(0);
     int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
     std::vector<PROCID> proc_info(cntp);
     std::fill(proc_info.begin(), proc_info.end(), 0);
@@ -356,7 +356,7 @@ namespace ngs::proc {
       vec.push_back(proc_info[i]);
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    if (proc_id_exists(0)) { vec.push_back(0); }
+    vec.push_back(0);
     PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
     while ((proc_t *proc_info = readproc(proc, nullptr))) {
       vec.push_back(proc_info->tgid);
@@ -393,7 +393,7 @@ namespace ngs::proc {
     kvm_close(kd);
     #elif defined(__OpenBSD__)
     kinfo_proc *proc_info = nullptr; int cntp = 0;
-    if (proc_id_exists(0)) { vec.push_back(0); }
+    vec.push_back(0);
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
