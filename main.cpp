@@ -27,6 +27,8 @@
 
 #include <iostream>
 
+#include <cstddef>
+
 #include "apiprocess/xproc.h"
 
 int main() {
