@@ -820,7 +820,10 @@ namespace ngs::proc {
     #elif (defined(__APPLE__) && defined(__MACH__))
     proc_vnodepathinfo vpi;
     if (proc_pidinfo(proc_id, PROC_PIDVNODEPATHINFO, 0, &vpi, sizeof(vpi)) > 0) {
-      path = vpi.pvi_cdir.vip_path;
+      char buffer[PATH_MAX];
+      if (realpath(vpi.pvi_cdir.vip_path, buffer)) {
+        path = buffer;
+      }
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
     char cwd[PATH_MAX];
@@ -828,22 +831,27 @@ namespace ngs::proc {
       path = cwd;
     }
     #elif defined(__FreeBSD__)
-    int mib[4]; 
-    std::size_t len = 0;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_CWD;
-    mib[3] = proc_id;
-    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-      std::string strbuff;
-      strbuff.resize(len, '\0');
-      char *cwd = strbuff.data();
-      if (sysctl(mib, 4, cwd, &len, nullptr, 0) == 0) {
-        char buffer[PATH_MAX];
-        if (realpath(cwd, buffer)) {
-          path = buffer;
+    char cwd[PATH_MAX]; unsigned cntp = 0;
+    procstat *proc_stat = procstat_open_sysctl();
+    if (proc_stat) {
+      kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, proc_id, &cntp);
+      if (proc_info) {
+        filestat_list *head = procstat_getfiles(proc_stat, proc_info, 0);
+        if (head) {
+          filestat *fst = nullptr;
+          STAILQ_FOREACH(fst, head, next) {
+            if (fst->fs_uflags & PS_FST_UFLAG_CDIR) {
+              char buffer[PATH_MAX];
+              if (realpath(fst->fs_path, buffer)) {
+                path = buffer;
+              }
+            }
+          }
+          procstat_freefiles(proc_stat, head);
         }
+        procstat_freeprocs(proc_stat, proc_info);
       }
+      procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
     int mib[4];
