@@ -778,7 +778,10 @@ namespace ngs::proc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return path;
-    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) return path;
+    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+      CloseHandle(proc); 
+      return path;
+    }
     wchar_t *buffer = nullptr;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCWD);
     if (buffer) {
@@ -896,7 +899,10 @@ namespace ngs::proc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-	if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) return vec;
+    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+      CloseHandle(proc); 
+      return vec;
+    }
     wchar_t *buffer = nullptr; int cmdsize = 0;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCMD);
     if (buffer) {
@@ -986,7 +992,10 @@ namespace ngs::proc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-	if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) return vec;
+    if (is_x86_process(GetCurrentProcess()) != is_x86_process(proc)) {
+      CloseHandle(proc); 
+      return vec;
+    }
     wchar_t *buffer = nullptr;
     cwd_cmd_env_from_proc(proc, &buffer, MEMENV);
     int i = 0;
