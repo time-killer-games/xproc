@@ -398,7 +398,7 @@ namespace ngs::proc {
 
   bool proc_id_exists(PROCID proc_id) {
     bool exists = false;
-    std::vector<std::string> vec = proc_id_enum();
+    std::vector<PROCID> vec = proc_id_enum();
     for (std::size_t i = 0; i < vec.size(); i++) {
       if (vec[i] == proc_id) {
       exists = true;
