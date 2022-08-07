@@ -182,28 +182,36 @@ namespace {
   #endif
 
   std::wstring widen(std::string str) {
-    std::size_t wchar_count = str.size() + 1; std::vector<wchar_t> buf(wchar_count);
+    std::size_t wchar_count = str.size() + 1; 
+    std::vector<wchar_t> buf(wchar_count);
     return std::wstring { buf.data(), (std::size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
   }
 
   std::string narrow(std::wstring wstr) {
-    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); std::vector<char> buf(nbytes);
+    int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
+    std::vector<char> buf(nbytes);
     return std::string { buf.data(), (std::size_t)WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), buf.data(), nbytes, nullptr, nullptr) };
   }
   
   std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-    std::size_t pos = 0; while ((pos = str.find(substr, pos)) != std::string::npos) {
-      message_pump(); str.replace(pos, substr.length(), nstr);
+    std::size_t pos = 0; 
+    while ((pos = str.find(substr, pos)) != std::string::npos) {
+      message_pump(); 
+      str.replace(pos, substr.length(), nstr);
       pos += nstr.length();
     }
     return str;
   }
 
   HANDLE open_process_with_debug_privilege(PROCID proc_id) {
-    HANDLE proc = nullptr; HANDLE hToken = nullptr; LUID luid; TOKEN_PRIVILEGES tkp;
+    HANDLE proc = nullptr; 
+    HANDLE hToken = nullptr; 
+    LUID luid; 
+    TOKEN_PRIVILEGES tkp;
     if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
       if (LookupPrivilegeValue(nullptr, SE_DEBUG_NAME, &luid)) {
-        tkp.PrivilegeCount = 1; tkp.Privileges[0].Luid = luid;
+        tkp.PrivilegeCount = 1; 
+        tkp.Privileges[0].Luid = luid;
         tkp.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
         if (AdjustTokenPrivileges(hToken, false, &tkp, sizeof(tkp), nullptr, nullptr)) {
           proc = OpenProcess(PROCESS_ALL_ACCESS, false, proc_id);
@@ -339,7 +347,8 @@ namespace ngs::proc {
     }
     CloseHandle(hp);
     #elif (defined(__APPLE__) && defined(__MACH__))
-    vec.push_back(0); int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+    vec.push_back(0); 
+    int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
     std::vector<PROCID> proc_info(cntp);
     std::fill(proc_info.begin(), proc_info.end(), 0);
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
@@ -348,14 +357,16 @@ namespace ngs::proc {
       vec.push_back(proc_info[i]);
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    vec.push_back(0); PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+    vec.push_back(0); 
+    PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
     while (proc_t *proc_info = readproc(proc, nullptr)) {
       vec.push_back(proc_info->tgid);
       freeproc(proc_info);
     }
     closeproc(proc);
     #elif defined(__FreeBSD__)
-    int cntp = 0; kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+    int cntp = 0; 
+    kinfo_proc *proc_info = kinfo_getallproc(&cntp);
     if (proc_info) {
       for (int i = 0; i < cntp; i++) {
         vec.push_back(proc_info[i].ki_pid);
@@ -363,8 +374,10 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
-    const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0;
+    const char *nlistf, *memf; 
+    nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
@@ -375,7 +388,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__NetBSD__)
-    kinfo_proc2 *proc_info = nullptr; int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
@@ -384,7 +398,9 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__OpenBSD__)
-    vec.push_back(0); kinfo_proc *proc_info = nullptr; int cntp = 0;
+    vec.push_back(0); 
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
@@ -495,8 +511,10 @@ namespace ngs::proc {
       free(proc_info);
     } 
     #elif defined(__DragonFly__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0; 
-    const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr;
+    int cntp = 0; 
+    const char *nlistf, *memf; 
+    nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       if (proc_info->kp_ppid >= 0) {
@@ -504,17 +522,19 @@ namespace ngs::proc {
       }
     }
     kvm_close(kd);
-    if (vec.empty() && proc_id == 0) 
+    if (vec.empty() && proc_id == 0)
       vec.push_back(0);
     #elif defined(__NetBSD__)
-    kinfo_proc2 *proc_info = nullptr; int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       vec.push_back(proc_info->p_ppid);
     }
     kvm_close(kd);
     #elif defined(__OpenBSD__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       vec.push_back(proc_info->p_ppid);
@@ -569,7 +589,8 @@ namespace ngs::proc {
     }
     closeproc(proc);
     #elif defined(__FreeBSD__)
-    int cntp = 0; kinfo_proc *proc_info = kinfo_getallproc(&cntp);
+    int cntp = 0; 
+    kinfo_proc *proc_info = kinfo_getallproc(&cntp);
     if (proc_info) {
       for (int i = 0; i < cntp; i++) {
         if (proc_info[i].ki_ppid == parent_proc_id) {
@@ -579,8 +600,10 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0; 
-    const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr;
+    int cntp = 0; 
+    const char *nlistf, *memf; 
+    nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
@@ -594,7 +617,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__NetBSD__)
-    kinfo_proc2 *proc_info = nullptr; int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr;
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
@@ -731,24 +755,25 @@ namespace ngs::proc {
     std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
     if (buffer.size()) {
       bool is_exe = false;
-      std::string argv0, cmdstr = buffer[0];
-      if (!cmdstr.empty() && cmdstr[0] == '/') {
-        argv0 = cmdstr;
+      std::string argv0;
+      if (!buffer[0].empty() && buffer[0][0] == '/') {
+        argv0 = buffer[0];
         is_exe = is_executable(proc_id, argv0.c_str(), &path);
-      } else if (cmdstr.find('/') == std::string::npos) {
+      } else if (buffer[0].find('/') == std::string::npos) {
         std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
         if (!penv.empty()) {
-          std::vector<std::string> env; std::string tmp;
+          std::vector<std::string> env; 
+          std::string tmp;
           std::stringstream sstr(penv); 
           while (std::getline(sstr, tmp, ':')) {
             env.push_back(tmp);
           }
           for (std::size_t i = 0; i < env.size(); i++) {
-            argv0 = env[i] + "/" + cmdstr;
+            argv0 = env[i] + "/" + buffer[0];
             is_exe = is_executable(proc_id, argv0.c_str(), &path);
             if (is_exe) break;
-            if (cmdstr[0] == '-') {
-              argv0 = env[i] + "/" + cmdstr.substr(1);
+            if (buffer[0][0] == '-') {
+              argv0 = env[i] + "/" + buffer[0].substr(1);
               is_exe = is_executable(proc_id, argv0.c_str(), &path);
               if (is_exe) break;
             }
@@ -757,13 +782,13 @@ namespace ngs::proc {
       } else {
         std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
         if (!pwd.empty()) {
-          argv0 = std::string(pwd) + "/" + cmdstr;
+          argv0 = std::string(pwd) + "/" + buffer[0];
           is_exe = is_executable(proc_id, argv0.c_str(), &path);
         }
         if (!is_exe) {
           std::string cwd = cwd_from_proc_id(proc_id);
           if (!cwd.empty()) {
-            argv0 = std::string(cwd) + "/" + cmdstr;
+            argv0 = std::string(cwd) + "/" + buffer[0];
             is_exe = is_executable(proc_id, argv0.c_str(), &path);
           }
         }
@@ -903,7 +928,8 @@ namespace ngs::proc {
       CloseHandle(proc); 
       return vec;
     }
-    wchar_t *buffer = nullptr; int cmdsize = 0;
+    wchar_t *buffer = nullptr; 
+    int cmdsize = 0;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCMD);
     if (buffer) {
       wchar_t **cmd = CommandLineToArgvW(buffer, &cmdsize);
@@ -931,7 +957,8 @@ namespace ngs::proc {
     }
     closeproc(proc);
     #elif defined(__FreeBSD__)
-    unsigned cntp = 0; procstat *proc_stat = procstat_open_sysctl();
+    unsigned cntp = 0; 
+    procstat *proc_stat = procstat_open_sysctl();
     if (proc_stat) {
       kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, proc_id, &cntp);
       if (proc_info) {
@@ -947,8 +974,10 @@ namespace ngs::proc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0; 
-    const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0; 
+    const char *nlistf, *memf; 
+    nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **cmd = kvm_getargv(kd, proc_info, 0);
@@ -960,7 +989,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__NetBSD__)
-    kinfo_proc2 *proc_info = nullptr; int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       char **cmd = kvm_getargv2(kd, proc_info, 0);
@@ -972,7 +1002,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__OpenBSD__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       char **cmd = kvm_getargv(kd, proc_info, 0);
@@ -1038,8 +1069,10 @@ namespace ngs::proc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
-    const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; 
+    int cntp = 0;
+    const char *nlistf, *memf; 
+    nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **env = kvm_getenvv(kd, proc_info, 0);
@@ -1051,7 +1084,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__NetBSD__)
-    kinfo_proc2 *proc_info = nullptr; int cntp = 0;
+    kinfo_proc2 *proc_info = nullptr;
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       char **env = kvm_getenvv2(kd, proc_info, 0);
@@ -1063,7 +1097,8 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__OpenBSD__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
+    kinfo_proc *proc_info = nullptr;
+    int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       char **env = kvm_getenvv(kd, proc_info, 0);
