@@ -39,6 +39,7 @@ namespace ngs::proc {
   #endif
 
   std::vector<PROCID> proc_id_enum();
+  bool proc_id_exists(PROCID proc_id);
   bool proc_id_suspend(PROCID proc_id);
   bool proc_id_resume(PROCID proc_id);
   bool proc_id_kill(PROCID proc_id);
