@@ -370,7 +370,7 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    vec.push_back(0); kinfo_proc *proc_info = nullptr; int cntp = 0;
+    kinfo_proc *proc_info = nullptr; int cntp = 0;
     const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
