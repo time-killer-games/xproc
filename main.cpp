@@ -27,7 +27,7 @@
 
 #include <iostream>
 
-#include "apiprocess/process.h"
+#include "apiprocess/xproc.h"
 
 int main() {
   std::vector<ngs::xproc::PROCID> pid = ngs::xproc::proc_id_enum();
