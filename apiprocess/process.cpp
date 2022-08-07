@@ -346,8 +346,7 @@ namespace ngs::proc {
     }
     CloseHandle(hp);
     #elif (defined(__APPLE__) && defined(__MACH__))
-    vec.push_back(0);
-    int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
+    vec.push_back(0); int cntp = proc_listpids(PROC_ALL_PIDS, 0, nullptr, 0);
     std::vector<PROCID> proc_info(cntp);
     std::fill(proc_info.begin(), proc_info.end(), 0);
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
@@ -356,8 +355,7 @@ namespace ngs::proc {
       vec.push_back(proc_info[i]);
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    vec.push_back(0);
-    PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
+    vec.push_back(0); PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
     while (proc_t *proc_info = readproc(proc, nullptr)) {
       vec.push_back(proc_info->tgid);
       freeproc(proc_info);
@@ -372,7 +370,7 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    vec.push_back(0); int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
@@ -392,8 +390,7 @@ namespace ngs::proc {
     }
     kvm_close(kd);
     #elif defined(__OpenBSD__)
-    kinfo_proc *proc_info = nullptr; int cntp = 0;
-    vec.push_back(0);
+    vec.push_back(0); kinfo_proc *proc_info = nullptr; int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
@@ -474,6 +471,8 @@ namespace ngs::proc {
     if (proc_pidinfo(proc_id, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
       vec.push_back(proc_info.pbi_ppid);
     }
+    if (vec.empty() && proc_id == 0) 
+      vec.push_back(0);
     #elif (defined(__linux__) && !defined(__ANDROID__))
     PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &proc_id);
     if (proc_t *proc_info = readproc(proc, nullptr)) {
@@ -481,6 +480,8 @@ namespace ngs::proc {
       freeproc(proc_info);
     }
     closeproc(proc);
+    if (vec.empty() && proc_id == 0) 
+      vec.push_back(0);
     #elif defined(__FreeBSD__)
     kinfo_proc *proc_info = kinfo_getproc(proc_id);
     if (proc_info) {
@@ -510,6 +511,8 @@ namespace ngs::proc {
       vec.push_back(proc_info->p_ppid);
     }
     kvm_close(kd);
+    if (vec.empty() && proc_id == 0) 
+      vec.push_back(0);
     #endif
     return vec;
   }
