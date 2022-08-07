@@ -396,6 +396,17 @@ namespace ngs::proc {
     return vec;
   }
 
+  bool proc_id_exists(PROCID proc_id) {
+    bool exists = false;
+    std::vector<std::string> vec = proc_id_enum();
+    for (std::size_t i = 0; i < vec.size(); i++) {
+      if (vec[i] == proc_id) {
+      exists = true;
+      break;
+    }
+    return exists;
+  }
+
   bool proc_id_suspend(PROCID proc_id) {
     #if !defined(_WIN32)
     return (kill(proc_id, SIGSTOP) != -1);
