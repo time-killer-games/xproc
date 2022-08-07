@@ -30,27 +30,27 @@
 #include "apiprocess/process.h"
 
 int main() {
-  std::vector<ngs::proc::PROCID> pid = ngs::proc::proc_id_enum();
+  std::vector<ngs::xproc::PROCID> pid = ngs::xproc::proc_id_enum();
   for (int i = 0; i < pid.size(); i++) {
 
-    std::string exe = ngs::proc::exe_from_proc_id(pid[i]);
+    std::string exe = ngs::xproc::exe_from_proc_id(pid[i]);
     if (!exe.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", exe: " << exe << std::endl;
 
-    std::string cwd = ngs::proc::cwd_from_proc_id(pid[i]);
+    std::string cwd = ngs::xproc::cwd_from_proc_id(pid[i]);
     if (!cwd.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", cwd: " << cwd << std::endl;
   
-    std::vector<PROCID> ppid = ngs::proc::parent_proc_id_from_proc_id(pid[i]);
+    std::vector<ngs::xproc::PROCID> ppid = ngs::xproc::parent_proc_id_from_proc_id(pid[i]);
     if (!ppid.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", ppid: " << ppid[0] << std::endl;
 
-    std::vector<PROCID> cpid = ngs::proc::proc_id_from_parent_proc_id(pid[i]);
+    std::vector<ngs::xproc::PROCID> cpid = ngs::xproc::proc_id_from_parent_proc_id(pid[i]);
     for (int j = 0; j < cpid.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", cpid[" << j << "]: " << cpid[j] << std::endl;
 
-    std::vector<std::string> cmd = ngs::proc::cmdline_from_proc_id(pid[i]);
+    std::vector<std::string> cmd = ngs::xproc::cmdline_from_proc_id(pid[i]);
     for (int j = 0; j < cmd.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", cmd[" << j << "]: " << cmd[j] << std::endl;
 
-    std::vector<std::string> env = ngs::proc::environ_from_proc_id(pid[i]);
+    std::vector<std::string> env = ngs::xproc::environ_from_proc_id(pid[i]);
     for (int j = 0; j < env.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", env[" << j << "]: " << env[j] << std::endl;
 
