@@ -203,7 +203,7 @@ namespace {
     return str;
   }
 
-  HANDLE open_process_with_debug_privilege(ngs::proc::PROCID proc_id) {
+  HANDLE open_process_with_debug_privilege(ngs::xproc::PROCID proc_id) {
     HANDLE proc = nullptr; 
     HANDLE hToken = nullptr; 
     LUID luid; 
@@ -273,7 +273,7 @@ namespace {
     MEMENV
   };
 
-  std::vector<std::string> cmd_env_from_proc_id(ngs::proc::PROCID proc_id, int type) {
+  std::vector<std::string> cmd_env_from_proc_id(ngs::xproc::PROCID proc_id, int type) {
     std::vector<std::string> vec;
     std::size_t s = 0;
     int argmax = 0, nargs = 0;
@@ -331,7 +331,7 @@ namespace {
 
 } // anonymous namespace
 
-namespace ngs::proc {
+namespace ngs::xproc {
 
   std::vector<PROCID> proc_id_enum() {
     std::vector<PROCID> vec;
@@ -1151,4 +1151,4 @@ namespace ngs::proc {
     return exists;
   }
 
-} // namespace ngs::proc
+} // namespace ngs::xproc
