@@ -782,13 +782,13 @@ namespace ngs::proc {
       } else {
         std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
         if (!pwd.empty()) {
-          argv0 = std::string(pwd) + "/" + buffer[0];
+          argv0 = pwd + "/" + buffer[0];
           is_exe = is_executable(proc_id, argv0.c_str(), &path);
         }
         if (!is_exe) {
           std::string cwd = cwd_from_proc_id(proc_id);
           if (!cwd.empty()) {
-            argv0 = std::string(cwd) + "/" + buffer[0];
+            argv0 = cwd + "/" + buffer[0];
             is_exe = is_executable(proc_id, argv0.c_str(), &path);
           }
         }
