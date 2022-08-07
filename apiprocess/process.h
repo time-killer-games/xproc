@@ -33,9 +33,9 @@
 namespace ngs::proc {
 
   #if !defined(_WIN32)
-  #define PROCID int
+  typedef int PROCID;
   #else
-  #define PROCID unsigned long
+  typedef unsigned long PROCID;
   #endif
 
   std::vector<PROCID> proc_id_enum();
