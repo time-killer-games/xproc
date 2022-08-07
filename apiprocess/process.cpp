@@ -831,7 +831,7 @@ namespace ngs::proc {
       path = cwd;
     }
     #elif defined(__FreeBSD__)
-    char cwd[PATH_MAX]; unsigned cntp = 0;
+    unsigned cntp = 0;
     procstat *proc_stat = procstat_open_sysctl();
     if (proc_stat) {
       kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, proc_id, &cntp);
