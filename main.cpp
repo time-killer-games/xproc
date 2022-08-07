@@ -45,15 +45,15 @@ int main() {
     if (!ppid.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", ppid: " << ppid[0] << std::endl;
 
     std::vector<ngs::xproc::PROCID> cpid = ngs::xproc::proc_id_from_parent_proc_id(pid[i]);
-    for (int j = 0; j < cpid.size(); j++)
+    for (std::size_t j = 0; j < cpid.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", cpid[" << j << "]: " << cpid[j] << std::endl;
 
     std::vector<std::string> cmd = ngs::xproc::cmdline_from_proc_id(pid[i]);
-    for (int j = 0; j < cmd.size(); j++)
+    for (std::size_t j = 0; j < cmd.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", cmd[" << j << "]: " << cmd[j] << std::endl;
 
     std::vector<std::string> env = ngs::xproc::environ_from_proc_id(pid[i]);
-    for (int j = 0; j < env.size(); j++)
+    for (std::size_t j = 0; j < env.size(); j++)
       std::cout << "pid[" << i << "]: " << pid[i] << ", env[" << j << "]: " << env[j] << std::endl;
 
   }
