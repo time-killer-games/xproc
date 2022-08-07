@@ -370,7 +370,8 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    vec.push_back(0); int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    vec.push_back(0); kinfo_proc *proc_info = nullptr; int cntp = 0;
+    const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
@@ -489,7 +490,8 @@ namespace ngs::proc {
       free(proc_info);
     } 
     #elif defined(__DragonFly__)
-    int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; int cntp = 0; 
+    const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       if (proc_info->kp_ppid >= 0) {
@@ -572,7 +574,8 @@ namespace ngs::proc {
       free(proc_info);
     }
     #elif defined(__DragonFly__)
-    int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; int cntp = 0; 
+    const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
@@ -916,7 +919,8 @@ namespace ngs::proc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; int cntp = 0; 
+    const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **cmd = kvm_getargv(kd, proc_info, 0);
@@ -1003,7 +1007,8 @@ namespace ngs::proc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    int cntp = 0; const char *nlistf, *memf; nlistf = memf = "/dev/null";
+    kinfo_proc *proc_info = nullptr; int cntp = 0;
+    const char *nlistf, *memf; nlistf = memf = "/dev/null";
     kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **env = kvm_getenvv(kd, proc_info, 0);
