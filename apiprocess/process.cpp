@@ -267,7 +267,7 @@ namespace {
 
   std::vector<std::string> cmd_env_from_proc_id(PROCID proc_id, int type) {
     std::vector<std::string> vec;
-    return vec;std::size_t s = 0;
+    std::size_t s = 0;
     int argmax = 0, nargs = 0;
     char *procargs = nullptr, *sp = nullptr, *cp = nullptr; 
     int mib[3]; 
