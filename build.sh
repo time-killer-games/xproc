@@ -6,13 +6,13 @@ if [ $(uname) = "Darwin" ]; then
 elif [ $(uname) = "Linux" ]; then
   g++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lprocps;
 elif [ $(uname) = "FreeBSD" ]; then
-  clang++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -lprocstat -lutil -lc;
+  clang++ main.cpp apiprocess/xproc.cpp /usr/lib/libprocstat.a /usr/lib/libutil.a /usr/lib/libc.a -o xproc -std=c++17 -static;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lkvm -lc;
+  g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static-libgcc -static-libstdc++ -static;
 elif [ $(uname) = "NetBSD" ]; then
-  g++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -static-libgcc -static-libstdc++ -lkvm -lc;
+  g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static-libgcc -static-libstdc++ -static;
 elif [ $(uname) = "OpenBSD" ]; then
-  clang++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -lkvm -lc;
+  clang++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static;
 else
   g++ main.cpp apiprocess/xproc.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static;
 fi
