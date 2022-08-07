@@ -267,7 +267,7 @@ namespace {
 
   std::vector<std::string> cmd_env_from_proc_id(PROCID proc_id, int type) {
     std::vector<std::string> vec;
-	std::size_t s = 0;
+    return vec;std::size_t s = 0;
     int argmax = 0, nargs = 0;
     char *procargs = nullptr, *sp = nullptr, *cp = nullptr; 
     int mib[3]; 
@@ -275,18 +275,18 @@ namespace {
     mib[1] = KERN_ARGMAX;
     s = sizeof(argmax);
     if (sysctl(mib, 2, &argmax, &s, nullptr, 0) == -1) {
-      return;
+      return vec;
     }
     procargs = (char *)malloc(argmax);
     if (procargs == nullptr) {
-      return;
+      return vec;
     }
     mib[0] = CTL_KERN; 
     mib[1] = KERN_PROCARGS2;
     mib[2] = proc_id; 
     s = argmax;
     if (sysctl(mib, 3, procargs, &s, nullptr, 0) == -1) {
-      free(procargs); return;
+      free(procargs); return vec;
     }
     memcpy(&nargs, procargs, sizeof(nargs));
     cp = procargs + sizeof(nargs);
@@ -294,13 +294,13 @@ namespace {
       if (*cp == '\0') break;
     }
     if (cp == &procargs[s]) {
-      free(procargs); return;
+      free(procargs); return vec;
     }
     for (; cp < &procargs[s]; cp++) {
       if (*cp != '\0') break;
     }
     if (cp == &procargs[s]) {
-      free(procargs); return;
+      free(procargs); return vec;
     }
     sp = cp; 
     int i = 0, j = 0;
@@ -477,7 +477,7 @@ namespace ngs::proc {
     if (proc_pidinfo(proc_id, PROC_PIDTBSDINFO, 0, &proc_info, sizeof(proc_info)) > 0) {
       vec.push_back(proc_info.pbi_ppid);
     }
-    if (vec.empty() && proc_id == 0) 
+    if (vec.empty() && (proc_id == 0 || proc_id == 1)) 
       vec.push_back(0);
     #elif (defined(__linux__) && !defined(__ANDROID__))
     PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &proc_id);
@@ -548,11 +548,11 @@ namespace ngs::proc {
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
     for (int i = cntp - 1; i >= 0; i--) {
       if (proc_info[i] == 0) { continue; }
-      PROCID ppid; parent_proc_id_from_proc_id(proc_info[i], &ppid);
-      if (proc_info[i] == 1 && ppid == 0 && parent_proc_id == 0) {
+      std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_info[i]);
+      if (proc_info[i] == 1 && parent_proc_id == 0) {
         vec.push_back(0);
       }
-      if (ppid == parent_proc_id) {
+      if (!ppid.empty() && ppid[0] == parent_proc_id) {
         vec.push_back(proc_info[i]);
       }
     }
