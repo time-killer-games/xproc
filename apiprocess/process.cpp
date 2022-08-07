@@ -810,9 +810,12 @@ namespace ngs::proc {
     wchar_t *buffer = nullptr;
     cwd_cmd_env_from_proc(proc, &buffer, MEMCWD);
     if (buffer) {
-      path = narrow(buffer);
-      if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
-        path = path.substr(0, path.length() - 1);
+      wchar_t wbuffer[MAX_PATH];
+      if (_wfullpath(wbuffer, buffer, MAX_PATH)) {
+        path = narrow(wbuffer);
+        if (!path.empty() && std::count(path.begin(), path.end(), '\\') > 1 && path.back() == '\\') {
+          path = path.substr(0, path.length() - 1);
+        }
       }
       delete[] buffer;
     }
@@ -907,23 +910,6 @@ namespace ngs::proc {
       }
     }
     #endif
-    if (!path.empty()) return path;
-    #if !defined(_WIN32)
-    const char *env = "PWD";
-    #else
-    const char *env = "WD";
-    #endif
-    std::string wd = envvar_value_from_proc_id(proc_id, env);
-    if (!wd.empty()) {
-      #if !defined(_WIN32)
-      char pwd[PATH_MAX];
-      if (realpath(wd.c_str(), pwd)) {
-        path = pwd; 
-      }
-      #else
-      path = wd; 
-      #endif
-    }
     return path;
   }
 
