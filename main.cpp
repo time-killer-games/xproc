@@ -30,7 +30,7 @@
 #include "apiprocess/process.h"
 
 int main() {
-  std::vector<PROCID> pid = ngs::proc::proc_id_enum();
+  std::vector<ngs::proc::PROCID> pid = ngs::proc::proc_id_enum();
   for (int i = 0; i < pid.size(); i++) {
 
     std::string exe = ngs::proc::exe_from_proc_id(pid[i]);
