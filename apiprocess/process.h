@@ -48,5 +48,7 @@ namespace ngs::proc {
   std::string cwd_from_proc_id(PROCID proc_id);
   std::vector<std::string> cmdline_from_proc_id(PROCID proc_id);
   std::vector<std::string> environ_from_proc_id(PROCID proc_id);
+  std::string envvar_value_from_proc_id(PROCID proc_id, std::string name);
+  bool envvar_exists_from_proc_id(PROCID proc_id, std::string name);
 
 } // namespace ngs::proc

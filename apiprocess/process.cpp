@@ -199,13 +199,6 @@ namespace {
     return str;
   }
 
-  bool file_exists(std::string fname) {
-    DWORD attr; std::wstring wfname = widen(fname);
-    attr = GetFileAttributesW(wfname.c_str());
-    return (attr != INVALID_FILE_ATTRIBUTES &&
-      !(attr & FILE_ATTRIBUTE_DIRECTORY));
-  }
-
   HANDLE open_process_with_debug_privilege(PROCID proc_id) {
     HANDLE proc = nullptr; HANDLE hToken = nullptr; LUID luid; TOKEN_PRIVILEGES tkp;
     if (OpenProcessToken(GetCurrentProcess(), TOKEN_ADJUST_PRIVILEGES | TOKEN_QUERY, &hToken)) {
@@ -711,7 +704,7 @@ namespace ngs::proc {
             for (int i = 0; i < cntp; i++) {
               if (kif[i].fd_fd == KERN_FILE_TEXT) {
                 if (st.st_dev == (dev_t)kif[i].va_fsid || st.st_ino == (ino_t)kif[i].va_fileid) {
-                  *out = result;
+                  *out = executable;
                   success = true;
                   break;
                 }
@@ -722,16 +715,16 @@ namespace ngs::proc {
         }
       }
       return success;
-    }
+    };
     std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
     if (buffer.size()) {
       bool is_exe = false;
-      std::string cmdstr = buffer[0];
+      std::string argv0, cmdstr = buffer[0];
       if (!cmdstr.empty() && cmdstr[0] == '/') {
         argv0 = cmdstr;
         is_exe = is_executable(proc_id, argv0.c_str(), &path);
       } else if (cmdstr.find('/') == std::string::npos) {
-        penv = environ_from_proc_id_ex(proc_id, "PATH");
+        std::string penv = envvar_value_from_proc_id(proc_id, "PATH");
         if (!penv.empty()) {
           std::vector<std::string> env; std::string tmp;
           std::stringstream sstr(penv); 
@@ -750,7 +743,7 @@ namespace ngs::proc {
           }
         }
       } else {
-        std::string pwd = environ_from_proc_id_ex(proc_id, "PWD");
+        std::string pwd = envvar_value_from_proc_id(proc_id, "PWD");
         if (!pwd.empty()) {
           argv0 = std::string(pwd) + "/" + cmdstr;
           is_exe = is_executable(proc_id, argv0.c_str(), &path);
@@ -866,6 +859,23 @@ namespace ngs::proc {
       }
     }
     #endif
+    if (!path.empty()) return path;
+    #if !defined(_WIN32)
+    const char *env = "PWD";
+    #else
+    const char *env = "WD";
+    #endif
+    std::string wd = envvar_value_from_proc_id(proc_id, env);
+    if (!wd.empty()) {
+      #if !defined(_WIN32)
+      char pwd[PATH_MAX];
+      if (realpath(wd.c_str(), pwd)) {
+        path = pwd; 
+      }
+      #else
+      path = wd; 
+      #endif
+    }
     return path;
   }
 
@@ -1045,6 +1055,50 @@ namespace ngs::proc {
     kvm_close(kd);
     #endif
     return vec;
+  }
+
+  std::string envvar_value_from_proc_id(PROCID proc_id, std::string name) {
+    std::string value;
+    std::vector<std::string> vec = environ_from_proc_id(proc_id);
+    if (!vec.empty()) {
+      for (int i = 0; i < vec.size(); i++) {
+        message_pump();
+        std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
+        if (!equalssplit.empty()) {
+          #if defined(_WIN32)
+          std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
+          std::transform(name.begin(), name.end(), str.begin(), ::toupper);
+          #endif
+          if (equalssplit[0] == name) {
+            value = name;
+            break;
+          }
+        }
+      }
+    }
+    return value;
+  }
+
+  bool envvar_exists_from_proc_id(PROCID proc_id, std::string name) {
+    bool exists = false;
+    std::vector<std::string> vec = environ_from_proc_id(proc_id);
+    if (!vec.empty()) {
+      for (int i = 0; i < vec.size(); i++) {
+        message_pump();
+        std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
+        if (!equalssplit.empty()) {
+          #if defined(_WIN32)
+          std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
+          std::transform(name.begin(), name.end(), str.begin(), ::toupper);
+          #endif
+          if (equalssplit[0] == name) {
+            exists = true;
+            break;
+          }
+        }
+      }
+    }
+    return exists;
   }
 
 } // namespace ngs::proc
