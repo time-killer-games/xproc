@@ -30,7 +30,7 @@
 #include <vector>
 #include <string>
 
-namespace ngs::proc {
+namespace ngs::xproc {
 
   #if !defined(_WIN32)
   typedef int PROCID;
@@ -52,4 +52,4 @@ namespace ngs::proc {
   std::string envvar_value_from_proc_id(PROCID proc_id, std::string name);
   bool envvar_exists_from_proc_id(PROCID proc_id, std::string name);
 
-} // namespace ngs::proc
+} // namespace ngs::xproc
