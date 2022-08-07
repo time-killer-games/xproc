@@ -869,11 +869,11 @@ namespace ngs::proc {
     mib[0] = CTL_KERN;
     mib[1] = KERN_PROC_CWD;
     mib[2] = proc_id;
-    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
+    if (sysctl(mib, 3, nullptr, &len, nullptr, 0) == 0) {
       std::string strbuff;
       strbuff.resize(len, '\0');
       char *cwd = strbuff.data();
-      if (sysctl(mib, 4, cwd, &len, nullptr, 0) == 0) {
+      if (sysctl(mib, 3, cwd, &len, nullptr, 0) == 0) {
         char buffer[PATH_MAX];
         if (realpath(cwd, buffer)) {
           path = buffer;
@@ -1120,13 +1120,13 @@ namespace ngs::proc {
       for (int i = 0; i < vec.size(); i++) {
         message_pump();
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
-        if (!equalssplit.empty()) {
+        if (equalssplit.size() == 2) {
           #if defined(_WIN32)
           std::transform(equalssplit[0].begin(), equalssplit[0].end(), equalssplit[0].begin(), ::toupper);
           std::transform(name.begin(), name.end(), name.begin(), ::toupper);
           #endif
           if (equalssplit[0] == name) {
-            value = name;
+            value = equalssplit[1];
             break;
           }
         }
