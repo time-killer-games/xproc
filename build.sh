@@ -10,9 +10,9 @@ elif [ $(uname) = "FreeBSD" ]; then
 elif [ $(uname) = "DragonFly" ]; then
   g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static-libgcc -static-libstdc++ -static;
 elif [ $(uname) = "NetBSD" ]; then
-  g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static-libgcc -static-libstdc++ -static;
+  g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libc.a -o xproc -std=c++17 -static-libgcc -static-libstdc++ -static;
 elif [ $(uname) = "OpenBSD" ]; then
-  clang++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libm.a /usr/lib/libc.a -o xproc -std=c++17 -static;
+  clang++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libc.a -o xproc -std=c++17 -static;
 else
   g++ main.cpp apiprocess/xproc.cpp -o xproc.exe -std=c++17 -static-libgcc -static-libstdc++ -static;
 fi
