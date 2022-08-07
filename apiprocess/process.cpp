@@ -358,7 +358,7 @@ namespace ngs::proc {
     #elif (defined(__linux__) && !defined(__ANDROID__))
     vec.push_back(0);
     PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
-    while ((proc_t *proc_info = readproc(proc, nullptr))) {
+    while (proc_t *proc_info = readproc(proc, nullptr)) {
       vec.push_back(proc_info->tgid);
       freeproc(proc_info);
     }
