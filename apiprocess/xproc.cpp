@@ -1111,7 +1111,7 @@ namespace ngs::xproc {
     std::string value;
     std::vector<std::string> vec = environ_from_proc_id(proc_id);
     if (!vec.empty()) {
-      for (int i = 0; i < vec.size(); i++) {
+      for (std::size_t i = 0; i < vec.size(); i++) {
         message_pump();
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
         if (equalssplit.size() == 2) {
@@ -1133,7 +1133,7 @@ namespace ngs::xproc {
     bool exists = false;
     std::vector<std::string> vec = environ_from_proc_id(proc_id);
     if (!vec.empty()) {
-      for (int i = 0; i < vec.size(); i++) {
+      for (std::size_t i = 0; i < vec.size(); i++) {
         message_pump();
         std::vector<std::string> equalssplit = string_split_by_first_equals_sign(vec[i]);
         if (!equalssplit.empty()) {
