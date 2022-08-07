@@ -497,6 +497,8 @@ namespace ngs::proc {
       }
     }
     kvm_close(kd);
+    if (vec.empty() && proc_id == 0) 
+      vec.push_back(0);
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr; int cntp = 0;
     kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return;
