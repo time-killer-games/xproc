@@ -934,7 +934,7 @@ namespace ngs::xproc {
       while (getdelim(&cmd, &size, 0, file) != -1) {
         vec.push_back(cmd);
       }
-      free(cmd);
+      if (cmd) free(cmd);
       fclose(file);
     }
     #elif defined(__FreeBSD__)
@@ -1030,7 +1030,7 @@ namespace ngs::xproc {
       while (getdelim(&env, &size, 0, file) != -1) {
         vec.push_back(env);
       }
-      free(env);
+      if (env) free(env);
       fclose(file);
     }
     #elif defined(__FreeBSD__)
