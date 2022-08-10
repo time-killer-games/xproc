@@ -352,7 +352,7 @@ namespace ngs::xproc {
     while ((ent = readdir(proc))) {
       if(!isdigit(*ent->d_name))
         continue;
-      tgid = (int)strtol(ent->d_name, nullptr, 10);
+      tgid = atoi(ent->d_name);
       vec.push_back(tgid);
     }
     closedir(proc);
@@ -488,12 +488,19 @@ namespace ngs::xproc {
     if (vec.empty() && (proc_id == 0 || proc_id == 1)) 
       vec.push_back(0);
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    PROCTAB *proc = openproc(PROC_FILLSTATUS | PROC_PID, &proc_id);
-    if (proc_t *proc_info = readproc(proc, nullptr)) {
-      vec.push_back(proc_info->ppid);
-      freeproc(proc_info);
+    char buffer[BUFSIZ];
+    sprintf(buffer, "/proc/%d/stat", proc_id);
+    FILE *stat = fopen(buffer, "r");
+    if (stat) {
+      size_t size = fread(buffer, sizeof(char), sizeof(buffer), stat);
+      if (size > 0) {
+        strtok(buffer, " ");
+        strtok(nullptr, " ");
+        strtok(nullptr, " ");
+        vec.push_back(atoi(strtok(nullptr, " ")));
+      }
+      fclose(stat);
     }
-    closeproc(proc);
     if (vec.empty() && proc_id == 0) 
       vec.push_back(0);
     #elif defined(__FreeBSD__)
@@ -569,17 +576,16 @@ namespace ngs::xproc {
       }
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    PROCTAB *proc = openproc(PROC_FILLSTAT);
-    while (proc_t *proc_info = readproc(proc, nullptr)) {
-      if (proc_info->tgid == 1 && proc_info->ppid == 0 && parent_proc_id == 0) {
+    std::vector<PROCID> proc_id = proc_id_enum();
+    for (std::size_t i = 0; i < proc_id.size(); i++) {
+      std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
+      if (proc_id[i] == 1 && parent_proc_id == 0) {
         vec.push_back(0);
       }
-      if (proc_info->ppid == parent_proc_id) {
-        vec.push_back(proc_info->tgid);
+      if (!ppid.empty() && ppid[0] != 0 && ppid[0] == parent_proc_id) {
+        vec.push_back(ppid[i]);
       }
-      freeproc(proc_info);
     }
-    closeproc(proc);
     #elif defined(__FreeBSD__)
     int cntp = 0; 
     kinfo_proc *proc_info = kinfo_getallproc(&cntp);
