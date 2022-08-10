@@ -664,7 +664,10 @@ namespace ngs::xproc {
     #elif (defined(__APPLE__) && defined(__MACH__))
     char exe[PROC_PIDPATHINFO_MAXSIZE];
     if (proc_pidpath(proc_id, exe, sizeof(exe)) > 0) {
-      path = exe;
+      char buffer[PATH_MAX];
+      if (realpath(exe, buffer)) {
+        path = buffer;
+      }
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
     char exe[PATH_MAX];
