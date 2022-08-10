@@ -350,7 +350,7 @@ namespace ngs::xproc {
     int tgid = 0;
     if (proc == nullptr) return vec;
     while ((ent = readdir(proc))) {
-      if(!isdigit(*ent->d_name))
+      if (!isdigit(*ent->d_name))
         continue;
       tgid = atoi(ent->d_name);
       vec.push_back(tgid);
