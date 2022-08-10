@@ -346,7 +346,7 @@ namespace ngs::xproc {
     #elif (defined(__linux__) && !defined(__ANDROID__))
     vec.push_back(0); 
     DIR *proc = opendir("/proc");
-    struct dirent *ent;
+    struct dirent *ent = nullptr;
     int tgid = 0;
     if (proc == nullptr) return vec;
     while ((ent = readdir(proc))) {
