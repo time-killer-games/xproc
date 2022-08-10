@@ -45,7 +45,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::string envvar_value_from_proc_id(PROCID proc_id, std::string name);` returns the string value of an environment variable of the given name in the name argument belonging to the process whose process identifier is represented by the proc_id argument. std::string::empty() if the variable does not exist if it does not have any value associated with it. To find out if a environment variable exists within the scope of a foreign process identifier, call envvar_exists_from_proc_id() instead, as there are times where a variable does exist within the environment block but has no value associated with it.
+`std::string envvar_value_from_proc_id(PROCID proc_id, std::string name);` returns the string value of an environment variable of the given name in the name argument belonging to the process whose process identifier is represented by the proc_id argument. std::string::empty() returns true if the variable does not exist or if the value it has is empty. To find out if a environment variable exists within the scope of a foreign process identifier, call envvar_exists_from_proc_id() instead, as there are times where a variable does exist within the environment block but has no value associated with it.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
