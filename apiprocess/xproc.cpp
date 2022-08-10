@@ -345,12 +345,17 @@ namespace ngs::xproc {
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
     vec.push_back(0); 
-    PROCTAB *proc = openproc(PROC_FILLMEM | PROC_FILLSTAT | PROC_FILLSTATUS);
-    while (proc_t *proc_info = readproc(proc, nullptr)) {
-      vec.push_back(proc_info->tgid);
-      freeproc(proc_info);
+    DIR *proc = opendir("/proc");
+    struct dirent *ent;
+    int tgid = 0;
+    if (proc == nullptr) return vec;
+    while ((ent = readdir(proc))) {
+      if(!isdigit(*ent->d_name))
+        continue;
+      tgid = (int)strtol(ent->d_name, nullptr, 10);
+      vec.push_back(tgid);
     }
-    closeproc(proc);
+    closedir(proc);
     #elif defined(__FreeBSD__)
     int cntp = 0; 
     kinfo_proc *proc_info = kinfo_getallproc(&cntp);
