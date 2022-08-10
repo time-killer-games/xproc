@@ -927,16 +927,16 @@ namespace ngs::xproc {
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMCMD);
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    PROCTAB *proc = openproc(PROC_FILLCOM | PROC_PID, &proc_id);
-    if (proc_t *proc_info = readproc(proc, nullptr)) {
-      if (proc_info->cmdline) {
-        for (int i = 0; proc_info->cmdline[i]; i++) {
-          vec.push_back(proc_info->cmdline[i]);
-        }
+    FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/cmdline").c_str(), "rb");
+    if (file) {
+      char *cmd = nullptr;
+      size_t size = 0;
+      while (getdelim(&cmd, &size, 0, file) != -1) {
+        vec.push_back(cmd);
       }
-      freeproc(proc_info);
+      free(cmd);
+      fclose(file);
     }
-    closeproc(proc);
     #elif defined(__FreeBSD__)
     unsigned cntp = 0; 
     procstat *proc_stat = procstat_open_sysctl();
@@ -1023,16 +1023,16 @@ namespace ngs::xproc {
     #elif (defined(__APPLE__) && defined(__MACH__))
     vec = cmd_env_from_proc_id(proc_id, MEMENV);
     #elif (defined(__linux__) && !defined(__ANDROID__))
-    PROCTAB *proc = openproc(PROC_FILLENV | PROC_PID, &proc_id);
-    if (proc_t *proc_info = readproc(proc, nullptr)) {
-      if (proc_info->environ) {
-        for (int i = 0; proc_info->environ[i]; i++) {
-          vec.push_back(proc_info->environ[i]);
-        }
+    FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/environ").c_str(), "rb");
+    if (file) {
+      char *env = nullptr;
+      size_t size = 0;
+      while (getdelim(&env, &size, 0, file) != -1) {
+        vec.push_back(env);
       }
-      freeproc(proc_info);
+      free(env);
+      fclose(file);
     }
-    closeproc(proc);
     #elif defined(__FreeBSD__)
     procstat *proc_stat = procstat_open_sysctl(); unsigned cntp = 0;
     if (proc_stat) {
