@@ -674,25 +674,7 @@ namespace ngs::xproc {
     if (realpath(("/proc/" + std::to_string(proc_id) + "/exe").c_str(), exe)) {
       path = exe;
     }
-    #elif defined(__FreeBSD__)
-    int mib[4]; 
-    std::size_t len;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_PATHNAME;
-    mib[3] = proc_id;
-    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-      std::string strbuff;
-      strbuff.resize(len, '\0');
-      char *exe = strbuff.data();
-      if (sysctl(mib, 4, exe, &len, nullptr, 0) == 0) {
-        char buffer[PATH_MAX];
-        if (realpath(exe, buffer)) {
-          path = buffer;
-        }
-      }
-    }
-    #elif defined(__DragonFly__)
+    #elif defined(__FreeBSD__) || defined(__DragonFly__)
     int mib[4]; 
     std::size_t len;
     mib[0] = CTL_KERN;
