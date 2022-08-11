@@ -281,7 +281,8 @@ namespace {
     mib[2] = proc_id; 
     s = argmax;
     if (sysctl(mib, 3, procargs, &s, nullptr, 0) == -1) {
-      free(procargs); return vec;
+      free(procargs); 
+      return vec;
     }
     memcpy(&nargs, procargs, sizeof(nargs));
     cp = procargs + sizeof(nargs);
@@ -289,13 +290,15 @@ namespace {
       if (*cp == '\0') break;
     }
     if (cp == &procargs[s]) {
-      free(procargs); return vec;
+      free(procargs); 
+      return vec;
     }
     for (; cp < &procargs[s]; cp++) {
       if (*cp != '\0') break;
     }
     if (cp == &procargs[s]) {
-      free(procargs); return vec;
+      free(procargs); 
+      return vec;
     }
     sp = cp; 
     int i = 0, j = 0;
@@ -307,7 +310,7 @@ namespace {
       }
       sp += strlen(sp) + 1; j++;
     }
-    if (procargs) free(procargs);
+    free(procargs);
     return vec;
   }
   #endif
