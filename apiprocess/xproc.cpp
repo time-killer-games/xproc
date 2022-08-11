@@ -350,7 +350,7 @@ namespace ngs::xproc {
     vec.push_back(0); 
     DIR *proc = opendir("/proc");
     struct dirent *ent = nullptr;
-    int tgid = 0;
+    PROCID tgid = 0;
     if (proc == nullptr) return vec;
     while ((ent = readdir(proc))) {
       if (!isdigit(*ent->d_name))
@@ -933,6 +933,8 @@ namespace ngs::xproc {
       while (getdelim(&cmd, &size, 0, file) != -1) {
         vec.push_back(cmd);
       }
+      while (!vec.empty() && vec.back().empty())
+        vec.pop_back();
       if (cmd) free(cmd);
       fclose(file);
     }
@@ -1029,6 +1031,12 @@ namespace ngs::xproc {
       while (getdelim(&env, &size, 0, file) != -1) {
         vec.push_back(env);
       }
+      struct is_empty {
+        bool operator()(const std::string &s) {
+          return s.empty();
+        }
+      };
+      vec.erase(std::remove_if(vec.begin(), vec.end(), is_empty()), vec.end());
       if (env) free(env);
       fclose(file);
     }
