@@ -411,7 +411,8 @@ namespace ngs::xproc {
     #elif defined(__sun)
     vec.push_back(0); 
     proc *proc_info = nullptr;
-    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr); 
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    printf("%p\n", kd);
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
       vec.push_back(proc_info->p_pid);      
