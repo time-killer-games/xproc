@@ -676,6 +676,14 @@ namespace ngs::xproc {
       }
     }
     kvm_close(kd);
+    #elif defined(__sun)
+    std::vector<PROCID> proc_id = proc_id_enum();
+    for (std::size_t i = 0; i < proc_id.size(); i++) {
+      std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
+      if (!ppid.empty() && ppid[0] != 0 && ppid[0] == parent_proc_id) {
+        vec.push_back(ppid[i]);
+      }
+    }
     #endif
     return vec;
   }
