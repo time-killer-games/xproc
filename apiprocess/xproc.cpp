@@ -612,9 +612,6 @@ namespace ngs::xproc {
     std::vector<PROCID> proc_id = proc_id_enum();
     for (std::size_t i = 0; i < proc_id.size(); i++) {
       std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
-      if (proc_id[i] == 1 && parent_proc_id == 0) {
-        vec.push_back(0);
-      }
       if (!ppid.empty() && ppid[0] == parent_proc_id) {
         vec.push_back(proc_id[i]);
       }
