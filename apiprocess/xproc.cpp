@@ -75,6 +75,11 @@
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <kvm.h>
+#elif defined(__sun)
+#include <kvm.h>
+#include <sys/param.h>
+#include <sys/time.h>
+#include <sys/proc.h>
 #endif
 
 namespace {
@@ -315,7 +320,7 @@ namespace {
   }
   #endif
 
-  #if defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__)
+  #if defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
   kvm_t *kd = nullptr;
   #endif
 
@@ -400,6 +405,15 @@ namespace ngs::xproc {
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
         vec.push_back(proc_info[i].p_pid);
+      }
+    }
+    kvm_close(kd);
+    #elif defined(__sun)
+    proc *proc_info = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    if ((proc_info = proc *kvm_getproc(kd, 0))) {
+      for (int i = 0; proc_info = kvm_nextproc(kd); i++) {
+        vec.push_back(proc_info[i].p_pid);      
       }
     }
     kvm_close(kd);
