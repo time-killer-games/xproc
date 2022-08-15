@@ -818,7 +818,7 @@ namespace ngs::xproc {
         }
       }
     }
-    #eif defined(__sun)
+    #elif defined(__sun)
     char exe[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(proc_id) + "/path/a.out").c_str(), exe)) {
       path = exe;
@@ -938,7 +938,7 @@ namespace ngs::xproc {
         }
       }
     }
-    #eif defined(__sun)
+    #elif defined(__sun)
     char cwd[PATH_MAX];
     if (realpath(("/proc/" + std::to_string(proc_id) + "/path/cwd").c_str(), cwd)) {
       path = cwd;
