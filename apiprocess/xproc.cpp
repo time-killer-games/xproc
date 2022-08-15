@@ -1045,13 +1045,12 @@ namespace ngs::xproc {
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        if (kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr) != -1) {
-          if (cmd) {
-            for (int i = 0; cmd[i]; i++) {
-              vec.push_back(cmd[i]);
-            }
-            free(cmd);
+        kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr);
+        if (cmd) {
+          for (int i = 0; cmd[i]; i++) {
+            vec.push_back(cmd[i]);
           }
+          free(cmd);
         }
       }
     }
@@ -1168,13 +1167,12 @@ namespace ngs::xproc {
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        if (kvm_getcmd(kd, proc_info, proc_user, nullptr, &env) != -1) {
-          if (env) {
-            for (int i = 0; env[i]; i++) {
-              vec.push_back(env[i]);
-            }
-            free(env);
+        kvm_getcmd(kd, proc_info, proc_user, nullptr, &env);
+        if (env) {
+          for (int i = 0; env[i]; i++) {
+            vec.push_back(env[i]);
           }
+          free(env);
         }
       }
     }
