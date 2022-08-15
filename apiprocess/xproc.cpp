@@ -378,7 +378,8 @@ namespace ngs::xproc {
     int cntp = 0;
     const char *nlistf, *memf; 
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
         if (proc_info[i].kp_pid >= 0) {
@@ -390,7 +391,8 @@ namespace ngs::xproc {
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
         vec.push_back(proc_info[i].p_pid);
@@ -401,7 +403,8 @@ namespace ngs::xproc {
     vec.push_back(0); 
     kinfo_proc *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
         vec.push_back(proc_info[i].p_pid);
@@ -409,12 +412,12 @@ namespace ngs::xproc {
     }
     kvm_close(kd);
     #elif defined(__sun)
+    struct pid cur_pid;
     proc *proc_info = nullptr;
-    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, "kvm_open");
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     while ((proc_info = kvm_nextproc(kd))) {
-      struct pid cur_pid; 
       if (kvm_read(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-        printf("%d\n", cur_pid.pid_id);
+        vec.insert(vec.begin(), cur_pid.pid_id);
       }
     }
     kvm_close(kd);
@@ -532,7 +535,8 @@ namespace ngs::xproc {
     int cntp = 0; 
     const char *nlistf, *memf; 
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       if (proc_info->kp_ppid >= 0) {
         vec.push_back(proc_info->kp_ppid);
@@ -544,7 +548,8 @@ namespace ngs::xproc {
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       vec.push_back(proc_info->p_ppid);
     }
@@ -552,7 +557,8 @@ namespace ngs::xproc {
     #elif defined(__OpenBSD__)
     kinfo_proc *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       vec.push_back(proc_info->p_ppid);
     }
@@ -620,7 +626,8 @@ namespace ngs::xproc {
     int cntp = 0; 
     const char *nlistf, *memf; 
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, &cntp))) {
       for (int i = 0; i < cntp; i++) {
         if (proc_info[i].kp_pid == 1 && proc_info[i].kp_ppid == 0 && parent_proc_id == 0) {
@@ -635,7 +642,8 @@ namespace ngs::xproc {
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr;
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc2), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
         if (proc_info[i].p_ppid == parent_proc_id) {
@@ -646,7 +654,8 @@ namespace ngs::xproc {
     kvm_close(kd);
     #elif defined(__OpenBSD__)
     kinfo_proc *proc_info = nullptr; int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_ALL, 0, sizeof(struct kinfo_proc), &cntp))) {
       for (int i = cntp - 1; i >= 0; i--) {
         if (proc_info[i].p_pid == 1 && proc_info[i].p_ppid == 0 && parent_proc_id == 0) {
@@ -975,7 +984,8 @@ namespace ngs::xproc {
     int cntp = 0; 
     const char *nlistf, *memf; 
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **cmd = kvm_getargv(kd, proc_info, 0);
       if (cmd) {
@@ -988,7 +998,8 @@ namespace ngs::xproc {
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       char **cmd = kvm_getargv2(kd, proc_info, 0);
       if (cmd) {
@@ -1001,7 +1012,8 @@ namespace ngs::xproc {
     #elif defined(__OpenBSD__)
     kinfo_proc *proc_info = nullptr; 
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       char **cmd = kvm_getargv(kd, proc_info, 0);
       if (cmd) {
@@ -1076,7 +1088,8 @@ namespace ngs::xproc {
     int cntp = 0;
     const char *nlistf, *memf; 
     nlistf = memf = "/dev/null";
-    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nlistf, memf, nullptr, O_RDONLY, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, &cntp))) {
       char **env = kvm_getenvv(kd, proc_info, 0);
       if (env) {
@@ -1089,7 +1102,8 @@ namespace ngs::xproc {
     #elif defined(__NetBSD__)
     kinfo_proc2 *proc_info = nullptr;
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getproc2(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc2), &cntp))) {
       char **env = kvm_getenvv2(kd, proc_info, 0);
       if (env) {
@@ -1102,7 +1116,8 @@ namespace ngs::xproc {
     #elif defined(__OpenBSD__)
     kinfo_proc *proc_info = nullptr;
     int cntp = 0;
-    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); if (!kd) return vec;
+    kd = kvm_openfiles(nullptr, nullptr, nullptr, KVM_NO_FILES, nullptr); 
+    if (!kd) return vec;
     if ((proc_info = kvm_getprocs(kd, KERN_PROC_PID, proc_id, sizeof(struct kinfo_proc), &cntp))) {
       char **env = kvm_getenvv(kd, proc_info, 0);
       if (env) {
