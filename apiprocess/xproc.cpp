@@ -570,7 +570,7 @@ namespace ngs::xproc {
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
-    if ((proc_info = kvm_getproc(kd))) {
+    if ((proc_info = kvm_getproc(kd, proc_id))) {
       vec.push_back(proc_info->p_ppid);
     }
     kvm_close(kd);
