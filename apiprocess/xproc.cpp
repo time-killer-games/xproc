@@ -412,14 +412,11 @@ namespace ngs::xproc {
     }
     kvm_close(kd);
     #elif defined(__sun)
-    struct pid cur_pid;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
-      if (kvm_read(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-        vec.insert(vec.begin(), cur_pid.pid_id);
-      }
+      vec.insert(vec.begin(), proc_info->p_pid);
     }
     kvm_close(kd);
     #endif
@@ -1044,11 +1041,8 @@ namespace ngs::xproc {
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
-      printf("info: %p\n", proc_info);
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        printf("user: %p\n", proc_user);
         if (!kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr)) {
-          printf("cmd0: %p\n", cmd[0]);
           for (int i = 0; cmd[i]; i++) {
             vec.push_back(cmd[i]);
           }
