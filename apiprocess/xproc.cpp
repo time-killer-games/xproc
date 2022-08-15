@@ -415,6 +415,7 @@ namespace ngs::xproc {
     struct pid cur_pid;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
       if (kvm_read(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
         vec.insert(vec.begin(), cur_pid.pid_id);
