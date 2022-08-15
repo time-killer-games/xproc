@@ -939,9 +939,9 @@ namespace ngs::xproc {
       }
     }
     #eif defined(__sun)
-    char exe[PATH_MAX];
-    if (realpath(("/proc/" + std::to_string(proc_id) + "/path/cwd").c_str(), exe)) {
-      path = exe;
+    char cwd[PATH_MAX];
+    if (realpath(("/proc/" + std::to_string(proc_id) + "/path/cwd").c_str(), cwd)) {
+      path = cwd;
     }
     #endif
     return path;
