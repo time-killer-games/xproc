@@ -35,7 +35,7 @@ int main() {
   std::vector<ngs::xproc::PROCID> pid = ngs::xproc::proc_id_enum();
   for (std::size_t i = 0; i < pid.size(); i++) {
     #if defined(__sun)
-    printf("%d\n", pid[i])
+    printf("%d\n", pid[i]);
     #endif
 
     std::string exe = ngs::xproc::exe_from_proc_id(pid[i]);
