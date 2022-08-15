@@ -13,6 +13,8 @@ elif [ $(uname) = "NetBSD" ]; then
   g++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libc.a -o xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -static;
 elif [ $(uname) = "OpenBSD" ]; then
   clang++ main.cpp apiprocess/xproc.cpp /usr/lib/libkvm.a /usr/lib/libc.a -o xproc -std=c++17 -Wall -static;
+elif [ $(uname) = "Illumos" ]; then
+  g++ main.cpp apiprocess/xproc.cpp -o xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -static;
 else
   g++ main.cpp apiprocess/xproc.cpp -o xproc.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static;
 fi
