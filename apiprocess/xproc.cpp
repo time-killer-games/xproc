@@ -566,6 +566,15 @@ namespace ngs::xproc {
     kvm_close(kd);
     if (vec.empty() && proc_id == 0) 
       vec.push_back(0);
+    #elif defined(__sun)
+    proc *proc_info = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd) return vec;
+    if ((proc_info = kvm_getproc(kd))) {
+        vec.push_back(proc_info->p_ppid);
+      }
+    }
+    kvm_close(kd);
     #endif
     return vec;
   }
@@ -665,15 +674,6 @@ namespace ngs::xproc {
         if (proc_info[i].p_ppid == parent_proc_id) {
           vec.push_back(proc_info[i].p_pid);
         }
-      }
-    }
-    kvm_close(kd);
-    #elif defined(__sun)
-    proc *proc_info = nullptr;
-    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
-    if (!kd) return vec;
-    if ((proc_info = kvm_getproc(kd))) {
-        vec.push_back(proc_info->p_ppid);
       }
     }
     kvm_close(kd);
