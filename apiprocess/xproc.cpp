@@ -409,7 +409,6 @@ namespace ngs::xproc {
     }
     kvm_close(kd);
     #elif defined(__sun)
-    struct pid cur_pid;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, "kvm_open");
     while ((proc_info = kvm_nextproc(kd))) {
