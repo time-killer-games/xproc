@@ -348,7 +348,7 @@ namespace ngs::xproc {
     std::fill(proc_info.begin(), proc_info.end(), 0);
     proc_listpids(PROC_ALL_PIDS, 0, &proc_info[0], sizeof(PROCID) * cntp);
     for (int i = cntp - 1; i >= 0; i--) {
-      if (proc_info[i] == 0) { continue; }
+      if (proc_info[i] == 0) continue;
       vec.push_back(proc_info[i]);
     }
     #elif (defined(__linux__) && !defined(__ANDROID__))
@@ -1045,7 +1045,7 @@ namespace ngs::xproc {
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        if (kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr) == 0 && cmd) {
+        if (!kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr)) {
           for (int i = 0; cmd[i]; i++) {
             vec.push_back(cmd[i]);
           }
@@ -1099,7 +1099,8 @@ namespace ngs::xproc {
       fclose(file);
     }
     #elif defined(__FreeBSD__)
-    procstat *proc_stat = procstat_open_sysctl(); unsigned cntp = 0;
+    procstat *proc_stat = procstat_open_sysctl(); 
+    unsigned cntp = 0;
     if (proc_stat) {
       kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, proc_id, &cntp);
       if (proc_info) {
@@ -1166,7 +1167,7 @@ namespace ngs::xproc {
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        if (kvm_getcmd(kd, proc_info, proc_user, nullptr, &env) == 0 && env) {
+        if (!kvm_getcmd(kd, proc_info, proc_user, nullptr, &env)) {
           for (int i = 0; env[i]; i++) {
             vec.push_back(env[i]);
           }
