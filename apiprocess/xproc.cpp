@@ -409,16 +409,13 @@ namespace ngs::xproc {
     }
     kvm_close(kd);
     #elif defined(__sun)
-    int i = 0;
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
-    if ((proc_info = kvm_getproc(kd, 0))) {
-      i++;
-      vec.push_back(proc_info[i].p_pid);
+    if ((proc_info = kvm_getproc(kd, 1))) {
+      vec.push_back(proc_info->p_pid);
       while ((proc_info = kvm_nextproc(kd))) {
-        i++;
-        vec.push_back(proc_info[i].p_pid);
+        vec.push_back(proc_info->p_pid);
       }
     }
     kvm_close(kd);
