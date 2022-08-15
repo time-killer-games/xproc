@@ -1050,6 +1050,7 @@ namespace ngs::xproc {
             for (int i = 0; cmd[i]; i++) {
               vec.push_back(cmd[i]);
             }
+            free(cmd);
           }
         }
       }
@@ -1172,6 +1173,7 @@ namespace ngs::xproc {
             for (int i = 0; env[i]; i++) {
               vec.push_back(env[i]);
             }
+            free(env);
           }
         }
       }
