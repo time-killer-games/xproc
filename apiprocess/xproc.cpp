@@ -1109,8 +1109,8 @@ namespace ngs::xproc {
       fclose(file);
     }
     #elif defined(__FreeBSD__)
-    procstat *proc_stat = procstat_open_sysctl(); 
     unsigned cntp = 0;
+    procstat *proc_stat = procstat_open_sysctl(); 
     if (proc_stat) {
       kinfo_proc *proc_info = procstat_getprocs(proc_stat, KERN_PROC_PID, proc_id, &cntp);
       if (proc_info) {
