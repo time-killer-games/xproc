@@ -1167,7 +1167,7 @@ namespace ngs::xproc {
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
       if ((proc_user = kvm_getu(kd, proc_info))) {
-        if (kvm_getcmd(kd, proc_info, proc_user, &env, nullptr) != -1) {
+        if (kvm_getcmd(kd, proc_info, proc_user, nullptr, &env) != -1) {
           if (env) {
             for (int i = 0; env[i]; i++) {
               vec.push_back(env[i]);
