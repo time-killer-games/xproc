@@ -1044,8 +1044,11 @@ namespace ngs::xproc {
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
     if (!kd) return vec;
     if ((proc_info = kvm_getproc(kd, proc_id))) {
+      printf("info: %p\n", proc_info);
       if ((proc_user = kvm_getu(kd, proc_info))) {
+        printf("user: %p\n", proc_user);
         if (!kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr)) {
+          printf("cmd0: %p\n", cmd[0]);
           for (int i = 0; cmd[i]; i++) {
             vec.push_back(cmd[i]);
           }
