@@ -413,9 +413,10 @@ namespace ngs::xproc {
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, "kvm_open");
     if (!kd) return vec;
     proc_info = kvm_getproc(kd, getpid());
+    printf("%d\n", proc_info->p_pid);
     do {
       vec.push_back(proc_info->p_pid);
-      printf("%d\n", vec.back());
+      printf("%d\n", proc_info->p_pid);
     } while ((proc_info = kvm_nextproc(kd)));
     kvm_close(kd);
     #endif
