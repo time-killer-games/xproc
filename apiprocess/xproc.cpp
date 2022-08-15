@@ -412,7 +412,7 @@ namespace ngs::xproc {
     proc *proc_info = nullptr;
     kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, "kvm_open");
     while ((proc_info = kvm_nextproc(kd))) {
-      if (kvm_read(kd, proc_info->p_pidp, &proc_info, sizeof(proc_info)) != -1) {
+      if (kvm_read(kd, (std::uintptr_t)proc_info->p_pidp, &proc_info, sizeof(proc_info)) != -1) {
         printf("%d\n", proc_info->p_pid);
       }
     }
