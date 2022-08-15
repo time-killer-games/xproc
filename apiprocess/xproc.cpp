@@ -1037,6 +1037,24 @@ namespace ngs::xproc {
       }
     }
     kvm_close(kd);
+    #elif defined(__sun)
+    char **cmd = nullptr;
+    proc *proc_info = nullptr;
+    user *proc_user = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd) return vec;
+    if ((proc_info = kvm_getproc(kd, proc_id))) {
+      if ((proc_user = kvm_getu(kd, proc_info))) {
+        if (kvm_getcmd(kd, proc_info, proc_user, &cmd, nullptr) != -1) {
+          if (cmd) {
+            for (int i = 0; cmd[i]; i++) {
+              vec.push_back(cmd[i]);
+            }
+          }
+        }
+      }
+    }
+    kvm_close(kd);
     #endif
     return vec;
   }
@@ -1137,6 +1155,24 @@ namespace ngs::xproc {
       if (env) {
         for (int i = 0; env[i]; i++) {
           vec.push_back(env[i]);
+        }
+      }
+    }
+    kvm_close(kd);
+    #elif defined(__sun)
+    char **env = nullptr;
+    proc *proc_info = nullptr;
+    user *proc_user = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd) return vec;
+    if ((proc_info = kvm_getproc(kd, proc_id))) {
+      if ((proc_user = kvm_getu(kd, proc_info))) {
+        if (kvm_getcmd(kd, proc_info, proc_user, &env, nullptr) != -1) {
+          if (env) {
+            for (int i = 0; env[i]; i++) {
+              vec.push_back(env[i]);
+            }
+          }
         }
       }
     }
