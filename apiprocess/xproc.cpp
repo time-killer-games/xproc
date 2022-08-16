@@ -754,7 +754,9 @@ namespace ngs::xproc {
     }
     #elif defined(__OpenBSD__)
     auto is_executable = [](PROCID proc_id, std::string in, std::string *out) {
-      bool success = false; *out = ""; struct stat st;
+      *out = "";
+      bool success = false;
+      struct stat st;
       if (!stat(in.c_str(), &st) && (st.st_mode & S_IXUSR) && (st.st_mode & S_IFREG)) {
         char executable[PATH_MAX];
         if (realpath(in.c_str(), executable)) {
