@@ -979,7 +979,7 @@ namespace ngs::xproc {
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/cmdline").c_str(), "rb");
     if (file) {
       char *cmd = nullptr;
-      size_t size = 0;
+      std::size_t size = 0;
       while (getdelim(&cmd, &size, 0, file) != -1) {
         vec.push_back(cmd);
       }
