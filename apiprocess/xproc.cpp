@@ -514,7 +514,7 @@ namespace ngs::xproc {
     sprintf(buffer, "/proc/%d/stat", proc_id);
     FILE *stat = fopen(buffer, "r");
     if (stat) {
-      size_t size = fread(buffer, sizeof(char), sizeof(buffer), stat);
+      std::size_t size = fread(buffer, sizeof(char), sizeof(buffer), stat);
       if (size > 0) {
         strtok(buffer, " ");
         strtok(nullptr, " ");
@@ -1097,7 +1097,7 @@ namespace ngs::xproc {
     FILE *file = fopen(("/proc/" + std::to_string(proc_id) + "/environ").c_str(), "rb");
     if (file) {
       char *env = nullptr;
-      size_t size = 0;
+      std::size_t size = 0;
       while (getdelim(&env, &size, 0, file) != -1) {
         vec.push_back(env);
       }
