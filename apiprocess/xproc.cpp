@@ -891,10 +891,10 @@ namespace ngs::xproc {
     }
     #elif defined(__DragonFly__)
     /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
-    FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
-      "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -p " + 
+    FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
+      "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
       std::to_string(proc_id) + " | /usr/bin/sed  -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\"  " +
-      "'BEGIN{print substr(str, 0, pos)}' | awk '{$1=$2=$3=$4=\"\"; print substr($0, 5)'}").c_str(), "r");
+      "'BEGIN{print substr(str, 0, pos - 5)}' | awk '{$1=$2=$3=$4=\"\"; print substr($0, 5)'}").c_str(), "r");
     if (fp) {
       char buf[PATH_MAX];
       if (fgets(buf, PATH_MAX, fp)) {
