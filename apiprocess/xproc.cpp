@@ -897,14 +897,13 @@ namespace ngs::xproc {
       "'BEGIN{print substr(str, 0, pos + 4)}' | /usr/bin/awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print" +
       " substr($0, 5)'}").c_str(), "r");
     if (fp) {
-      char buf[PATH_MAX];
-      if (fgets(buf, PATH_MAX, fp)) {
-        std::string str = buf;
-        std::size_t pos = str.find("\n", strlen(buf) - 1);
+      char buffer[PATH_MAX];
+      if (fgets(buffer, PATH_MAX, fp)) {
+        std::string str = buffer;
+        std::size_t pos = str.find("\n", strlen(buffer) - 1);
         if (pos != std::string::npos) {
           str.replace(pos, 1, "");
         }
-        char buffer[PATH_MAX];
         if (realpath(str.c_str(), buffer)) {
           path = buffer;
         }
