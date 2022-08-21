@@ -890,22 +890,22 @@ namespace ngs::xproc {
       procstat_close(proc_stat);
     }
     #elif defined(__DragonFly__)
-    int mib[4];
-    std::size_t len = 0;
-    mib[0] = CTL_KERN;
-    mib[1] = KERN_PROC;
-    mib[2] = KERN_PROC_CWD;
-    mib[3] = proc_id;
-    if (sysctl(mib, 4, nullptr, &len, nullptr, 0) == 0) {
-      std::string strbuff;
-      strbuff.resize(len, '\0');
-      char *cwd = strbuff.data();
-      if (sysctl(mib, 4, cwd, &len, nullptr, 0) == 0) {
-        char buffer[PATH_MAX];
-        if (realpath(cwd, buffer)) {
-          path = buffer;
+    /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
+    FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
+      "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -p " + 
+      std::to_string(proc_id) + " | /usr/bin/sed  -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\"  " +
+      "'BEGIN{print substr(str, 0, pos)}' | awk '{$1=$2=$3=$4=\"\"; print substr($0, 5)'}").c_str(), "r");
+    if (fp) {
+      char buf[PATH_MAX];
+      if (fgets(buf, PATH_MAX, fp)) {
+        std::string str = buf;
+        std::size_t pos = str.find("\n", strlen(buf) - 1);
+        if (pos != std::string::npos) {
+          str.replace(pos, 1, "");
         }
+        path = str;
       }
+      pclose(fp);
     }
     #elif defined(__OpenBSD__)
     int mib[3];
