@@ -904,7 +904,10 @@ namespace ngs::xproc {
         if (pos != std::string::npos) {
           str.replace(pos, 1, "");
         }
-        path = str;
+        char buffer[PATH_MAX];
+        if (realpath(str.c_str(), buffer)) {
+          path = buffer;
+        }
       }
       pclose(fp);
     }
