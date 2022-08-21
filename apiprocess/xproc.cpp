@@ -893,7 +893,7 @@ namespace ngs::xproc {
     /* Probably the hackiest thing ever we are doing here, because the "official" API is broken OS-level. */
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
       "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
-      std::to_string(proc_id) + " | /usr/bin/sed  -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\"  " +
+      std::to_string(proc_id) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\"  " +
       "'BEGIN{print substr(str, 0, pos + 4)}' | /usr/bin/awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print" +
       " substr($0, 5)'}").c_str(), "r");
     if (fp) {
