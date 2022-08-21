@@ -894,7 +894,8 @@ namespace ngs::xproc {
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
       "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " + 
       std::to_string(proc_id) + " | /usr/bin/sed  -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\"  " +
-      "'BEGIN{print substr(str, 0, pos + 4)}' | awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print substr($0, 5)'}").c_str(), "r");
+      "'BEGIN{print substr(str, 0, pos + 4)}' | /usr/bin/awk 'NF{NF--};1 {$1=$2=$3=$4=\"\"; print" +
+      " substr($0, 5)'}").c_str(), "r");
     if (fp) {
       char buf[PATH_MAX];
       if (fgets(buf, PATH_MAX, fp)) {
