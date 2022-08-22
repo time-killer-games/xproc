@@ -1,6 +1,5 @@
 #!/bin/sh
 cd "${0%/*}"
-
 if [ $(uname) = "Darwin" ]; then
   clang++ example.cpp ../xproc.cpp -o xproc -std=c++17 -Wall -arch arm64 -arch x86_64; ./xproc;
 elif [ $(uname) = "Linux" ]; then
