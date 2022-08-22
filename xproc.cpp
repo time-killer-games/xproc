@@ -57,7 +57,7 @@
 #include <sys/proc_info.h>
 #include <libproc.h>
 #elif (defined(__linux__) && !defined(__ANDROID__))
-#include <proc/readproc.h>
+#include <dirent.h>
 #elif defined(__FreeBSD__)
 #include <sys/socket.h>
 #include <sys/sysctl.h>
