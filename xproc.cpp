@@ -700,8 +700,8 @@ namespace ngs::xproc {
     } else {
       HANDLE proc = open_process_with_debug_privilege(proc_id);
       if (proc == nullptr) return path;
-      DWORD size = MAX_PATH;
       wchar_t buffer[MAX_PATH];
+      DWORD size = sizeof(buffer);
       if (QueryFullProcessImageNameW(proc, 0, buffer, &size) != 0) {
         wchar_t exe[MAX_PATH];
         if (_wfullpath(exe, buffer, sizeof(exe))) {
