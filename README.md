@@ -25,7 +25,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::vector<PROCID> proc_id_from_parent_proc_id(PROCID parent_proc_id);` on success, the function returns a C++ std::vector holding all process identifiers which represent the children of the given parent process identifier in the parent_proc_id argument. std::vector::empty() returns true if there are no children, or if the function has failed. To determine whether an error occurred, check against the value of errno after a call to the function.
+`std::vector<PROCID> proc_id_from_parent_proc_id(PROCID parent_proc_id);` on success, the function returns a C++ std::vector holding all process identifiers which represent the children of the given parent process identifier in the parent_proc_id argument. std::vector::empty() returns true if there are no children, or false if the function has failed. To determine whether an error occurred, check against the value of errno after a call to the function.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
