@@ -418,8 +418,11 @@ namespace ngs::xproc {
     if (!kd) return vec;
     while ((proc_info = kvm_nextproc(kd))) {
       if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
-        vec.insert(vec.begin(), cur_pid.pid_id);
+        vec.push_back(cur_pid.pid_id);
       }
+    }
+    if (!vec.empty()) {
+      std::reverse(vec.begin(), vec.end());
     }
     kvm_close(kd);
     #endif
