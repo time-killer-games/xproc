@@ -791,7 +791,7 @@ namespace ngs::xproc {
       return success;
     };
     std::vector<std::string> buffer = cmdline_from_proc_id(proc_id);
-    if (buffer.size()) {
+    if (!buffer.empty()) {
       bool is_exe = false;
       std::string argv0;
       if (!buffer[0].empty()) {
