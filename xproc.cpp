@@ -678,13 +678,21 @@ namespace ngs::xproc {
     }
     kvm_close(kd);
     #elif defined(__sun)
-    std::vector<PROCID> proc_id = proc_id_enum();
-    for (std::size_t i = 0; i < proc_id.size(); i++) {
-      std::vector<PROCID> ppid = parent_proc_id_from_proc_id(proc_id[i]);
-      if (!ppid.empty() && ppid[0] == parent_proc_id) {
-        vec.push_back(proc_id[i]);
+    struct pid cur_pid;
+    proc *proc_info = nullptr;
+    kd = kvm_open(nullptr, nullptr, nullptr, O_RDONLY, nullptr);
+    if (!kd) return vec;
+    while ((proc_info = kvm_nextproc(kd))) {
+      if (kvm_kread(kd, (std::uintptr_t)proc_info->p_pidp, &cur_pid, sizeof(cur_pid)) != -1) {
+        if (proc_info->p_ppid == parent_proc_id) {
+          vec.push_back(cur_pid.pid_id);
+        }
       }
     }
+    if (!vec.empty()) {
+      std::reverse(vec.begin(), vec.end());
+    }
+    kvm_close(kd);
     #endif
     return vec;
   }
