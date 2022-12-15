@@ -365,7 +365,7 @@ namespace ngs::xproc {
     while ((ent = readdir(proc))) {
       if (!isdigit(*ent->d_name))
         continue;
-      tgid = atoi(ent->d_name);
+      tgid = (PROCID)strtoul(ent->d_name, nullptr, 10);
       vec.push_back(tgid);
     }
     closedir(proc);
