@@ -33,7 +33,7 @@
 int main(int argc, char **argv) {
   std::vector<ngs::xproc::PROCID> pid;
   if (argc == 1) pid = ngs::xproc::proc_id_enum();
-  for (std::size_t i = 1; i < argc; i++) {
+  for (int i = 1; i < argc; i++) {
     std::vector<ngs::xproc::PROCID> exe = ngs::xproc::proc_id_from_exe(argv[i]);
     std::vector<ngs::xproc::PROCID> cwd = ngs::xproc::proc_id_from_cwd(argv[i]);
     pid.insert(pid.end(), exe.begin(), exe.end());
