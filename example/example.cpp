@@ -30,8 +30,15 @@
 
 #include "../xproc.hpp"
 
-int main() {
-  std::vector<ngs::xproc::PROCID> pid = ngs::xproc::proc_id_enum();
+int main(int argc, char **argv) {
+  std::vector<ngs::xproc::PROCID> pid;
+  if (argc == 1) pid = ngs::xproc::proc_id_enum();
+  for (std::size_t i = 1; i < argc; i++) {
+    std::vector<ngs::xproc::PROCID> exe = ngs::xproc::proc_id_from_exe(argv[i]);
+    std::vector<ngs::xproc::PROCID> cwd = ngs::xproc::proc_id_from_cwd(argv[i]);
+    pid.insert(pid.end(), exe.begin(), exe.end());
+    pid.insert(pid.end(), cwd.begin(), cwd.end());
+  }
   for (std::size_t i = 0; i < pid.size(); i++) {
 
     std::string exe = ngs::xproc::exe_from_proc_id(pid[i]);
