@@ -1,4 +1,6 @@
 build_script:
   - set PATH=C:\projects\xproc;C:\msys64;C:\msys64\mingw64\bin;C:\msys64\usr\local\bin;C:\msys64\usr\bin;%PATH%
   - C:\msys64\msys2_shell.cmd -defterm -mingw32 -no-start -here -lc "sh C:/projects/xproc/example/example.sh"
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "C:/projects/xproc/example/xproc.exe | awk '{if ($3 ~ \"exe\") {printf $2;{for (i=4; i<=NF; i++) if (i==NF) {print $i;} else {printf \"%s \", $i;}}}}'"
   - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "sh C:/projects/xproc/example/example.sh"
+  - C:\msys64\msys2_shell.cmd -defterm -mingw64 -no-start -here -lc "C:/projects/xproc/example/xproc.exe | awk '{if ($3 ~ \"exe\") {printf $2;{for (i=4; i<=NF; i++) if (i==NF) {print $i;} else {printf \"%s \", $i;}}}}'"
