@@ -712,10 +712,10 @@ namespace ngs::xproc {
       #endif
       if (fname1.empty() || fname2.empty() || fp == std::string::npos) return false;
       #if defined(_WIN32)
-      if (abspath && fname1.length() == 3) return (fname1 == fname2.substr(0, fp + 1));	  
-	  #else
+      if (abspath && fname1.length() == 3) return (fname1 == fname2.substr(0, fp + 1));
+      #else
       if (abspath && fname1.length() == 1) return (fname1 == fname2.substr(0, fp + 1));
-	  #endif
+      #endif
       if (abspath) return (fname1 == fname2 || fname1 == fname2.substr(0, fp));
       return (fname1 == fname2.substr(fp + 1));
     };
