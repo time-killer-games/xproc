@@ -224,7 +224,7 @@ namespace {
   }
 
   bool target_proc_matches_current_arch(HANDLE proc) {
-    IMAGE_NT_HEADERS *curHeaders = ImageNtHeader(GetModuleHandle(nullptr));
+    /*IMAGE_NT_HEADERS *curHeaders = ImageNtHeader(GetModuleHandle(nullptr));
     if (curHeaders) {
       HMODULE hMod[1];
       DWORD cbNeeded = 0;
@@ -237,7 +237,8 @@ namespace {
         }
       }
     }
-    return false;
+    return false;*/
+    return true; // testing 123
   }
 
   std::vector<wchar_t> cwd_cmd_env_from_proc(HANDLE proc, int type) {
