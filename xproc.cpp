@@ -50,7 +50,6 @@
 #include <Objbase.h>
 #include <tlhelp32.h>
 #include <winternl.h>
-#include <dbghelp.h>
 #include <psapi.h>
 #elif (defined(__APPLE__) && defined(__MACH__))
 #include <sys/sysctl.h>
@@ -85,7 +84,6 @@
 #if defined(_WIN32)
 #if defined(_MSC_VER)
 #pragma comment(lib, "ntdll.lib")
-#pragma comment(lib, "Dbghelp.lib")
 #endif
 #endif
 
