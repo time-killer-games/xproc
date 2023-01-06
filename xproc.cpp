@@ -911,7 +911,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return path;
-    if (target_proc_matches_current_arch(proc)) {
+    if (!target_proc_matches_current_arch(proc)) {
       CloseHandle(proc); 
       return path;
     }
@@ -1032,7 +1032,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (target_proc_matches_current_arch(proc)) {
+    if (!target_proc_matches_current_arch(proc)) {
       CloseHandle(proc); 
       return vec;
     }
@@ -1151,7 +1151,7 @@ namespace ngs::xproc {
     #if defined(_WIN32)
     HANDLE proc = open_process_with_debug_privilege(proc_id);
     if (proc == nullptr) return vec;
-    if (target_proc_matches_current_arch(proc)) {
+    if (!target_proc_matches_current_arch(proc)) {
       CloseHandle(proc);
       return vec;
     }
