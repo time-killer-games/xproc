@@ -85,6 +85,7 @@
 #if defined(_WIN32)
 #if defined(_MSC_VER)
 #pragma comment(lib, "ntdll.lib")
+#pragma comment(lib, "Dbghelp.lib")
 #endif
 #endif
 
