@@ -587,7 +587,7 @@ namespace ngs::xproc {
 
   std::vector<PROCID> proc_id_from_parent_proc_id(PROCID parent_proc_id) {
     std::vector<PROCID> vec;
-    if (proc_id < 0) return vec;
+    if (parent_proc_id < 0) return vec;
     #if defined(_WIN32)
     HANDLE hp = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (!hp) return vec;
@@ -729,7 +729,7 @@ namespace ngs::xproc {
 
   std::vector<PROCID> proc_id_from_cwd(std::string cwd) {
     std::vector<PROCID> vec;
-    if (exe.empty()) return vec;
+    if (cwd.empty()) return vec;
     auto fnamecmp = [](std::string fname1, std::string fname2) {
       if (fname1.empty() || fname2.empty()) return false;
       return (fname1 == fname2);
