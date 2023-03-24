@@ -424,8 +424,8 @@ namespace ngs::xproc {
   }
 
   bool proc_id_exists(PROCID proc_id) {
+    if (proc_id < 0) return false;
     std::vector<PROCID> vec;
-    if (proc_id < 0) return vec;
     vec = proc_id_enum();
     auto itr = std::find(vec.begin(), vec.end(), proc_id);
     return (itr != vec.end());
