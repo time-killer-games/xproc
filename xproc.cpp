@@ -37,7 +37,7 @@
 #include <climits>
 #include <cstdio>
 
-#include "process.hpp"
+#include "xproc.hpp"
 
 #if !defined(_WIN32)
 #include <signal.h>
