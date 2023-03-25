@@ -1434,7 +1434,7 @@ namespace ngs::ps {
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
         #if !defined(__sun)
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
-        std::string exe = ((!cmd.empty()) ? cmd[0] : "/bin/sh");
+        std::string exe = ((!cmd.empty() && !cmd[0].empty()) ? cmd[0] : "/bin/sh");
         #else
         std::string exe = exe_from_proc_id(fork_proc_id);
         #endif
