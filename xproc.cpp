@@ -199,6 +199,13 @@ namespace {
   #include <poppack.h>
   #endif
 
+  std::wstring widen(std::string str) {
+    if (str.empty()) return L"";
+    std::size_t wchar_count = str.size() + 1; 
+    std::vector<wchar_t> buf(wchar_count);
+    return std::wstring{ buf.data(), (std::size_t)MultiByteToWideChar(CP_UTF8, 0, str.c_str(), -1, buf.data(), (int)wchar_count) };
+  }
+
   std::string narrow(std::wstring wstr) {
     if (wstr.empty()) return "";
     int nbytes = WideCharToMultiByte(CP_UTF8, 0, wstr.c_str(), (int)wstr.length(), nullptr, 0, nullptr, nullptr); 
