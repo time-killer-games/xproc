@@ -1436,7 +1436,7 @@ namespace ngs::ps {
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
         const char *env = getenv("SHELL");
         std::string shell = ((env) ? env : "/bin/sh");
-        if (cmd.size() && strcmp(cmd[0].c_str(), ((!env.empty()) ? env.c_str() : "/bin/sh")) == 0) {
+        if (cmd.size() && strcmp(cmd[0].c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
         }
       }
