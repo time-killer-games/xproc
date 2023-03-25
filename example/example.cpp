@@ -28,7 +28,7 @@
 
 #include <cstddef>
 
-#include "../ps.hpp"
+#include "../xproc.hpp"
 
 int main(int argc, char **argv) {
 
