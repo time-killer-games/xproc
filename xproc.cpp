@@ -1044,10 +1044,11 @@ namespace ngs::ps {
     std::string exe = exe_from_proc_id(proc_id);
     if (exe.empty()) return "";
     #if !defined(_WIN32)
-    if (std::size_t pos = (exe.find_last_of("/") != std::string::npos)) {
+    std::size_t pos = exe.find_last_of("/");
     #else
-    if (std::size_t pos = (exe.find_last_of("\\/") != std::string::npos)) {
+    std::size_t pos = exe.find_last_of("\\/");
     #endif
+    if (pos != std::string::npos) {
       exe = exe.substr(pos + 1);
       return exe.substr(0, MAXCOMMLEN);
     }
