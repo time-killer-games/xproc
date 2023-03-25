@@ -1374,7 +1374,10 @@ namespace ngs::ps {
         setsid();
         const char *env   = getenv("SHELL");
         const char *shell = ((env) ? env : "/bin/sh");
-        execl(shell, shell, "-c", command, nullptr);
+        char buffer[PATH_MAX];
+        if (realpath(env, buffer)) {
+          execl(buffer, buffer, "-c", command, nullptr);
+        }
         _exit(-1);
       }
       close(p_stdin[0]);
@@ -1435,11 +1438,18 @@ namespace ngs::ps {
         #if !defined(__sun)
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
         std::string exe = ((!cmd.empty() && !cmd[0].empty()) ? cmd[0] : "/bin/sh");
+        char buffer[PATH_MAX];
+        if (realpath(env, buffer)) {
+          exe = buffer;
+        }
         #else
         std::string exe = exe_from_proc_id(fork_proc_id);
         #endif
         const char *env   = getenv("SHELL");
         std::string shell = ((env) ? env : "/bin/sh");
+        if (realpath(env, buffer)) {
+          shell = buffer;
+        }
         if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
         }
