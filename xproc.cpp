@@ -1048,7 +1048,7 @@ namespace ngs::ps {
     #else
     if (std::size_t pos = (exe.find_last_of("\\/") != std::string::npos)) {
     #endif
-      return exe.substr(pos + 1, MAXCOMMLEN);
+      return exe.substr(pos + 1).substr(0, MAXCOMMLEN);
     }
     return exe;
   }
