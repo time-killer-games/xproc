@@ -1435,27 +1435,27 @@ namespace ngs::ps {
       while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
-        #if !defined(__sun)
-        std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
-        std::string exe = ((!cmd.empty() && !cmd[0].empty()) ? cmd[0] : "/bin/sh");
-        char buffer[PATH_MAX];
-        if (realpath(env, buffer)) {
-          exe = buffer;
-        }
-        #else
         std::string exe = exe_from_proc_id(fork_proc_id);
-        #endif
+        if (exe.empty()) {
+          proc_id = 0;
+          break;
+        }
         const char *env   = getenv("SHELL");
         std::string shell = ((env) ? env : "/bin/sh");
         char envbuf[PATH_MAX]; 
         if (realpath(env, envbuf)) {
           shell = envbuf;
-        }
-        if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
-          if (wait_proc_id > 0) proc_id = wait_proc_id;
+          if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
+            if (wait_proc_id > 0) proc_id = wait_proc_id;
+          }
+        } else {
+          proc_id = 0;
+          break;
         }
       }
-    } else { proc_id = 0; }
+    } else {
+      proc_id = 0;
+    }
     child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
     proc_did_execute[index] = true; NGS_PROCID proc_index = proc_id;
     stdipt_map[proc_index] = (std::intptr_t)infd;
