@@ -1375,7 +1375,7 @@ namespace ngs::ps {
         const char *env   = getenv("SHELL");
         const char *shell = ((env) ? env : "/bin/sh");
         char buffer[PATH_MAX];
-        if (realpath(env, buffer)) {
+        if (realpath(shell, buffer)) {
           execl(buffer, buffer, "-c", command, nullptr);
         }
         _exit(-1);
