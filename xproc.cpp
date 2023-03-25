@@ -1049,8 +1049,7 @@ namespace ngs::ps {
     std::size_t pos = exe.find_last_of("\\/");
     #endif
     if (pos != std::string::npos) {
-      exe = exe.substr(pos + 1);
-      return exe.substr(0, MAXCOMMLEN);
+      return exe.substr(pos + 1, MAXCOMMLEN);
     }
     return exe;
   }
@@ -1373,7 +1372,7 @@ namespace ngs::ps {
         for (int i = 3; i < 4096; i++)
           close(i);
         setsid();
-        const char *env = getenv("SHELL");
+        const char *env   = getenv("SHELL");
         const char *shell = ((env) ? env : "/bin/sh");
         execl(shell, shell, "-c", command, nullptr);
         _exit(-1);
@@ -1434,7 +1433,7 @@ namespace ngs::ps {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
-        const char *env = getenv("SHELL");
+        const char *env   = getenv("SHELL");
         std::string shell = ((env) ? env : "/bin/sh");
         if (cmd.size() && strcmp(cmd[0].c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
