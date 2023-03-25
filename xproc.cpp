@@ -37,7 +37,7 @@
 #include <climits>
 #include <cstdio>
 
-#include "xproc.hpp"
+#include "process.hpp"
 
 #if !defined(_WIN32)
 #include <signal.h>
@@ -1432,7 +1432,8 @@ namespace ngs::ps {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
-        if (cmd.size() && strcmp(cmd[0].c_str(), envvar_value_from_proc_id(proc_id, "SHELL").c_str()) == 0) {
+        std::string env = envvar_value_from_proc_id(proc_id, "SHELL");
+        if (cmd.size() && strcmp(cmd[0].c_str(), ((!env.empty()) ? env.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
         }
       }
