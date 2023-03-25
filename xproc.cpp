@@ -1421,7 +1421,7 @@ namespace ngs::ps {
 
   } // anonymous namespace
 
-  NGS_PROCID child_proc_id_exec_helper(std::string command) {
+  NGS_PROCID spawn_child_proc_id_helper(std::string command) {
     index++;
     #if !defined(_WIN32)
     int infd = 0, outfd = 0;
@@ -1494,10 +1494,10 @@ namespace ngs::ps {
     return proc_index;  
   }
 
-  NGS_PROCID child_proc_id_exec(std::string command, bool wait) {
-    if (wait) return child_proc_id_exec_helper(command);
+  NGS_PROCID spawn_child_proc_id(std::string command, bool wait) {
+    if (wait) return spawn_child_proc_id_helper(command);
     int prevIndex = index;
-    std::thread proc_thread(child_proc_id_exec_helper, command);
+    std::thread proc_thread(spawn_child_proc_id_helper, command);
     while (prevIndex == index) {
       message_pump();
       std::this_thread::sleep_for(std::chrono::milliseconds(5));
