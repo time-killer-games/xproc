@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
     if (!exe.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", exe: " << exe << "\n";
     std::string cwd = ngs::ps::cwd_from_proc_id(pid[i]);
     if (!cwd.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", cwd: " << cwd << "\n";
-    std::string comm = ngs::ps::cwd_from_proc_id(pid[i]);
+    std::string comm = ngs::ps::comm_from_proc_id(pid[i]);
     if (!comm.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", comm: " << comm << "\n";
     std::vector<ngs::ps::NGS_PROCID> ppid = ngs::ps::parent_proc_id_from_proc_id(pid[i]);
     if (!ppid.empty()) std::cout << "pid[" << i << "]: " << pid[i] << ", ppid: " << ppid[0] << "\n";
