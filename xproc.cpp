@@ -1420,94 +1420,94 @@ namespace ngs::ps {
       return proc_id;
     }
     #endif
+ 
+    NGS_PROCID spawn_child_proc_id_helper(std::string command) {
+      index++;
+      #if !defined(_WIN32)
+      int infd = 0, outfd = 0;
+      NGS_PROCID proc_id = 0, fork_proc_id = 0, wait_proc_id = 0;
+      fork_proc_id = process_execute_helper(command.c_str(), &infd, &outfd);
+      proc_id = fork_proc_id; wait_proc_id = proc_id;
+      std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      if (fork_proc_id != -1) {
+        while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
+          std::this_thread::sleep_for(std::chrono::milliseconds(5));
+          int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
+          std::string exe = exe_from_proc_id(fork_proc_id);
+          if (exe.empty()) {
+            proc_id = 0;
+            break;
+          }
+          const char *env   = getenv("SHELL");
+          std::string shell = ((env) ? env : "/bin/sh");
+          char envbuf[PATH_MAX]; 
+          if (realpath(env, envbuf)) {
+            shell = envbuf;
+            if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
+              if (wait_proc_id > 0) proc_id = wait_proc_id;
+            }
+          } else {
+            proc_id = 0;
+            break;
+          }
+        }
+      } else {
+        proc_id = 0;
+      }
+      child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      proc_did_execute[index] = true; NGS_PROCID proc_index = proc_id;
+      stdipt_map[proc_index] = (std::intptr_t)infd;
+      std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
+      opt_thread.join();
+      #else
+      std::wstring wstr_command = widen(command); bool proceed = true;
+      wchar_t *cwstr_command = new wchar_t[wstr_command.length() + 1]();
+      wcsncpy_s(cwstr_command, wstr_command.length() + 1, wstr_command.c_str(), wstr_command.length() + 1);
+      HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
+      HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
+      SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
+      proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
+      if (proceed == false) return 0;
+      SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
+      proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
+      if (proceed == false) return 0;
+      STARTUPINFOW si;
+      ZeroMemory(&si, sizeof(si));
+      si.cb = sizeof(STARTUPINFOW);
+      si.dwFlags = STARTF_USESTDHANDLES;
+      si.hStdError = stdout_write;
+      si.hStdOutput = stdout_write;
+      si.hStdInput = stdin_read;
+      PROCESS_INFORMATION pi; ZeroMemory(&pi, sizeof(pi)); NGS_PROCID proc_index = 0;
+      BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+      delete[] cwstr_command;
+      if (success) {
+        CloseHandle(stdout_write);
+        CloseHandle(stdin_read);
+        NGS_PROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = proc_id;
+        std::this_thread::sleep_for(std::chrono::milliseconds(5)); proc_did_execute[index] = true;
+        stdipt_map[proc_index] = (std::intptr_t)(void *)stdin_write;
+        HANDLE wait_handles[] = { pi.hProcess, stdout_read };
+        std::thread opt_thread(output_thread, (std::intptr_t)(void *)stdout_read, proc_index);
+        while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
+          message_pump();
+        }
+        opt_thread.join();
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+        CloseHandle(stdout_read);
+        CloseHandle(stdin_write);
+      } else {
+        proc_did_execute[index] = true;
+        child_proc_id[index] = 0;
+      }
+      #endif
+      std::this_thread::sleep_for(std::chrono::milliseconds(100));
+      complete_map[proc_index] = true;
+      return proc_index;  
+    }
 
   } // anonymous namespace
-
-  NGS_PROCID spawn_child_proc_id_helper(std::string command) {
-    index++;
-    #if !defined(_WIN32)
-    int infd = 0, outfd = 0;
-    NGS_PROCID proc_id = 0, fork_proc_id = 0, wait_proc_id = 0;
-    fork_proc_id = process_execute_helper(command.c_str(), &infd, &outfd);
-    proc_id = fork_proc_id; wait_proc_id = proc_id;
-    std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    if (fork_proc_id != -1) {
-      while ((proc_id = proc_id_from_fork_proc_id(proc_id)) == wait_proc_id) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
-        int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
-        std::string exe = exe_from_proc_id(fork_proc_id);
-        if (exe.empty()) {
-          proc_id = 0;
-          break;
-        }
-        const char *env   = getenv("SHELL");
-        std::string shell = ((env) ? env : "/bin/sh");
-        char envbuf[PATH_MAX]; 
-        if (realpath(env, envbuf)) {
-          shell = envbuf;
-          if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
-            if (wait_proc_id > 0) proc_id = wait_proc_id;
-          }
-        } else {
-          proc_id = 0;
-          break;
-        }
-      }
-    } else {
-      proc_id = 0;
-    }
-    child_proc_id[index] = proc_id; std::this_thread::sleep_for(std::chrono::milliseconds(5));
-    proc_did_execute[index] = true; NGS_PROCID proc_index = proc_id;
-    stdipt_map[proc_index] = (std::intptr_t)infd;
-    std::thread opt_thread(output_thread, (std::intptr_t)outfd, proc_index);
-    opt_thread.join();
-    #else
-    std::wstring wstr_command = widen(command); bool proceed = true;
-    wchar_t *cwstr_command = new wchar_t[wstr_command.length() + 1]();
-    wcsncpy_s(cwstr_command, wstr_command.length() + 1, wstr_command.c_str(), wstr_command.length() + 1);
-    HANDLE stdin_read = nullptr; HANDLE stdin_write = nullptr;
-    HANDLE stdout_read = nullptr; HANDLE stdout_write = nullptr;
-    SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), nullptr, true };
-    proceed = CreatePipe(&stdin_read, &stdin_write, &sa, 0);
-    if (proceed == false) return 0;
-    SetHandleInformation(stdin_write, HANDLE_FLAG_INHERIT, 0);
-    proceed = CreatePipe(&stdout_read, &stdout_write, &sa, 0);
-    if (proceed == false) return 0;
-    STARTUPINFOW si;
-    ZeroMemory(&si, sizeof(si));
-    si.cb = sizeof(STARTUPINFOW);
-    si.dwFlags = STARTF_USESTDHANDLES;
-    si.hStdError = stdout_write;
-    si.hStdOutput = stdout_write;
-    si.hStdInput = stdin_read;
-    PROCESS_INFORMATION pi; ZeroMemory(&pi, sizeof(pi)); NGS_PROCID proc_index = 0;
-    BOOL success = CreateProcessW(nullptr, cwstr_command, nullptr, nullptr, true, CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
-    delete[] cwstr_command;
-    if (success) {
-      CloseHandle(stdout_write);
-      CloseHandle(stdin_read);
-      NGS_PROCID proc_id = pi.dwProcessId; child_proc_id[index] = proc_id; proc_index = proc_id;
-      std::this_thread::sleep_for(std::chrono::milliseconds(5)); proc_did_execute[index] = true;
-      stdipt_map[proc_index] = (std::intptr_t)(void *)stdin_write;
-      HANDLE wait_handles[] = { pi.hProcess, stdout_read };
-      std::thread opt_thread(output_thread, (std::intptr_t)(void *)stdout_read, proc_index);
-      while (MsgWaitForMultipleObjects(2, wait_handles, false, 5, QS_ALLEVENTS) != WAIT_OBJECT_0) {
-        message_pump();
-      }
-      opt_thread.join();
-      CloseHandle(pi.hProcess);
-      CloseHandle(pi.hThread);
-      CloseHandle(stdout_read);
-      CloseHandle(stdin_write);
-    } else {
-      proc_did_execute[index] = true;
-      child_proc_id[index] = 0;
-    }
-    #endif
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
-    complete_map[proc_index] = true;
-    return proc_index;  
-  }
 
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait) {
     if (wait) return spawn_child_proc_id_helper(command);
