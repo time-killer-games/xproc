@@ -1434,7 +1434,8 @@ namespace ngs::ps {
         std::this_thread::sleep_for(std::chrono::milliseconds(5));
         int status; wait_proc_id = waitpid(fork_proc_id, &status, WNOHANG);
         std::vector<std::string> cmd = cmdline_from_proc_id(fork_proc_id);
-        std::string env = envvar_value_from_proc_id(proc_id, "SHELL");
+        const char *env = getenv("SHELL");
+        std::string shell = ((env) ? env : "/bin/sh");
         if (cmd.size() && strcmp(cmd[0].c_str(), ((!env.empty()) ? env.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
         }
