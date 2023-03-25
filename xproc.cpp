@@ -1447,8 +1447,9 @@ namespace ngs::ps {
         #endif
         const char *env   = getenv("SHELL");
         std::string shell = ((env) ? env : "/bin/sh");
-        if (realpath(env, buffer)) {
-          shell = buffer;
+        char envbuf[PATH_MAX]; 
+        if (realpath(env, envbuf)) {
+          shell = envbuf;
         }
         if (strcmp(exe.c_str(), ((!shell.empty()) ? shell.c_str() : "/bin/sh")) == 0) {
           if (wait_proc_id > 0) proc_id = wait_proc_id;
