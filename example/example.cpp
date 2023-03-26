@@ -28,7 +28,7 @@
 
 #include <cstddef>
 
-#include "process.hpp"
+#include "../process.hpp"
 
 int main(int argc, char **argv) {
   std::vector<ngs::ps::NGS_PROCID> pid;
