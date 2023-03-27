@@ -33,44 +33,16 @@
 
 #include "../process.hpp"
 
-static std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-  std::size_t pos = 0;
-  while ((pos = str.find(substr, pos)) != std::string::npos) {
-    str.replace(pos, substr.length(), nstr);
-    pos += nstr.length();
-  }
-  return str;
-}
-
 int main(int argc, char **argv) {
+  std::vector<std::string> vec;
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
     return 0;
   } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
-    std::string command;
-    for (int i = 2; i < argc; i++) {
-      for (int j = 0; j < (int)strlen(argv[i]) + 1; j++) {
-        if (isspace(argv[i][j])) {
-          std::string tmp = string_replace_all(argv[i], "\\", "\\\\");
-          tmp += string_replace_all(tmp, "\0", "\\\0");
-          tmp += string_replace_all(tmp, "\a", "\\\a");
-          tmp += string_replace_all(tmp, "\b", "\\\b");
-          tmp += string_replace_all(tmp, "\f", "\\\f");
-          tmp += string_replace_all(tmp, "\n", "\\\n");
-          tmp += string_replace_all(tmp, "\r", "\\\r");
-          tmp += string_replace_all(tmp, "\t", "\\\t");
-          tmp += string_replace_all(tmp, "\v", "\\\v");
-          tmp += string_replace_all(tmp, "'", "\\'");
-          command += "\"" + string_replace_all(tmp, "\"", "\\\"") + "\" ";
-          goto next;
-        }
-      }
-      command += std::string(argv[i]) + " ";
-      next:;
-    }
-    if (!command.empty() && command.back() == ' ')
-      command.pop_back();
+    for (int i = 0; i < argc; i++)
+      vec.push_back(argv[i]);
+    std::string command = ngs::ps::cmdline_vector_to_string(vec);
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
     while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id));
     printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
