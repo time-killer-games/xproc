@@ -42,10 +42,10 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 }
 
 int main(int argc, char **argv) {
-   if if (argc >= 2 && strcmp(argv[i], "-h") == 0) {
+   if (argc >= 2 && (strcmp(argv[i], "-h") == 0 || strcmp(argv[i], "-help") == 0)) {
      printf("usage: xproc <options>\n\toptions:\n\t\t-exe <command>\n\t\t<pathname>\n");
      return 0;
-   } else if (argc >= 3 && strcmp(argv[i], "-exec") == 0) {
+   } else if (argc >= 3 && (strcmp(argv[i], "-e") == 0 || strcmp(argv[i], "-exec") == 0)) {
     std::string command;
     for (int i = 2; i < argc; i++) {
       for (int j = 0; j < (int)strlen(argv[i]) + 1; j++) {
