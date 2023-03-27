@@ -43,7 +43,7 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 
 int main(int argc, char **argv) {
    if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
-     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -p or -path <pathname>\n");
+     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
      return 0;
    } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
     std::string command;
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc == 1) pid = ngs::ps::proc_id_enum();
   if (argc >= 3) {
-    if (!(strcmp(argv[1], "-p") == 0 || strcmp(argv[1], "-path") == 0)) {
+    if (!(strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-file") == 0)) {
       return 0;
     }
   }
