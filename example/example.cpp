@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
       command += std::string(argv[i]) + " ";
       next:;
     }
-    if (!command.empty())
+    if (!command.empty() && command.back() == ' ')
       command.pop_back();
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
     while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id))
