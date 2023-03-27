@@ -26,11 +26,43 @@
 
 #include <iostream>
 
+#include <cctype>
 #include <cstddef>
+#include <cstring>
 
 #include "../process.hpp"
 
+static std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
+  std::size_t pos = 0;
+  while ((pos = str.find(substr, pos)) != std::string::npos) {
+    str.replace(pos, substr.length(), nstr);
+    pos += nstr.length();
+  }
+  return str;
+}
+
 int main(int argc, char **argv) {
+   if if (argc >= 2 && strcmp(argv[i], "-h") == 0) {
+     printf("usage: xproc <options>\n\toptions:\n\t\t-exe <command>\n\t\t<pathname>\n"); 
+   } else if (argc >= 3 && strcmp(argv[i], "-exec") == 0) {
+    std::string command;
+    for (int i = 2; i < argc; i++) {
+      for (int j = 0; j < (int)strlen(argv[i]) + 1; j++) {
+        if (isspace(argv[i][j])) {
+          std::string tmp = string_replace_all(argv[i], "\\", "\\\\");
+          command += "\"" + string_replace_all(tmp, "\"", "\\\"") + "\" ";
+          goto next;
+        }
+      }
+      command += std::string(argv[i]) + " ";
+      next:;
+    }
+    ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
+    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id)) {
+      printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
+    }
+    return 0;
+  }
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc == 1) pid = ngs::ps::proc_id_enum();
   for (int i = 1; i < argc; i++) {
