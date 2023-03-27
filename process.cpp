@@ -68,7 +68,7 @@
 #include <sys/user.h>
 #include <libprocstat.h>
 #include <libutil.h>
-#elif defined(__DragonFly__) || defined(__OpenBSD__)
+#elif (defined(__DragonFly__) || defined(__OpenBSD__))
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/user.h>
@@ -84,10 +84,8 @@
 #include <sys/proc.h>
 #endif
 
-#if defined(_WIN32)
-#if defined(_MSC_VER)
+#if (defined(_WIN32) || defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
-#endif
 #endif
 
 #if !defined(MAXCOMMLEN)
@@ -330,7 +328,7 @@ namespace {
   }
   #endif
 
-  #if defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun)
+  #if (defined(__DragonFly__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__sun))
   kvm_t *kd = nullptr;
   #endif
 
@@ -724,6 +722,8 @@ namespace ngs::ps {
     if (exe.empty()) return vec;
     auto fnamecmp = [](std::string fname1, std::string fname2) {
       #if defined(_WIN32)
+      std::transform(fname1.begin(), fname1.end(), fname1.begin(), ::toupper);
+      std::transform(fname2.begin(), fname2.end(), fname2.begin(), ::toupper);
       std::size_t fp = fname2.find_last_of("\\/");
       bool abspath = (!fname1.empty() && fname1.length() >= 3 && fname1[1] == ':' &&
         (fname1[2] == '\\' || fname1[2] == '/'));
@@ -753,6 +753,10 @@ namespace ngs::ps {
     std::vector<NGS_PROCID> vec;
     if (cwd.empty()) return vec;
     auto fnamecmp = [](std::string fname1, std::string fname2) {
+      #if defined(_WIN32)
+      std::transform(fname1.begin(), fname1.end(), fname1.begin(), ::toupper);
+      std::transform(fname2.begin(), fname2.end(), fname2.begin(), ::toupper);
+      #endif
       if (fname1.empty() || fname2.empty()) return false;
       return (fname1 == fname2);
     };
@@ -803,7 +807,7 @@ namespace ngs::ps {
     if (realpath(("/proc/" + std::to_string(proc_id) + "/exe").c_str(), exe)) {
       path = exe;
     }
-    #elif defined(__FreeBSD__) || defined(__DragonFly__)
+    #elif (defined(__FreeBSD__) || defined(__DragonFly__))
     int mib[4]; 
     std::size_t len = 0;
     mib[0] = CTL_KERN;
@@ -1329,17 +1333,6 @@ namespace ngs::ps {
   }
   
   namespace {
-  	
-    #if defined(__ANDROID__)
-    std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
-      std::size_t pos = 0;
-      while ((pos = str.find(substr, pos)) != std::string::npos) {
-        str.replace(pos, substr.length(), nstr);
-        pos += nstr.length();
-      }
-      return str;
-    }
-    #endif
 
     std::unordered_map<NGS_PROCID, std::intptr_t> stdipt_map;
     std::unordered_map<NGS_PROCID, std::string> stdopt_map;
