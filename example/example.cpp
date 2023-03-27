@@ -43,7 +43,7 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 
 int main(int argc, char **argv) {
    if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
-     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    <pathname>\n");
+     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -p or -path <pathname>\n");
      return 0;
    } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
     std::string command;
@@ -66,7 +66,10 @@ int main(int argc, char **argv) {
   }
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc == 1) pid = ngs::ps::proc_id_enum();
-  for (int i = 1; i < argc; i++) {
+  if (!(argc >= 3 && (strcmp(argv[2], "-p") == 0 || strcmp(argv[2], "-path") == 0))) {
+    return 0;
+  }
+  for (int i = 2; i < argc; i++) {
     std::vector<ngs::ps::NGS_PROCID> exe = ngs::ps::proc_id_from_exe(argv[i]);
     std::vector<ngs::ps::NGS_PROCID> cwd = ngs::ps::proc_id_from_cwd(argv[i]);
     pid.insert(pid.end(), exe.begin(), exe.end());
