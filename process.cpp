@@ -36,6 +36,7 @@
 #include <cstring>
 #include <climits>
 #include <cstdio>
+#include <cctype>
 
 #include "process.hpp"
 
