@@ -42,10 +42,10 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 }
 
 int main(int argc, char **argv) {
-   if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
-     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
-     return 0;
-   } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
+  if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
+    printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
+    return 0;
+  } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
     std::string command;
     for (int i = 2; i < argc; i++) {
       for (int j = 0; j < (int)strlen(argv[i]) + 1; j++) {
@@ -58,18 +58,19 @@ int main(int argc, char **argv) {
       command += std::string(argv[i]) + " ";
       next:;
     }
+    if (!command.empty())
+      command.pop_back();
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
-    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id)) {
+    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id))
       printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
-    }
     return 0;
   }
   std::vector<ngs::ps::NGS_PROCID> pid;
-  if (argc == 1) pid = ngs::ps::proc_id_enum();
-  if (argc >= 3) {
-    if (!(strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-file") == 0)) {
+  if (argc == 1) {
+    pid = ngs::ps::proc_id_enum();
+  } else if (argc >= 3) {
+    if (!(strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-file") == 0))
       return 0;
-    }
   }
   for (int i = 2; i < argc; i++) {
     std::vector<ngs::ps::NGS_PROCID> exe = ngs::ps::proc_id_from_exe(argv[i]);
