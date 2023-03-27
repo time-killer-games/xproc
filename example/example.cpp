@@ -43,6 +43,7 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 }
 
 int main(int argc, char **argv) {
+  std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
     return 0;
@@ -67,9 +68,7 @@ int main(int argc, char **argv) {
     free_stdout_from_child_proc_id(proc_id);
     free_stdin_from_child_proc_id(proc_id);
     return 0;
-  }
-  std::vector<ngs::ps::NGS_PROCID> pid;
-  if (argc == 1) {
+  } else if (argc == 1) {
     pid = ngs::ps::proc_id_enum();
   } else if (argc >= 3) {
     if (!(strcmp(argv[1], "-f") == 0 || strcmp(argv[1], "-file") == 0))
