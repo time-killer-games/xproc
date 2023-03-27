@@ -43,7 +43,7 @@ static std::string string_replace_all(std::string str, std::string substr, std::
 
 int main(int argc, char **argv) {
    if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
-     printf("usage: xproc <options>\n\toptions:\n\t\t-exe <command>\n\t\t<pathname>\n");
+     printf("usage: xproc <options>\n\toptions:\n\t\t-h or -help\n\t\t-e or -exec <command>\n\t\t<pathname>\n");
      return 0;
    } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
     std::string command;
