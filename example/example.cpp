@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc == 1) pid = ngs::ps::proc_id_enum();
   if (argc >= 3) {
-    if (!(strcmp(argv[2], "-p") == 0 || strcmp(argv[2], "-path") == 0)) {
+    if (!(strcmp(argv[1], "-p") == 0 || strcmp(argv[1], "-path") == 0)) {
       return 0;
     }
   }
