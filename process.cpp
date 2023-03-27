@@ -1396,7 +1396,7 @@ namespace ngs::ps {
           tmp = string_replace_all(command, "\r", "\\r");
           tmp = string_replace_all(command, "\t", "\\t");
           tmp = string_replace_all(command, "\v", "\\v");
-          tmp = string_replace_all(command, "'", "\"");
+          tmp = string_replace_all(command, "'", "\'");
           tmp = "\"" + string_replace_all(tmp, "\"", "\\\"") + "\"";
           system(("$SHELL -c " + tmp).c_str());
         }
