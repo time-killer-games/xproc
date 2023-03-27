@@ -65,8 +65,8 @@ int main(int argc, char **argv) {
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
     while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id));
     printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
-    free_stdout_from_child_proc_id(proc_id);
-    free_stdin_from_child_proc_id(proc_id);
+    free_stdout_for_child_proc_id(proc_id);
+    free_stdin_for_child_proc_id(proc_id);
     return 0;
   } else if (argc == 1) {
     pid = ngs::ps::proc_id_enum();
