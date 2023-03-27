@@ -32,6 +32,12 @@
 
 #include "../process.hpp"
 
+#if !defined(_WIN32)
+#define CLEAR_STDOUT "clear"
+#else
+#define CLEAR_STDOUT "cls"
+#endif
+
 static std::string string_replace_all(std::string str, std::string substr, std::string nstr) {
   std::size_t pos = 0;
   while ((pos = str.find(substr, pos)) != std::string::npos) {
@@ -61,8 +67,13 @@ int main(int argc, char **argv) {
     if (!command.empty() && command.back() == ' ')
       command.pop_back();
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
-    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id))
-      printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
+    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id)) {
+      if (system(nullptr)) {
+        if (system(CLEAR_STDOUT)) {
+          printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
+        }
+      }
+    }
     return 0;
   }
   std::vector<ngs::ps::NGS_PROCID> pid;
