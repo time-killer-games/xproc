@@ -34,15 +34,16 @@
 #include "../process.hpp"
 
 int main(int argc, char **argv) {
-  std::vector<std::string> vec;
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
     printf("usage: xproc <options>\n  options:\n    -h or -help\n    -e or -exec <command>\n    -f or -file <filename>\n");
     return 0;
   } else if (argc >= 3 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
-    for (int i = 0; i < argc; i++)
-      vec.push_back(argv[i]);
-    std::string command = ngs::ps::cmdline_vector_to_string(vec);
+    std::string command;
+    for (int i = 2; i < argc; i++)
+      command += std::string(argv[i]) + " ";
+    if (!command.empty() && command.back() == ' ')
+      command.pop_back();
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
     while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id));
     printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
