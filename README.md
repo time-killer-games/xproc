@@ -37,7 +37,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::string exe_from_proc_id(PROCID proc_id);` returns the executable pathname associated with the given process identifier in the proc_id argument. std::string::empty() is true if the function has failed. The return value will be an absolute pathname with all symbollic links resolved. The pathname will be normalized, meaning there will be no double slashes, no dot, and no dot-dot in the returned pathname. The returned pathname is limited to MAX_PATH characters on Windows, and on Unix-likes, the returned pathname is limited to PATH_MAX characters. PATH_MAX is implementation-defined by the platform. On failure, std::string::empty() returns true.
+`std::string exe_from_proc_id(PROCID proc_id);` returns the executable pathname associated with the given process identifier in the proc_id argument. std::string::empty() is true if the function has failed. The return value will be an absolute pathname with all symbollic links resolved. The pathname will be normalized, meaning there will be no double slashes, no dot, and no dot-dot in the returned pathname. The returned pathname is limited to MAX_PATH characters on Windows, and on Unix-likes, the returned pathname is limited to PATH_MAX characters. PATH_MAX is implementation-defined by the platform.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
