@@ -1073,7 +1073,7 @@ namespace ngs::ps {
         if (pos != std::string::npos) {
           str.replace(pos, 1, "");
         }
-        if (realpath(str.c_str(), buffer)){
+        if (realpath(str.c_str(), buffer)) {
           path = buffer;
         }
         
