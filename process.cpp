@@ -317,8 +317,8 @@ namespace {
   #elif defined(__FreeBSD__)
   kinfo_file *kinfo_file_from_proc_id(ngs::ps::NGS_PROCID proc_id, int *cntp) {
     *cntp = 0;
-    std::size_t len = 0;
     int cnt = 0;
+    std::size_t len = 0;
     char *buf = nullptr, *bp = nullptr, *eb = nullptr;
     kinfo_file *kif = nullptr, *kp = nullptr, *kf = nullptr;
     int mib[4];
