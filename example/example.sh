@@ -7,13 +7,13 @@ elif [ $(uname) = "Linux" ]; then
 elif [ $(uname) = "FreeBSD" ]; then
   clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lelf -lkvm -lc -lpthread -static; ../xproc;
 elif [ $(uname) = "DragonFly" ]; then
-  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -lelf -lkvm -lc -lpthread -static; ../xproc;
+  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -lkvm -lc -lpthread -static; ../xproc;
 elif [ $(uname) = "NetBSD" ]; then
-  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -lelf -lkvm -lc -lpthread -static; ../xproc;
+  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -lkvm -lc -lpthread -static; ../xproc;
 elif [ $(uname) = "OpenBSD" ]; then
-  clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lelf -lkvm -lc -lpthread -static; ../xproc;
+  clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lkvm -lc -lpthread -static; ../xproc;
 elif [ $(uname) = "SunOS" ]; then
-  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -lelf -lkvm -lc -lpthread; ../xproc;
+  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -lkvm -lc -lpthread; ../xproc;
 else
   g++ example.cpp ../process.cpp -o ../xproc.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -lntdll; ../xproc;
 fi
