@@ -106,7 +106,7 @@ namespace {
   enum MEMTYP {
     MEMCMD,
     MEMENV,
-    MEMf
+    MEMCWD
   };
 
   #if !defined(_MSC_VER)
