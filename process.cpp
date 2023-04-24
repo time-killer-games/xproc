@@ -1267,12 +1267,6 @@ namespace ngs::ps {
       while (getdelim(&env, &size, 0, file) != -1) {
         vec.push_back(env);
       }
-      struct is_empty {
-        bool operator()(const std::string &s) {
-          return s.empty();
-        }
-      };
-      vec.erase(std::remove_if(vec.begin(), vec.end(), is_empty()), vec.end());
       if (env) free(env);
       fclose(file);
     }
@@ -1342,6 +1336,12 @@ namespace ngs::ps {
     }
     kvm_close(kd);
     #endif
+    struct is_invalid {
+      bool operator()(const std::string &s) {
+        return (s.find('=') == std::string::npos);
+      }
+    };
+    vec.erase(std::remove_if(vec.begin(), vec.end(), is_invalid()), vec.end());
     return vec;
   }
 
