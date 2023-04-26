@@ -1602,10 +1602,10 @@ namespace ngs::ps {
     nwritten = write((int)stdipt_map[proc_id], &v[0], v.size());
     return nwritten;
     #else
-    DWORD dwWritten = -1;
+    DWORD dwwritten = -1;
     SetFilePointer((HANDLE)(void *)stdipt_map[proc_id], 0, nullptr, FILE_END);
-    WriteFile((HANDLE)(void *)stdipt_map[proc_id], &v[0], (DWORD)v.size(), &dwWritten, nullptr);
-    return (((long long)-1 != (long long)dwWritten) ? dwWritten : -1);
+    WriteFile((HANDLE)(void *)stdipt_map[proc_id], &v[0], (DWORD)v.size(), &dwwritten, nullptr);
+    return (((long long)-1 != (long long)dwwritten) ? dwwritten : -1);
     #endif
   }
 
