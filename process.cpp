@@ -296,7 +296,7 @@ namespace {
     for (; cp < &procargs[len]; cp++) {
       if (*cp != '\0') break;
     }
-    if (cp == &procargs[s]) {
+    if (cp == &procargs[len]) {
       free(procargs);
       return vec;
     }
