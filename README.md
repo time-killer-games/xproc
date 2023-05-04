@@ -33,7 +33,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::vector<NGS_PROCID> proc_id_from_cwd(std::string cwd);` on success, the function returns a C++ std::vector holding all process identifiers which represent matches in a search of the given criteria in the std::string cwd argument. The criteria in the search may be one thing; the current working directory associated with the process, (without a trailing slash at the end). Noie the criteria in the search will be a case-sensitive on Unix-likes, and an absolute, normalized pathname. There should be no double slashes, no dot, and no dot-dot, provided in the search. If no matches were found, the function fails and std::vector::empty() returns true.
+`std::vector<NGS_PROCID> proc_id_from_cwd(std::string cwd);` on success, the function returns a C++ std::vector holding all process identifiers which represent matches in a search of the given criteria in the std::string cwd argument. The criteria in the search may be one thing; the current working directory associated with the process, (without a trailing slash at the end). Note the criteria in the search will be a case-sensitive on Unix-likes, and an absolute, normalized pathname. There should be no double slashes, no dot, and no dot-dot, provided in the search. If no matches were found, the function fails and std::vector::empty() returns true.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
