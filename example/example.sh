@@ -6,7 +6,7 @@ elif [ $(uname) = "Linux" ]; then
   if [ -f "/bin/g++" ]; then
     g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ../xproc;
   else
-    clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static; ../xproc;
+    clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall; ../xproc;
   fi
 elif [ $(uname) = "FreeBSD" ]; then
   clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lelf -lkvm -lpthread -static; ../xproc;
