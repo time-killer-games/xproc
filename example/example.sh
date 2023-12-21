@@ -3,7 +3,11 @@ cd "${0%/*}"
 if [ $(uname) = "Darwin" ]; then
   clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -arch arm64 -arch x86_64; ../xproc;
 elif [ $(uname) = "Linux" ]; then
-  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ../xproc;
+  if [ -f "/bin/g++" ]; then
+    g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -static-libstdc++ -static; ../xproc;
+  else
+    clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static; ../xproc;
+  fi
 elif [ $(uname) = "FreeBSD" ]; then
   clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lelf -lkvm -lpthread -static; ../xproc;
 elif [ $(uname) = "DragonFly" ]; then
