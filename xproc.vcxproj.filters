@@ -15,15 +15,15 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="xproc.cpp">
+    <ClCompile Include="example\example.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="example\example.cpp">
+    <ClCompile Include="process.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="xproc.hpp">
+    <ClInclude Include="process.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
