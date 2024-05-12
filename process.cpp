@@ -1064,7 +1064,7 @@ namespace ngs::ps {
     }
     if (!path.empty())
       return path;
-    #elif defined(__FreeBSD__)
+    #if defined(__FreeBSD__)
     int cntp = 0;
     kinfo_file *kif = nullptr;
     kif = kinfo_file_from_proc_id(proc_id, &cntp);
@@ -1099,6 +1099,7 @@ namespace ngs::ps {
       }
       fclose(fp);
     }
+    #endif
     #elif defined(__NetBSD__)
     int mib[4];
     std::size_t len = 0;
