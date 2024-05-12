@@ -1059,7 +1059,26 @@ namespace ngs::ps {
       }
       free(kif);
     }
-    #elif defined(__DragonFly__) 
+    #elif defined(__DragonFly__)
+    int mib[4];
+    std::size_t len = 0;
+    mib[0] = CTL_KERN;
+    mib[1] = KERN_PROC;
+    mib[2] = KERN_PROC_CWD;
+    mib[3] = proc_id;
+    if (!sysctl(mib, 4, nullptr, &len, nullptr, 0)) {
+      std::vector<char> vecbuff;
+      vecbuff.resize(len);
+      char *cwd = &vecbuff[0];
+      if (!sysctl(mib, 4, cwd, &len, nullptr, 0)) {
+        char buffer[PATH_MAX];
+        if (realpath(cwd, buffer)) {
+          path = buffer;
+        }
+      }
+    }
+    if (!path.empty())
+      return path;
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
       "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " +
       std::to_string(proc_id) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\" " +
