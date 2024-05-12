@@ -1044,22 +1044,7 @@ namespace ngs::ps {
     if (realpath(("/proc/" + std::to_string(proc_id) + "/cwd").c_str(), cwd)) {
       path = cwd;
     }
-    #elif defined(__FreeBSD__)
-    int cntp = 0;
-    kinfo_file *kif = nullptr;
-    kif = kinfo_file_from_proc_id(proc_id, &cntp);
-    if (kif) {
-      for (int i = 0; i < cntp && kif[i].kf_fd < 0; i++) {
-        if (kif[i].kf_fd == KF_FD_TYPE_CWD) {
-          char cwd[PATH_MAX];
-          if (realpath(kif[i].kf_path, cwd)) {
-            path = cwd;
-          }
-        }
-      }
-      free(kif);
-    }
-    #elif defined(__DragonFly__)
+    #elif (defined(__FreeBSD__) || defined(__DragonFly__))
     int mib[4];
     std::size_t len = 0;
     mib[0] = CTL_KERN;
@@ -1079,6 +1064,22 @@ namespace ngs::ps {
     }
     if (!path.empty())
       return path;
+    #elif defined(__FreeBSD__)
+    int cntp = 0;
+    kinfo_file *kif = nullptr;
+    kif = kinfo_file_from_proc_id(proc_id, &cntp);
+    if (kif) {
+      for (int i = 0; i < cntp && kif[i].kf_fd < 0; i++) {
+        if (kif[i].kf_fd == KF_FD_TYPE_CWD) {
+          char cwd[PATH_MAX];
+          if (realpath(kif[i].kf_path, cwd)) {
+            path = cwd;
+          }
+        }
+      }
+      free(kif);
+    }
+    #elif defined(__DragonFly__)
     FILE *fp = popen(("pos=`ans=\\`/usr/bin/fstat -w -p " + std::to_string(proc_id) + " | /usr/bin/sed -n 1p\\`; " +
       "/usr/bin/awk -v ans=\"$ans\" 'BEGIN{print index(ans, \"INUM\")}'`; str=`/usr/bin/fstat -w -p " +
       std::to_string(proc_id) + " | /usr/bin/sed -n 3p`; /usr/bin/awk -v str=\"$str\" -v pos=\"$pos\" " +
