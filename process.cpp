@@ -75,9 +75,20 @@
 #include <sys/time.h>
 #include <sys/proc.h>
 #endif
-
+#if defined(USE_SDL_POLLEVENT)
+#include <SDL.h>
+#endif
 #if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(lib, "ntdll.lib")
+#endif
+#if defined(USE_SDL_POLLEVENT)
+#if defined(_MSC_VER)
+#if defined(_WIN32) && !defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
+#elif defined(_WIN32) && defined(_WIN64)
+#pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
+#endif
+#endif
 #endif
 
 namespace {
@@ -1547,7 +1558,29 @@ namespace ngs::ps {
   } // anonymous namespace
 
   NGS_PROCID spawn_child_proc_id(std::string command, bool wait) {
+    #if defined(USE_SDL_POLLEVENT)
+    if (wait) {
+      int prevIndex = index;
+      std::thread proc_thread(spawn_child_proc_id_helper, command);
+      while (prevIndex == index) {
+        message_pump();
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      }
+      while (proc_did_execute.find(index) == proc_did_execute.end() || !proc_did_execute[index]) {
+        message_pump();
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+      }
+      NGS_PROCID proc_index = child_proc_id[index];
+      SDL_Event event;
+      while (!complete_map[proc_index]) {
+        while (SDL_PollEvent(&event) > 0);
+      }
+      proc_thread.join();
+      return proc_index;
+    }
+    #else
     if (wait) return spawn_child_proc_id_helper(command);
+    #endif
     int prevIndex = index;
     std::thread proc_thread(spawn_child_proc_id_helper, command);
     while (prevIndex == index) {
