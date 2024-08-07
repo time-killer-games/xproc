@@ -1203,7 +1203,7 @@ namespace ngs::ps {
     kvm_t *kd = nullptr;
     char **cmd = nullptr;
     struct proc *proc_info = nullptr;
-    user *proc_user = nullptr;
+    struct user *proc_user = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
@@ -1306,7 +1306,7 @@ namespace ngs::ps {
     kvm_t *kd = nullptr;
     char **env = nullptr;
     struct proc *proc_info = nullptr;
-    user *proc_user = nullptr;
+    struct user *proc_user = nullptr;
     if (!vec.empty()) { 
       goto finish;
     }
