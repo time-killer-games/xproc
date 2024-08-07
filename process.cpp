@@ -430,7 +430,8 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
     proc *proc_info = nullptr;
@@ -607,7 +608,8 @@ namespace ngs::ps {
     kvm_close(kd);
     if (vec.empty() && proc_id == 0)
       vec.push_back(0);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     pstatus_t status;
     char buffer[BUFSIZ];
     sprintf(buffer, "/proc/%d/status", proc_id);
@@ -736,7 +738,8 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     struct pid cur_pid;
     kvm_t *kd = nullptr;
     proc *proc_info = nullptr;
@@ -1195,7 +1198,8 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     kvm_t *kd = nullptr;
     char **cmd = nullptr;
     proc *proc_info = nullptr;
@@ -1297,7 +1301,8 @@ namespace ngs::ps {
       }
     }
     kvm_close(kd);
-    #elif defined(__sun)
+    #endif
+    #if defined(__sun)
     kvm_t *kd = nullptr;
     char **env = nullptr;
     proc *proc_info = nullptr;
