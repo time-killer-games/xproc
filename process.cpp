@@ -74,9 +74,10 @@
 #include <tcl.h>
 #include <dirent.h>
 #include <libproc.h>
-#include <sys/param.h>
 #include <sys/time.h>
 #include <sys/proc.h>
+#include <sys/user.h>
+#include <sys/param.h>
 #include <sys/procfs.h>
 #endif
 #if defined(USE_SDL_POLLEVENT)
