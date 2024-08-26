@@ -17,7 +17,7 @@ elif [ $(uname) = "NetBSD" ]; then
 elif [ $(uname) = "OpenBSD" ]; then
   clang++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -lkvm -lpthread -static; ../xproc;
 elif [ $(uname) = "SunOS" ]; then
-  export PKG_CONFIG_PATH=/usr/lib/64/pkgconfig && g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc `pkg-config --cflags --libs tcl --static` -lproc -lkvm; ../xproc;
+  g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -Wall -static-libgcc -lkvm -lproc; ../xproc;
 else
   g++ example.cpp ../process.cpp -o ../xproc.exe -std=c++17 -Wall -static-libgcc -static-libstdc++ -static -lntdll; ../xproc;
 fi
