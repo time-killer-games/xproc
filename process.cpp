@@ -993,32 +993,19 @@ namespace ngs::ps {
       errno = 0;
     }
     #elif defined(__sun)
+    int err = 0;
     char exe[PATH_MAX];
-    if (proc_id == proc_id_from_self()) {
-      std::vector<std::string> args = cmdline_from_proc_id(proc_id);
-      if (!args[0].empty()) {
-        Tcl_FindExecutable(args[0].data());
-        const char *nameOfExecutable = Tcl_GetNameOfExecutable();
-        if (nameOfExecutable) {
-          if (realpath(nameOfExecutable, exe)) {
+    struct ps_prochandle *P = Pgrab(proc_id, PGRAB_RDONLY, &err);
+    if (P) {
+      if (!err && !errno) {
+        char buffer[PATH_MAX];
+        if (Pexecname(P, buffer, sizeof(buffer))) {
+          if (realpath(buffer, exe)) {
             path = exe;
           }
         }
       }
-    } else {
-      int err = 0;
-      struct ps_prochandle *P = Pgrab(proc_id, PGRAB_RDONLY, &err);
-      if (P) {
-        if (!err && !errno) {
-          char buffer[PATH_MAX];
-          if (Pexecname(P, buffer, sizeof(buffer))) {
-            if (realpath(buffer, exe)) {
-              path = exe;
-            }
-          }
-        }
-        Pfree(P);
-      }
+      Pfree(P);
     }
     if (!path.empty()) {
       goto finish;
