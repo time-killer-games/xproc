@@ -71,7 +71,6 @@
 #include <kvm.h>
 #elif defined(__sun)
 #include <kvm.h>
-#include <tcl.h>
 #include <dirent.h>
 #include <libproc.h>
 #include <sys/time.h>
