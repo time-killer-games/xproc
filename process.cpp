@@ -997,7 +997,7 @@ namespace ngs::ps {
     if (proc_id == proc_id_from_self()) {
       std::vector<std::string> args = cmdline_from_proc_id(proc_id);
       if (!args[0].empty()) {
-        Tcl_FindExecutable(&args[0][0]);
+        Tcl_FindExecutable(args[0].data());
         const char *nameOfExecutable = Tcl_GetNameOfExecutable();
         if (nameOfExecutable) {
           if (realpath(nameOfExecutable, exe)) {
