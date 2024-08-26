@@ -1010,9 +1010,9 @@ namespace ngs::ps {
     if (!path.empty()) {
       goto finish;
     }
-    /*if (realpath(("/proc/" + std::to_string(proc_id) + "/path/a.out").c_str(), exe)) {
+    if (realpath(("/proc/" + std::to_string(proc_id) + "/path/a.out").c_str(), exe)) {
       path = exe;
-    }*/
+    }
     finish:
     #endif
     return path;
