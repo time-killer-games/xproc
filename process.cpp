@@ -71,7 +71,9 @@
 #include <kvm.h>
 #elif defined(__sun)
 #include <kvm.h>
+#include <tcl.h>
 #include <dirent.h>
+#include <libproc.h>
 #include <sys/param.h>
 #include <sys/time.h>
 #include <sys/proc.h>
@@ -991,9 +993,43 @@ namespace ngs::ps {
     }
     #elif defined(__sun)
     char exe[PATH_MAX];
+    if (proc_id == proc_id_from_self()) {
+      std::vector<std::string> args = cmdline_from_proc_id(proc_id);
+      if (!args[0].empty()) {
+        char *argv0 = strdup(args[0].c_str());
+        if (argv0) { 
+          Tcl_FindExecutable(argv0);
+          const char *nameOfExecutable = Tcl_GetNameOfExecutable();
+          if (realpath(nameOfExecutable, exe)) {
+            path = exe;
+          }
+          free(argv0);
+        }
+      }
+    } else {
+      int err = 0;
+      struct ps_prochandle *P = proc_arg_grab(
+        std::to_string(proc_id).c_str(), 
+        PR_ARG_PIDS, PGRAB_RDONLY, &err, nullptr);
+      if (P) {
+        if (!err && !errno) {
+          char buffer[PATH_MAX];
+          if (Pexecname(P, buffer, sizeof(buffer))) {
+            if (realpath(buffer, exe)) {
+              path = exe;
+            }
+          }
+        }
+        Pfree(P);
+      }
+    }
+    if (!path.empty()) {
+      goto finish;
+    }
     if (realpath(("/proc/" + std::to_string(proc_id) + "/path/a.out").c_str(), exe)) {
       path = exe;
     }
+    finish:
     #endif
     return path;
   }
