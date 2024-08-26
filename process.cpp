@@ -88,9 +88,9 @@
 #endif
 #if defined(USE_SDL_POLLEVENT)
 #if defined(_MSC_VER)
-#if defined(_WIN32) && !defined(_WIN64)
+#if (defined(_WIN32) && !defined(_WIN64))
 #pragma comment(lib, __FILE__"\\..\\lib\\x86\\SDL2.lib")
-#elif defined(_WIN32) && defined(_WIN64)
+#elif (defined(_WIN32) && defined(_WIN64))
 #pragma comment(lib, __FILE__"\\..\\lib\\x64\\SDL2.lib")
 #endif
 #endif
