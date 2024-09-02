@@ -372,7 +372,7 @@ namespace {
       args = (char **)malloc(args_size);
       if (!args) goto finish;
     }
-    if ((long)(nread = pread(fd, args, args_size, (off_t)((type == MEMENV) ? psinfo.pr_envp : psinfo.pr_argv))) <= 0) {
+    if ((long)(nread = pread(fd, args, args_size, (off_t)((type != MEMCMD) ? psinfo.pr_envp : psinfo.pr_argv))) <= 0) {
       close(fd);
     }
     for (n = 0; args[n]; n++) {
