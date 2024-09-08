@@ -88,3 +88,15 @@ Cross-Platform, Foreign Process Information Explorer API
 `bool child_proc_id_is_complete(NGS_PROCID proc_id);` returns whether the child process indentifier specificed in the proc_id argument corresponds to a process that either previously spawned from spawn_child_proc_id() and completed execution, or is a non-existent child process identifier.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+`std::string read_from_stdin_for_self()` returns the string held in the standard output file descriptor, for the current process.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+`bool free_stdout_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard output file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+`bool free_stdin_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard input file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
