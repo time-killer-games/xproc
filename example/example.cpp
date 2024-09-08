@@ -42,7 +42,17 @@ int main(int argc, char **argv) {
     std::string command;
     for (int i = 2; i < argc; i++)
       command += std::string(argv[i]) + " ";
-    if (!command.empty() && command.back() == ' ')
+    while (!command.empty() && command.back() == ' ')
+      command.pop_back();
+    ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
+    while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id));
+    printf("%s", ngs::ps::read_from_stdout_for_child_proc_id(proc_id).c_str());
+    ngs::ps::free_stdout_for_child_proc_id(proc_id);
+    ngs::ps::free_stdin_for_child_proc_id(proc_id);
+    return 0;
+  } else if (argc >= 2 && (strcmp(argv[1], "-e") == 0 || strcmp(argv[1], "-exec") == 0)) {
+    std::string command = ngs::ps::read_from_stdin_for_self();
+    while (!command.empty() && (command.back() == '\r' || command.back() == '\n' || command.back() == ' '))
       command.pop_back();
     ngs::ps::NGS_PROCID proc_id = ngs::ps::spawn_child_proc_id(command, false);
     while (proc_id != 0 && !ngs::ps::child_proc_id_is_complete(proc_id));
