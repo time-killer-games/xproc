@@ -2,6 +2,10 @@
 Cross-Platform, Foreign Process Information Explorer API
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
+`NGS_PROCID proc_id_from_self();` returns the process identifier for the current process, (or current running instance of the application). On Windows, this identifier is an unsigned long. On Unix-likes, this number is a signed int. Despite being signed on Unix likes, process identifiers should never be a negative number unless to indicate an error of some kind. For portability reasons, across Windows and Unix-likes, none of the functions in the xproc library will return a negative number to represent an error. Instead, it should return zero, with errno being set to non-zero.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+
 `std::vector<NGS_PROCID> proc_id_enum();` returns a C++ std::vector of process identifiers for every running process in the current user session. On some platforms the process identifier of zero is included by default, while on other platforms it is omitted, despite it always pointing to a valid and existing process id, one which represents the process swapper. For the sake of consistency, the vector returned by this function will prepend a process identifier of zero to the vector depending on whether the underlying platform-specific API happened to omit that process identifier. On Unix-likes, a process identifier of one represents the system initialization process, which is responsible for starting up and shutting down your machine. This function only includes thread group identifiers in the vector, which are the process identifiers of a process's main thread. Kernel thread identifiers are omitted. On failure, std::vector::empty() will be true.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
