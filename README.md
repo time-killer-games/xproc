@@ -93,10 +93,10 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`bool free_stdout_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard output file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution. Do not attempt to use this function on a child process which is still running.
+`bool free_stdout_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard output file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution. Do not attempt to use this function on a child process which is still running. To check whether a child process has completed running, call the child_proc_id_is_complete() function on its process identifier.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`bool free_stdin_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard input file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution. Do not attempt to use this function on a child process which is still running.
+`bool free_stdin_for_child_proc_id(NGS_PROCID proc_id);` frees the string held in the standard input file descriptor of the given child process identifier, as indicated by the proc_id argument, which was a process previously spawned from the spawn_child_proc_id() function, and the child completed its execution. Do not attempt to use this function on a child process which is still running. To check whether a child process has completed running, call the child_proc_id_is_complete() function on its process identifier.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
