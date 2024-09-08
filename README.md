@@ -77,11 +77,11 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id);` returns the string held in the standard output file descriptor, for a child process spawned from the spawn_child_proc_id() function, based on the given child process identifier. This string can have its number of bytes truncated to a specified limit as provided by the stdout_set_buffer_limit() function.
+`std::string read_from_stdout_for_child_proc_id(NGS_PROCID proc_id);` returns the string held in the standard output file descriptor, for a child process spawned from the spawn_child_proc_id() function, based on the given child process identifier. This string can have its number of bytes truncated to a specified limit as provided by the stdout_set_buffer_limit() function. Always free the standard output string when the child process has completed execution by passing its process identifier to the free_stdout_for_child_proc_id() function.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);` writes a string to the standard input file descriptor for the specified child process identifier, using the given input argument as the string to write. Returns the number of bytes written, or -1 if the function failed to write anything.
+`long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);` writes a string to the standard input file descriptor for the specified child process identifier, using the given input argument as the string to write. Returns the number of bytes written, or -1 if the function failed to write anything. Always free the standard input string when the child process has completed execution by passing its process identifier to the free_stdin_for_child_proc_id() function.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
