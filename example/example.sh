@@ -19,5 +19,5 @@ elif [ $(uname) = "OpenBSD" ]; then
 elif [ $(uname) = "SunOS" ]; then
   g++ example.cpp ../process.cpp -o ../xproc -std=c++17 -DNULLIFY_STDERR -Wall -static-libgcc -lkvm -lproc; ../xproc;
 else
-  g++ example.cpp ../process.cpp -o ../xproc.exe -std=c++17 -DNULLIFY_STDERR -Wall -static-libgcc -static-libstdc++ -static -lntdll; ../xproc;
+  g++ example.cpp ../process.cpp -o ../xproc.exe -std=c++17 -DNULLIFY_STDERR -Wall -static-libgcc -static-libstdc++ -static -lntdll -mwindows; ../xproc;
 fi
