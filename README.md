@@ -85,6 +85,6 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`bool child_proc_id_is_complete(NGS_PROCID proc_id);` returns whether the child process indentifier specificed in the proc_id argument corresponds to a process that either previously spawned from spawn_child_proc_id() and completed execution, or is a non-existent child process id.
+`bool child_proc_id_is_complete(NGS_PROCID proc_id);` returns whether the child process indentifier specificed in the proc_id argument corresponds to a process that either previously spawned from spawn_child_proc_id() and completed execution, or is a non-existent child process identifier.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
