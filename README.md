@@ -2,7 +2,7 @@
 Cross-Platform, Foreign Process Information Explorer API
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`NGS_PROCID proc_id_from_self();` returns the process identifier for the current process, (or current running instance of the application). On Windows, this identifier is an unsigned long. On Unix-likes, this number is a signed int. Despite being signed on Unix likes, process identifiers should never be a negative number unless to indicate an error of some kind. For portability reasons, across Windows and Unix-likes, none of the functions in the xproc library will return a negative number to represent an error. Instead, it should return zero, with errno being set to non-zero.
+`NGS_PROCID proc_id_from_self();` returns the process identifier for the current process, (or current running instance of the application). On Windows, this identifier is an unsigned long. On Unix-likes, this number is a signed int. Despite being signed on Unix likes, process identifiers should never be a negative number unless to indicate an error of some kind. For portability reasons, across Windows and Unix-likes, none of the functions in the xproc library will return a negative number to represent an error. Instead, it should return zero, with errno being set to non-zero. Getting the process identifier of the current process never fails, and so it will never return zero, nor will it ever set errno to a non-zero value.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
