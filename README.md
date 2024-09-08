@@ -84,3 +84,7 @@ Cross-Platform, Foreign Process Information Explorer API
 `long long write_to_stdin_for_child_proc_id(NGS_PROCID proc_id, std::string input);` writes a string to the standard input file descriptor for the specified child process identifier, using the given input argument as the string to write. Returns the number of bytes written, or -1 if the function failed to write anything.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
+
+`bool child_proc_id_is_complete(NGS_PROCID proc_id);` returns whether the child process indentifier specificed in the proc_id argument corresponds to a process that either previously spawned from spawn_child_proc_id() and completed execution, or is a non-existent child process id.
+
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
