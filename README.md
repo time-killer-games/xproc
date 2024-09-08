@@ -89,7 +89,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::string read_from_stdin_for_self()` returns the string held in the standard output file descriptor, for the current process.
+`std::string read_from_stdin_for_self()` returns the string held in the standard input file descriptor, for the current process.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
