@@ -33,7 +33,7 @@
 
 #include "../process.hpp"
 
-#if (defined(_WIN32) && defined(_MSVC))
+#if (defined(_WIN32) && defined(_MSC_VER))
 #pragma comment(linker, "/subsystem:windows")
 #endif
 
