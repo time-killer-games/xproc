@@ -89,7 +89,7 @@ Cross-Platform, Foreign Process Information Explorer API
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
-`std::string read_from_stdin_for_self()` returns the string held in the standard input file descriptor, for the current process. std::string::empty() is true if the function has failed. Known issue: on Windows, you must build your app using the Windows subsystem to make it be treated like a GUI program, and not a console, otherwise the fucnition will fail. The Windows subsystem can be used with the /SUBSYSTEM:WINDOWS flag in MSVC or -mwindows in MinGW.
+`std::string read_from_stdin_for_self()` returns the string held in the standard input file descriptor, for the current process. std::string::empty() is true if the function has failed. Known issue: on Windows, you must build your app using the Windows subsystem to make it be treated like a GUI program, and not a console, otherwise the fucnition will fail. The Windows subsystem can be used with the /subsystem:windows flag in MSVC or -mwindows in MinGW.
 
 -----------------------------------------------------------------------------------------------------------------------------------------------------------
 
