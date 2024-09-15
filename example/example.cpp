@@ -33,6 +33,10 @@
 
 #include "../process.hpp"
 
+#if (defined(_WIN32) && defined(_MSVC))
+#pragma comment(linker, "/subsystem:windows")
+#endif
+
 int main(int argc, char **argv) {
   std::vector<ngs::ps::NGS_PROCID> pid;
   if (argc >= 2 && (strcmp(argv[1], "-h") == 0 || strcmp(argv[1], "-help") == 0)) {
